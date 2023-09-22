@@ -1,0 +1,5 @@
+/_source
+/_build
+/_install
+/run.sh
+/libopenh264-*.so
