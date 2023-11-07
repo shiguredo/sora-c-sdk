@@ -35,6 +35,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 - RTCP CNAME 対応
   - [RFC 3550: RTP: A Transport Protocol for Real\-Time Applications](https://www.rfc-editor.org/rfc/rfc3550.html)
   - [RFC 7022: Guidelines for Choosing RTP Control Protocol \(RTCP\) Canonical Names \(CNAMEs\)](https://www.rfc-editor.org/rfc/rfc7022)
+- SCTP Zero Checksum へ対応
+  - [Zero Checksum for the Stream Control Transmission Protocol](https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-sctp-zero-checksum)
 - Apache-2.0 ライセンスで OSS として公開しています
   - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -60,9 +62,10 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | VP8        | 対応         | 非対応     |
 | VP9        | 対応         | 非対応     |
 | AV1        | 対応         | 非対応     |
+| H.264      | 対応         | 対応予定   |
 | H.264      | 対応         | 対応       |
 
-基本的には Sora C++ SDK を利用してください。
+基本的には [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 バイナリサイズやフットプリント、アップデート頻度を抑えたい場合のみ Sora C SDK を利用してください。
 
 ## 対応 Sora
@@ -80,20 +83,20 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Ubuntu 22.04
   - x86_64
-- macOS 14
-  - arm64
 
 ### 対応予定
 
-- Raspberry Pi OS
-  - ARMv8
-  - ARMv7
-  - ARMv6
+- macOS 14
+  - arm64
+  - VideoToolbox
+    - H.264 / H.265 HWA
+- [VisionFive 2](https://www.starfivetech.com/en/site/boards)
+  - Debian 12.0
+  - riscv64
+  - H.264 / H.265 HWA
 - Ubuntu 22.04
+  - arm64
   - x86
-  - ARMv8
-  - ARMv7
-  - ARMv6
 
 ## FAQ
 
@@ -117,33 +120,32 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - [WebRTC's Statistics](https://www.w3.org/TR/webrtc-stats/)
 - [Google congestion control (GCC)](https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-congestion-03)
 - [RTP Extensions for Transport-wide Congestion Control](https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01)
-  - https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/transport-wide-cc-02
+  - [Transport-Wide Congestion Control](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/transport-wide-cc-02)
 - [RTCP XR](https://datatracker.ietf.org/doc/html/rfc3611)
 - [RTP Retransmission Payload Format](https://datatracker.ietf.org/doc/html/rfc4588)
 - [RTP FlexFEC](https://datatracker.ietf.org/doc/html/rfc8627)
   - [RTP FEC](https://datatracker.ietf.org/doc/html/rfc5109)
 - RTP header extensions
-  - https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/
-  - https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/
-  - https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/video-layers-allocation00/
+  - [Absolute Capture Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/)
+  - [Absolute Send Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/)
+  - [Video Layers Allocation](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/video-layers-allocation00/)
 - コーデック
-  - AAC 対応
+  - AAC HWA 対応
     - Sora の対応も含みます
     - [RTP Payload Format for MPEG\-4 Audio/Visual Streams](https://datatracker.ietf.org/doc/html/rfc6416)
-  - VP8 対応
-  - VP9 対応
-  - AV1 対応
-  - H.265 対応
+  - VP8 HWA 対応
+  - VP9 HWA 対応
+  - AV1 HWA 対応
+  - H.265 HWA 対応
   - H.266 対応
     - Sora の対応も含みます
     - [RTP Payload Format for Versatile Video Coding \(VVC\)](https://datatracker.ietf.org/doc/html/rfc9328)
 - プラットフォーム
   - iOS 対応
   - Android 対応
-  - Windows IoT 対応
-    - https://learn.microsoft.com/ja-jp/previous-versions/windows/iot-core/windows-iot
-  - Ubuntu Core 対応
-    - https://ubuntu.com/core
+  - [Raspberry Pi OS 対応](https://www.raspberrypi.com/software/)
+  - [Windows IoT 対応](https://learn.microsoft.com/ja-jp/previous-versions/windows/iot-core/windows-iot)
+  - [Ubuntu Core 対応](https://ubuntu.com/core)
 
 ## サポートについて
 
