@@ -26,19 +26,19 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
   - [paullouisageneau/libdatachannel](https://github.com/paullouisageneau/libdatachannel)
 - コードのフットプリントが小さい Mbed TLS を利用しています
   - [Mbed\-TLS/mbedtl](https://github.com/Mbed-TLS/mbedtls)
-- OpenH264 に対応
+- Apache-2.0 ライセンスで OSS として公開しています
+  - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
+- OpenH264 対応
   - [cisco/openh264](https://github.com/cisco/openh264)
-- RTCP Feedback Messages PLI へ対応
+- RTCP Feedback Messages PLI 対応
   - [RFC 4585: Extended RTP Profile for Real\-time Transport Control Protocol \(RTCP\)\-Based Feedback \(RTP/AVPF\)](https://www.rfc-editor.org/rfc/rfc4585.html)
 - Reduced-Size RTCP 対応
   - [RFC 5506: Support for Reduced\-Size Real\-Time Transport Control Protocol \(RTCP\): Opportunities and Consequences](https://www.rfc-editor.org/rfc/rfc5506)
 - RTCP CNAME 対応
   - [RFC 3550: RTP: A Transport Protocol for Real\-Time Applications](https://www.rfc-editor.org/rfc/rfc3550.html)
   - [RFC 7022: Guidelines for Choosing RTP Control Protocol \(RTCP\) Canonical Names \(CNAMEs\)](https://www.rfc-editor.org/rfc/rfc7022)
-- SCTP Zero Checksum へ対応
+- SCTP Zero Checksum 対応
   - [Zero Checksum for the Stream Control Transmission Protocol](https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-sctp-zero-checksum)
-- Apache-2.0 ライセンスで OSS として公開しています
-  - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
 
 ## Sora C++ SDK との比較
 
@@ -62,8 +62,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | VP8        | 対応         | 非対応     |
 | VP9        | 対応         | 非対応     |
 | AV1        | 対応         | 非対応     |
-| H.264      | 対応         | 対応予定   |
 | H.264      | 対応         | 対応       |
+| H.265      | 対応         | 対応予定   |
 
 基本的には [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 バイナリサイズやフットプリント、アップデート頻度を抑えたい場合のみ Sora C SDK を利用してください。
@@ -90,13 +90,13 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - arm64
   - VideoToolbox
     - H.264 / H.265 HWA
+- Ubuntu 22.04
+  - arm64
+  - x86
 - [VisionFive 2](https://www.starfivetech.com/en/site/boards)
   - Debian 12.0
   - riscv64
   - H.264 / H.265 HWA
-- Ubuntu 22.04
-  - arm64
-  - x86
 
 ## FAQ
 
@@ -129,17 +129,20 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - [Absolute Capture Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/)
   - [Absolute Send Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/)
   - [Video Layers Allocation](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/video-layers-allocation00/)
-- コーデック
+- HWA を利用したコーデック
   - AAC HWA 対応
     - Sora の対応も含みます
     - [RTP Payload Format for MPEG\-4 Audio/Visual Streams](https://datatracker.ietf.org/doc/html/rfc6416)
   - VP8 HWA 対応
   - VP9 HWA 対応
   - AV1 HWA 対応
-  - H.265 HWA 対応
+- 次世代コーデック
   - H.266 対応
     - Sora の対応も含みます
     - [RTP Payload Format for Versatile Video Coding \(VVC\)](https://datatracker.ietf.org/doc/html/rfc9328)
+  - EVC 対応
+    - Sora の対応も含みます
+    - [RTP Payload Format for Essential Video Coding \(EVC\)](https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-evc)
 - プラットフォーム
   - iOS 対応
   - Android 対応
