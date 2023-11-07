@@ -44,14 +44,15 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ## Sora C++ SDK との比較
 
-| 項目             | Sora C++ SDK | Sora C SDK     |
-| ---------------- | ------------ | -------------- |
-| ライセンス       | Apache-2.0   | Apache-2.0     |
-| ライブラリ       | libwebrtc    | libdatachannel |
-| バイナリサイズ   | 大きい       | 小さい         |
-| フットプリント   | 大きい       | 小さい         |
-| アップデート頻度 | 積極的       | 控えめ         |
-| 暗号ライブラリ   | BoringSSL    | Mbed TLS       |
+| 項目                 | Sora C++ SDK | Sora C SDK     |
+| -------------------- | ------------ | -------------- |
+| ライセンス           | Apache-2.0   | Apache-2.0     |
+| ライブラリ           | libwebrtc    | libdatachannel |
+| ライブラリライセンス | BSD-3-Clause | MPL-2.0        |
+| バイナリサイズ       | 大きい       | 小さい         |
+| フットプリント       | 大きい       | 小さい         |
+| アップデート頻度     | 積極的       | 控えめ         |
+| 暗号ライブラリ       | BoringSSL    | Mbed TLS       |
 
 | プロトコル | Sora C++ SDK | Sora C SDK |
 | ---------- | ------------ | ---------- |
