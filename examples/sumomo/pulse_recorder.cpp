@@ -5,6 +5,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <functional>
+#include <optional>
 #include <thread>
 #include <vector>
 
