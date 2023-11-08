@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -41,9 +42,15 @@ void on_track(SoracTrack* track, void* userdata) {
   if (strcmp(buf, "video") == 0) {
     state->video_track = sorac_track_share(track);
     if (state->opt->video_type == SUMOMO_OPTION_VIDEO_TYPE_V4L2) {
+#if defined(__linux__)
       state->capturer = sumomo_v4l2_capturer_create(
           state->opt->video_device_name, state->opt->video_device_width,
           state->opt->video_device_height);
+#else
+      fprintf(stderr,
+              "V4L2 capturer cannot be used on environments other than Linux");
+      exit(1);
+#endif
     } else {
       state->capturer = sumomo_fake_capturer_create();
     }
@@ -52,7 +59,13 @@ void on_track(SoracTrack* track, void* userdata) {
   } else if (strcmp(buf, "audio") == 0) {
     state->audio_track = sorac_track_share(track);
     if (state->opt->audio_type == SUMOMO_OPTION_AUDIO_TYPE_PULSE) {
+#if defined(__linux__)
       state->recorder = sumomo_pulse_recorder_create();
+#else
+      fprintf(stderr,
+              "Pulse audio cannot be used on environments other than Linux");
+      exit(1);
+#endif
     } else {
       state->recorder = sumomo_fake_recorder_create();
     }

@@ -19,10 +19,16 @@ target_sources(sumomo
     steady_frame_thread.cpp
     sumomo.c
     option.c
-    pulse_recorder.cpp
     recorder.cpp
-    v4l2_capturer.cpp
 )
+
+if (SUMOMO_TARGET STREQUAL "ubuntu-20.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubuntu-22.04_x86_64")
+  target_sources(sumomo
+    PRIVATE
+      pulse_recorder.cpp
+      v4l2_capturer.cpp
+  )
+endif()
 
 set_target_properties(sumomo PROPERTIES CXX_STANDARD 20 C_STANDARD 17)
 

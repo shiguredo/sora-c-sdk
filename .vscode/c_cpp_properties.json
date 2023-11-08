@@ -1,18 +1,25 @@
 {
     "configurations": [
         {
-            "name": "ubuntu-20.04_x86_64 Release",
+            "name": "Release",
             "includePath": [
+                "${workspaceFolder}/include",
                 "${workspaceFolder}/_source/libdatachannel/include",
                 "${workspaceFolder}/_source/libdatachannel/deps/json/include",
                 "${workspaceFolder}/_source/libdatachannel/deps/plog/include",
                 "${workspaceFolder}/_source/opus/include",
+
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/mbedtls/include",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/openh264/include",
                 "${workspaceFolder}/_build/ubuntu-20.04_x86_64/release/sorac/proto/sorac",
-                "${workspaceFolder}/include",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libjpeg-turbo/include",
-                "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libyuv/include"
+                "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libyuv/include",
+
+                "${workspaceFolder}/_install/macos_arm64/release/mbedtls/include",
+                "${workspaceFolder}/_install/macos_arm64/release/openh264/include",
+                "${workspaceFolder}/_build/macos_arm64/release/sorac/proto/sorac",
+                "${workspaceFolder}/_install/macos_arm64/release/libjpeg-turbo/include",
+                "${workspaceFolder}/_install/macos_arm64/release/libyuv/include"
             ],
             "defines": [
                 "JSONIF_USE_NLOHMANN_JSON",

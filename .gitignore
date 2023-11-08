@@ -3,3 +3,5 @@
 /_install
 /run.sh
 /libopenh264-*.so
+/libopenh264-*.dylib
+/cacert.pem

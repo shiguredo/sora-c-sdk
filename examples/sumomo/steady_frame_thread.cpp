@@ -49,7 +49,11 @@ void SteadyFrameThread::Start(
         ts.tv_nsec = std::chrono::nanoseconds(frame_duration -
                                               std::chrono::milliseconds(1) - d)
                          .count();
+#if defined(__linux__)
         clock_nanosleep(CLOCK_MONOTONIC, 0, &ts, NULL);
+#elif defined(__APPLE__)
+        nanosleep(&ts, NULL);
+#endif
         continue;
       } else if (d < frame_duration) {
         // d = [frame_duration - 1, frame_duration)

@@ -33,7 +33,7 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
 
   void ForceIntraNextFrame() override { next_iframe_ = true; }
 
-  bool InitEncode() {
+  bool InitEncode() override {
     Release();
 
     if (create_encoder_(&encoder_) != 0) {
@@ -110,11 +110,12 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
     return true;
   }
 
-  void SetEncodeCallback(std::function<void(const EncodedImage&)> callback) {
+  void SetEncodeCallback(
+      std::function<void(const EncodedImage&)> callback) override {
     callback_ = callback;
   }
 
-  void Encode(const VideoFrame& frame) {
+  void Encode(const VideoFrame& frame) override {
     SSourcePicture pic = {};
     pic.iPicWidth = 640;
     pic.iPicHeight = 480;
@@ -169,7 +170,7 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
     callback_(encoded);
   }
 
-  void Release() {
+  void Release() override {
     if (encoder_) {
       destroy_encoder_(encoder_);
       encoder_ = nullptr;
