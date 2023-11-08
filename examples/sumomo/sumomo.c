@@ -1,8 +1,9 @@
-#include "sorac/sora_client_sdk.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
+// Sora C SDK
+#include <sorac/sorac.h>
 
 #include "fake_capturer.h"
 #include "fake_recorder.h"

@@ -87,7 +87,7 @@ target_sources(sorac
     src/opus_audio_encoder.cpp
     src/signaling.cpp
     src/types.cpp
-    src/sora_client_sdk.cpp
+    src/sorac.cpp
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS
@@ -102,7 +102,7 @@ target_sources(sorac
       "include/sorac/opus_audio_encoder.hpp"
       "include/sorac/signaling.hpp"
       "include/sorac/types.hpp"
-      "include/sorac/sora_client_sdk.h"
+      "include/sorac/sorac.h"
 )
 target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(sorac PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac")

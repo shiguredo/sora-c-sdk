@@ -1,7 +1,7 @@
 #ifndef SUMOMO_FAKE_CAPTURER_H_
 #define SUMOMO_FAKE_CAPTURER_H_
 
-#include <sorac/sora_client_sdk.h>
+#include <sorac/sorac.h>
 
 #include "capturer.h"
 

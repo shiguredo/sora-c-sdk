@@ -1,7 +1,7 @@
 #ifndef SUMOMO_CAPTURER_H_
 #define SUMOMO_CAPTURER_H_
 
-#include <sorac/sora_client_sdk.h>
+#include <sorac/sorac.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,5 +1,5 @@
-#ifndef SORA_CLIENT_SDK_H_
-#define SORA_CLIENT_SDK_H_
+#ifndef SORAC_H_
+#define SORAC_H_
 
 #include "soracp.json.c.h"
 
