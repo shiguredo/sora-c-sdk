@@ -66,13 +66,13 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | TURN-TCP   | 対応         | 非対応     |
 | TURN-TLS   | 対応         | 非対応     |
 
-| コーデック | Sora C++ SDK | Sora C SDK |
-| ---------- | ------------ | ---------- |
-| VP8        | 対応         | 非対応     |
-| VP9        | 対応         | 非対応     |
-| AV1        | 対応         | 非対応     |
-| H.264      | 対応         | 対応       |
-| H.265      | 対応         | 対応予定   |
+| コーデック  | Sora C++ SDK | Sora C SDK |
+| ----------- | ------------ | ---------- |
+| VP8         | 対応         | 優先実装   |
+| VP9         | 対応         | 優先実装   |
+| AV1         | 対応         | 優先実装   |
+| H.264 (HWA) | 対応         | 対応       |
+| H.265 (HWA) | 対応         | 対応予定   |
 
 | OS / アーキテクチャ | Sora C++ SDK | Sora C SDK |
 | ------------------- | ------------ | ---------- |
@@ -112,14 +112,16 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - macOS 14
   - arm64
   - VideoToolbox
-    - H.264 / H.265 HWA
+    - H.264 HWA
+    - H.265 HWA
 - Ubuntu 22.04
   - arm64
   - x86
 - [VisionFive 2](https://www.starfivetech.com/en/site/boards)
   - Debian 12.0
   - riscv64
-  - H.264 / H.265 HWA
+  - H.264 HWA
+  - H.265 HWA
 
 ## FAQ
 
