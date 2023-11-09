@@ -143,14 +143,15 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Sora 機能
   - 送受信 (sendrecv) 対応
+  - 受信 (recvonly) 対応
 - [WebRTC's Statistics](https://www.w3.org/TR/webrtc-stats/)
 - [Google congestion control (GCC)](https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-congestion-03)
 - [RTP Extensions for Transport-wide Congestion Control](https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01)
   - [Transport-Wide Congestion Control](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/transport-wide-cc-02)
 - [RTCP XR](https://datatracker.ietf.org/doc/html/rfc3611)
 - [RTP Retransmission Payload Format](https://datatracker.ietf.org/doc/html/rfc4588)
+- [RTP ULPFEC](https://datatracker.ietf.org/doc/html/rfc5109)
 - [RTP FlexFEC](https://datatracker.ietf.org/doc/html/rfc8627)
-  - [RTP FEC](https://datatracker.ietf.org/doc/html/rfc5109)
 - RTP header extensions
   - [Absolute Capture Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/)
   - [Absolute Send Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/)
@@ -159,9 +160,11 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - AAC HWA 対応
     - Sora の対応も含みます
     - [RTP Payload Format for MPEG\-4 Audio/Visual Streams](https://datatracker.ietf.org/doc/html/rfc6416)
-  - VP8 HWA 対応
-  - VP9 HWA 対応
-  - AV1 HWA 対応
+  - VP8 / VP9 / AV1 / VP9 / H.264 / H.265 HWA 対応
+    - AMD [Advanced Media Framework (AMF) SDK](https://github.com/GPUOpen-LibrariesAndSDKs/AMF)
+    - Intel [oneVPL](https://github.com/oneapi-src/oneVPL)
+    - NVIDIA [Video Codec SDK](https://developer.nvidia.com/video-codec-sdk)
+    - NVIDIA [Jetson](https://www.nvidia.com/ja-jp/autonomous-machines/embedded-systems/)
 - 次世代コーデック
   - H.266 対応
     - Sora の対応も含みます
