@@ -15,7 +15,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ## Sora C SDK について
 
-**Sora C SDK は現在開発中です**
+**現在開発中です**
 
 [WebRTC SFU Sora](https://sora.shiguredo.jp/) 向けの C のクライアント向け SDK です。
 [libwebrtc](https://webrtc.googlesource.com/src) を利用せず、
@@ -28,6 +28,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
   - [paullouisageneau/libdatachannel](https://github.com/paullouisageneau/libdatachannel)
 - コードのフットプリントが小さい Mbed TLS を利用しています
   - [Mbed\-TLS/mbedtl](https://github.com/Mbed-TLS/mbedtls)
+- バイナリサイズが小さい
+  - WebRTC と Sora シグナリングを含んだ libsorac は libwebrtc と比較してサイズは約 1/7 です
 - Apache-2.0 ライセンスで OSS として公開しています
   - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
 - OpenH264 対応
