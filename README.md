@@ -19,7 +19,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 [WebRTC SFU Sora](https://sora.shiguredo.jp/) 向けの C のクライアント向け SDK です。
 [libwebrtc](https://webrtc.googlesource.com/src) を利用せず、
-[libdatachannel](https://github.com/paullouisageneau/libdatachannel) を利用する事でバイナリサイズやフットプリント、アップデート頻度を押さえています。
+[libdatachannel](https://github.com/paullouisageneau/libdatachannel) を利用する事でバイナリサイズやフットプリント、アップデート頻度を抑えています。
 
 ## 特徴
 
@@ -44,15 +44,19 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ## Sora C++ SDK との比較
 
-| 項目                 | Sora C++ SDK | Sora C SDK     |
-| -------------------- | ------------ | -------------- |
-| ライセンス           | Apache-2.0   | Apache-2.0     |
-| ライブラリ           | libwebrtc    | libdatachannel |
-| ライブラリライセンス | BSD-3-Clause | MPL-2.0        |
-| バイナリサイズ       | 大きい       | 小さい         |
-| フットプリント       | 大きい       | 小さい         |
-| アップデート頻度     | 積極的       | 控えめ         |
-| 暗号ライブラリ       | BoringSSL    | Mbed TLS       |
+| 項目                        | Sora C++ SDK | Sora C SDK     |
+| --------------------------- | ------------ | -------------- |
+| ライセンス                  | Apache-2.0   | Apache-2.0     |
+| WebRTC ライブラリ           | libwebrtc    | libdatachannel |
+| WebRTC ライブラリライセンス | BSD-3-Clause | MPL-2.0        |
+| バイナリサイズ              | 大きい       | 小さい         |
+| フットプリント              | 大きい       | 小さい         |
+| アップデート頻度            | 積極的       | 控えめ         |
+| 暗号ライブラリ              | BoringSSL    | Mbed TLS       |
+| SRTP ライブラリ             | libwebrtc    | libsrtp        |
+| SCTP ライブラリ             | libwebrtc    | usrsctp        |
+| ICE ライブラリ              | libwebrtc    | libjuice       |
+| WebSocket ライブラリ        | Boost        | libdatachannel |
 
 | プロトコル | Sora C++ SDK | Sora C SDK |
 | ---------- | ------------ | ---------- |
@@ -67,6 +71,20 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | AV1        | 対応         | 非対応     |
 | H.264      | 対応         | 対応       |
 | H.265      | 対応         | 対応予定   |
+
+| OS / アーキテクチャ | Sora C++ SDK | Sora C SDK |
+| ------------------- | ------------ | ---------- |
+| linux / x86_64      | 対応         | 対応       |
+| linux / x86         | 非対応       | 優先実装   |
+| linux / arm64       | 対応         | 優先実装   |
+| linux / arm         | 非対応       | 優先実装   |
+| linux / riscv64     | 非対応       | 対応予定   |
+| linux / riscv32     | 非対応       | 優先実装   |
+| windows / x86_64    | 対応         | 優先実装   |
+| windows / arm64     | 非対応       | 優先実装   |
+| macos / arm64       | 対応         | 対応予定   |
+| ios / arm64         | 対応         | 優先実装   |
+| android / arm64     | 対応         | 優先実装   |
 
 基本的には [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 バイナリサイズやフットプリント、アップデート頻度を抑えたい場合のみ Sora C SDK を利用してください。
@@ -109,6 +127,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Sora の機能への積極的な追従は行いません
 - libdatachannel へ積極的な貢献を行います
+- 映像コーデックはハードウェアアクセラレーターを利用します
 
 ## 優先実装
 
@@ -150,8 +169,15 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - iOS 対応
   - Android 対応
   - [Raspberry Pi OS 対応](https://www.raspberrypi.com/software/)
+    - arm64
+    - arm
   - [Windows IoT 対応](https://learn.microsoft.com/ja-jp/previous-versions/windows/iot-core/windows-iot)
+    - x86
+    - arm64
   - [Ubuntu Core 対応](https://ubuntu.com/core)
+    - x86
+    - arm64
+    - arm
 
 ## サポートについて
 
