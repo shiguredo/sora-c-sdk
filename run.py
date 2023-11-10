@@ -776,6 +776,7 @@ def main():
                 cmake_args = []
                 cmake_args.append(f'-DCMAKE_BUILD_TYPE={configuration}')
                 cmake_args.append(f"-DSORAC_DIR={cmake_path(os.path.join(install_dir, 'sorac'))}")
+                cmake_args.append(f"-DSUMOMO_TARGET={target_platform}")
                 cmake_args.append(f"-DLIBJPEG_TURBO_DIR={cmake_path(os.path.join(install_dir, 'libjpeg-turbo'))}")
                 cmake_args.append(f"-DLIBYUV_DIR={cmake_path(os.path.join(install_dir, 'libyuv'))}")
                 if target_platform in ('macos_x86_64', 'macos_arm64'):

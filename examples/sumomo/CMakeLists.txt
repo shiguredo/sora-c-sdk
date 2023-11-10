@@ -28,6 +28,33 @@ if (SUMOMO_TARGET STREQUAL "ubuntu-20.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubun
       pulse_recorder.cpp
       v4l2_capturer.cpp
   )
+elseif (SUMOMO_TARGET STREQUAL "macos_arm64")
+  enable_language(OBJCXX)
+  target_link_options(sumomo PRIVATE -ObjC)
+  target_sources(sumomo
+    PRIVATE
+      mac_capturer.mm
+  )
+  target_link_libraries(sumomo
+    PUBLIC
+      "-framework Foundation"
+      "-framework AVFoundation"
+      #"-framework CoreServices"
+      #"-framework CoreFoundation"
+      #"-framework AudioUnit"
+      #"-framework AudioToolbox"
+      #"-framework CoreAudio"
+      #"-framework QuartzCore"
+      #"-framework CoreGraphics"
+      "-framework CoreMedia"
+      "-framework CoreVideo"
+      #"-framework VideoToolbox"
+      #"-framework AppKit"
+      #"-framework Metal"
+      #"-framework MetalKit"
+      #"-framework OpenGL"
+      #"-framework IOSurface"
+  )
 endif()
 
 set_target_properties(sumomo PROPERTIES CXX_STANDARD 20 C_STANDARD 17)

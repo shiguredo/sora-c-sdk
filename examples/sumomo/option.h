@@ -4,6 +4,7 @@
 typedef enum SumomoOptionVideoType {
   SUMOMO_OPTION_VIDEO_TYPE_FAKE,
   SUMOMO_OPTION_VIDEO_TYPE_V4L2,
+  SUMOMO_OPTION_VIDEO_TYPE_MAC,
 } SumomoOptionVideoType;
 typedef enum SumomoOptionAudioType {
   SUMOMO_OPTION_AUDIO_TYPE_FAKE,

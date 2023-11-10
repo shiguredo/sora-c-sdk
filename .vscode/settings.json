@@ -11,6 +11,12 @@
     "[cpp]": {
         "editor.formatOnSave": true
     },
+    "[objective-c]": {
+        "editor.formatOnSave": true
+    },
+    "[objective-cpp]": {
+        "editor.formatOnSave": true
+    },
     "files.associations": {
         "*.cs": "csharp",
         "CMakeLists.txt": "cmake",

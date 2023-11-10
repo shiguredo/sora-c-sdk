@@ -10,7 +10,12 @@
 #include "fake_recorder.h"
 #include "option.h"
 #include "pulse_recorder.h"
+
+#if defined(__linux__)
 #include "v4l2_capturer.h"
+#elif defined(__APPLE__)
+#include "mac_capturer.h"
+#endif
 
 typedef struct State {
   SumomoOption* opt;
@@ -44,6 +49,16 @@ void on_track(SoracTrack* track, void* userdata) {
     if (state->opt->video_type == SUMOMO_OPTION_VIDEO_TYPE_V4L2) {
 #if defined(__linux__)
       state->capturer = sumomo_v4l2_capturer_create(
+          state->opt->video_device_name, state->opt->video_device_width,
+          state->opt->video_device_height);
+#else
+      fprintf(stderr,
+              "V4L2 capturer cannot be used on environments other than Linux");
+      exit(1);
+#endif
+    } else if (state->opt->video_type == SUMOMO_OPTION_VIDEO_TYPE_MAC) {
+#if defined(__APPLE__)
+      state->capturer = sumomo_mac_capturer_create(
           state->opt->video_device_name, state->opt->video_device_width,
           state->opt->video_device_height);
 #else
