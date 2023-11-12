@@ -34,6 +34,7 @@ elseif (SUMOMO_TARGET STREQUAL "macos_arm64")
   target_sources(sumomo
     PRIVATE
       mac_capturer.mm
+      macos_recorder.cpp
   )
   target_link_libraries(sumomo
     PUBLIC
@@ -42,8 +43,8 @@ elseif (SUMOMO_TARGET STREQUAL "macos_arm64")
       #"-framework CoreServices"
       #"-framework CoreFoundation"
       #"-framework AudioUnit"
-      #"-framework AudioToolbox"
-      #"-framework CoreAudio"
+      "-framework AudioToolbox"
+      "-framework CoreAudio"
       #"-framework QuartzCore"
       #"-framework CoreGraphics"
       "-framework CoreMedia"

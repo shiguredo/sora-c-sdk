@@ -94,6 +94,7 @@
         "variant": "cpp",
         "any": "cpp",
         "unistd.h": "c",
-        "recorder.h": "c"
+        "recorder.h": "c",
+        "__mutex_base": "cpp"
     }
 }

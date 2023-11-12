@@ -85,6 +85,8 @@ int sumomo_option_parse(SumomoOption* option,
           option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
         } else if (strcmp(optarg, "pulse") == 0) {
           option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_PULSE;
+        } else if (strcmp(optarg, "macos") == 0) {
+          option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_MACOS;
         } else {
           fprintf(stderr, "Invalid audio type: %s\n", optarg);
           *error = 1;
@@ -110,7 +112,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  -n, --video-device-name=NAME\n");
       fprintf(stdout, "  -w, --video-device-width=WIDTH\n");
       fprintf(stdout, "  -h, --video-device-height=HEIGHT\n");
-      fprintf(stdout, "  -a, --audio-type=fake,pulse\n");
+      fprintf(stdout, "  -a, --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  -o, --openh264=PATH\n");
       fprintf(stdout, "  -e, --cacert=PATH\n");
       fprintf(stdout, "      --help\n");

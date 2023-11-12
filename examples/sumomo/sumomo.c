@@ -9,12 +9,13 @@
 #include "fake_capturer.h"
 #include "fake_recorder.h"
 #include "option.h"
-#include "pulse_recorder.h"
 
 #if defined(__linux__)
+#include "pulse_recorder.h"
 #include "v4l2_capturer.h"
 #elif defined(__APPLE__)
 #include "mac_capturer.h"
+#include "macos_recorder.h"
 #endif
 
 typedef struct State {
@@ -79,6 +80,14 @@ void on_track(SoracTrack* track, void* userdata) {
 #else
       fprintf(stderr,
               "Pulse audio cannot be used on environments other than Linux");
+      exit(1);
+#endif
+    } else if (state->opt->audio_type == SUMOMO_OPTION_AUDIO_TYPE_MACOS) {
+#if defined(__APPLE__)
+      state->recorder = sumomo_macos_recorder_create();
+#else
+      fprintf(stderr,
+              "macOS audio cannot be used on environments other than macOS");
       exit(1);
 #endif
     } else {

@@ -9,6 +9,7 @@ typedef enum SumomoOptionVideoType {
 typedef enum SumomoOptionAudioType {
   SUMOMO_OPTION_AUDIO_TYPE_FAKE,
   SUMOMO_OPTION_AUDIO_TYPE_PULSE,
+  SUMOMO_OPTION_AUDIO_TYPE_MACOS,
 } SumomoOptionAudioType;
 
 typedef struct SumomoOption {
