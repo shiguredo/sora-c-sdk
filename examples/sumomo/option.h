@@ -1,6 +1,8 @@
 #ifndef SUMOMO_OPTION_H_
 #define SUMOMO_OPTION_H_
 
+#include <sorac/sorac.h>
+
 typedef enum SumomoOptionVideoType {
   SUMOMO_OPTION_VIDEO_TYPE_FAKE,
   SUMOMO_OPTION_VIDEO_TYPE_V4L2,
@@ -20,6 +22,7 @@ typedef struct SumomoOption {
   int video_device_width;
   int video_device_height;
   SumomoOptionAudioType audio_type;
+  soracp_H264EncoderType h264_encoder_type;
   const char* openh264;
   const char* cacert;
 } SumomoOption;

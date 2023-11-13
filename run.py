@@ -663,12 +663,12 @@ def main():
         cmake_args.append(f"-DPROTOC_GEN_JSONIF_DIR={cmake_path(os.path.join(install_dir, 'protoc-gen-jsonif'))}")
         with cd(BASE_DIR):
             version = read_version_file('VERSION')
-            sora_client_sdk_version = version['SORA_CLIENT_SDK_VERSION']
-            sora_client_sdk_commit = cmdcap(['git', 'rev-parse', 'HEAD'])
+            sora_c_sdk_version = version['SORA_C_SDK_VERSION']
+            sora_c_sdk_commit = cmdcap(['git', 'rev-parse', 'HEAD'])
             # android_native_api_level = version['ANDROID_NATIVE_API_LEVEL']
-        cmake_args.append(f"-DSORA_CLIENT_SDK_VERSION={sora_client_sdk_version}")
-        cmake_args.append(f"-DSORA_CLIENT_SDK_COMMIT={sora_client_sdk_commit}")
-        cmake_args.append(f"-DSORA_CLIENT_SDK_TARGET={target_platform}")
+        cmake_args.append(f"-DSORAC_VERSION={sora_c_sdk_version}")
+        cmake_args.append(f"-DSORAC_COMMIT={sora_c_sdk_commit}")
+        cmake_args.append(f"-DSORAC_TARGET={target_platform}")
         if target_platform in ('macos_x86_64', 'macos_arm64'):
             sysroot = cmdcap(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
             target = 'x86_64-apple-darwin' if target_platform in ('macos_x86_64',) else 'aarch64-apple-darwin'
@@ -800,7 +800,7 @@ def main():
 
         with cd(BASE_DIR):
             version = read_version_file('VERSION')
-            sora_client_sdk_version = version['SORA_CLIENT_SDK_VERSION']
+            sora_c_sdk_version = version['SORA_C_SDK_VERSION']
 
         def archive(archive_path, files, is_windows):
             if is_windows:
@@ -817,7 +817,7 @@ def main():
         content_type = 'application/zip' if is_windows else 'application/gzip'
 
         with cd(install_dir):
-            archive_name = f'sora-cpp-sdk-{sora_client_sdk_version}_{target_platform}.{ext}'
+            archive_name = f'sora-cpp-sdk-{sora_c_sdk_version}_{target_platform}.{ext}'
             archive_path = os.path.join(package_dir, archive_name)
             archive(archive_path, enum_all_files('sorac', '.'), is_windows)
 

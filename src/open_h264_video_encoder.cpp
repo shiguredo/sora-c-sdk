@@ -116,6 +116,11 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
   }
 
   void Encode(const VideoFrame& frame) override {
+    if (frame.i420_buffer == nullptr) {
+      PLOG_ERROR << "OpenH264 only support I420 buffer.";
+      return;
+    }
+
     SSourcePicture pic = {};
     pic.iPicWidth = 640;
     pic.iPicHeight = 480;
@@ -128,8 +133,7 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
     pic.pData[1] = frame.i420_buffer->u.get();
     pic.pData[2] = frame.i420_buffer->v.get();
 
-    bool send_key_frame = next_iframe_;
-    next_iframe_ = false;
+    bool send_key_frame = next_iframe_.exchange(false);
     if (send_key_frame) {
       encoder_->ForceIntraFrame(true);
     }

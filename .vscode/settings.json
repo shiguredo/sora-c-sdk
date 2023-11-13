@@ -95,6 +95,8 @@
         "any": "cpp",
         "unistd.h": "c",
         "recorder.h": "c",
-        "__mutex_base": "cpp"
+        "__mutex_base": "cpp",
+        "sorac.h": "c",
+        "soracp.json.c.h": "c"
     }
 }

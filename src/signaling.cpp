@@ -15,6 +15,10 @@
 #include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
 
+#if defined(__APPLE__)
+#include "sorac/vt_h264_video_encoder.hpp"
+#endif
+
 // https://github.com/paullouisageneau/libdatachannel/issues/990
 namespace rtc {
 using ::operator<<;
@@ -278,7 +282,20 @@ class SignalingImpl : public Signaling {
             return;
           }
 
-          client_.h264_encoder = CreateOpenH264VideoEncoder(config_.openh264);
+          if (config_.h264_encoder_type == soracp::H264EncoderType::OPEN_H264) {
+            client_.h264_encoder = CreateOpenH264VideoEncoder(config_.openh264);
+          } else if (config_.h264_encoder_type ==
+                     soracp::H264EncoderType::VIDEO_TOOLBOX) {
+#if defined(__APPLE__)
+            client_.h264_encoder = CreateVTH264VideoEncoder();
+#else
+            PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+            return;
+#endif
+          } else {
+            PLOG_ERROR << "Unknown H264EncoderType";
+            return;
+          }
           if (!client_.h264_encoder->InitEncode()) {
             PLOG_ERROR << "Failed to InitEncode()";
             return;

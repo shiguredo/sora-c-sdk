@@ -160,6 +160,7 @@ int main(int argc, char* argv[]) {
   if (opt.cacert != NULL) {
     soracp_SignalingConfig_set_ca_certificate(&config, opt.cacert);
   }
+  soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
 

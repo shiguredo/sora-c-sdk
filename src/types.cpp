@@ -23,7 +23,7 @@ std::shared_ptr<VideoFrameBufferNV12> VideoFrameBufferNV12::Create(int width,
   p->width = width;
   p->height = height;
   p->stride_y = width;
-  p->stride_uv = width;
+  p->stride_uv = (width + 1) / 2 * 2;
   int chroma_height = (height + 1) / 2;
   p->y.reset(new uint8_t[p->stride_y * height]());
   p->uv.reset(new uint8_t[p->stride_uv * chroma_height]());

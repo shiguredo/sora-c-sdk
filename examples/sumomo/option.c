@@ -15,12 +15,13 @@ static struct option long_opts[] = {
     {"video-device-width", required_argument, 0, 'w'},
     {"video-device-height", required_argument, 0, 'h'},
     {"audio-type", required_argument, 0, 'a'},
+    {"h264-encoder-type", required_argument, 0, 'H'},
     {"openh264", required_argument, 0, 'o'},
     {"cacert", required_argument, 0, 'e'},
     {"help", no_argument, 0, 0},
     {0, 0, 0, 0},
 };
-static const char short_opts[] = "s:c:v:n:w:h:a:o:e:";
+static const char short_opts[] = "s:c:v:n:w:h:a:H:o:e:";
 
 int sumomo_option_parse(SumomoOption* option,
                         int argc,
@@ -92,6 +93,16 @@ int sumomo_option_parse(SumomoOption* option,
           *error = 1;
         }
         break;
+      case 'H':
+        if (strcmp(optarg, "openh264") == 0) {
+          option->h264_encoder_type = soracp_H264EncoderType_OPEN_H264;
+        } else if (strcmp(optarg, "videotoolbox") == 0) {
+          option->h264_encoder_type = soracp_H264EncoderType_VIDEO_TOOLBOX;
+        } else {
+          fprintf(stderr, "Invalid h264 encoder type: %s\n", optarg);
+          *error = 1;
+        }
+        break;
       case 'o':
         option->openh264 = optarg;
         break;
@@ -113,6 +124,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  -w, --video-device-width=WIDTH\n");
       fprintf(stdout, "  -h, --video-device-height=HEIGHT\n");
       fprintf(stdout, "  -a, --audio-type=fake,pulse,macos\n");
+      fprintf(stdout, "  -H, --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  -o, --openh264=PATH\n");
       fprintf(stdout, "  -e, --cacert=PATH\n");
       fprintf(stdout, "      --help\n");

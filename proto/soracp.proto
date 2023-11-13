@@ -8,6 +8,11 @@ enum OptionalBool {
     FALSE = 2;
 }
 
+enum H264EncoderType {
+    OPEN_H264 = 0;
+    VIDEO_TOOLBOX = 1;
+}
+
 message DataChannel {
     // required
     string label = 1;
@@ -43,6 +48,7 @@ message ForwardingFilter {
 
 message SignalingConfig {
     repeated string signaling_url_candidates = 1;
+    H264EncoderType h264_encoder_type = 11;
     string openh264 = 2;
     string ca_certificate = 3;
     string proxy_url = 44;
