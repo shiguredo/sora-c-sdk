@@ -248,7 +248,13 @@ class VTH264VideoEncoder : public H264VideoEncoder {
     }
   }
 
-  void Release() override {}
+  void Release() override {
+    if (vtref_ != nullptr) {
+      VTCompressionSessionInvalidate(vtref_);
+      CFRelease(vtref_);
+      vtref_ = nullptr;
+    }
+  }
 
  private:
   static void OnEncodeStatic(void* encoder,
