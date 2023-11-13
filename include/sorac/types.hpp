@@ -6,7 +6,7 @@
 
 namespace sorac {
 
-struct VideoFrameBuffer {
+struct VideoFrameBufferI420 {
   int width;
   int height;
   std::unique_ptr<uint8_t[]> y;
@@ -16,11 +16,23 @@ struct VideoFrameBuffer {
   std::unique_ptr<uint8_t[]> v;
   int stride_v;
 
-  static std::shared_ptr<VideoFrameBuffer> Create(int width, int height);
+  static std::shared_ptr<VideoFrameBufferI420> Create(int width, int height);
+};
+
+struct VideoFrameBufferNV12 {
+  int width;
+  int height;
+  std::unique_ptr<uint8_t[]> y;
+  int stride_y;
+  std::unique_ptr<uint8_t[]> uv;
+  int stride_uv;
+
+  static std::shared_ptr<VideoFrameBufferNV12> Create(int width, int height);
 };
 
 struct VideoFrame {
-  std::shared_ptr<VideoFrameBuffer> video_frame_buffer;
+  std::shared_ptr<VideoFrameBufferI420> i420_buffer;
+  std::shared_ptr<VideoFrameBufferNV12> nv12_buffer;
   std::chrono::microseconds timestamp;
 };
 

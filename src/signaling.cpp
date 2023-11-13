@@ -12,7 +12,7 @@
 #include <plog/Log.h>
 
 #include "sorac/current_time.hpp"
-#include "sorac/h264_video_encoder.hpp"
+#include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
 
 // https://github.com/paullouisageneau/libdatachannel/issues/990
@@ -281,6 +281,7 @@ class SignalingImpl : public Signaling {
           client_.h264_encoder = CreateOpenH264VideoEncoder(config_.openh264);
           if (!client_.h264_encoder->InitEncode()) {
             PLOG_ERROR << "Failed to InitEncode()";
+            return;
           }
           client_.h264_encoder->SetEncodeCallback(
               [this, initial_timestamp =
@@ -374,6 +375,7 @@ class SignalingImpl : public Signaling {
                   ENCODING_SAMPLE_RATE, ENCODING_CHANNELS,
                   ENCODING_FRAME_DURATION_MS, ENCODING_BITRATE_KBPS)) {
             PLOG_ERROR << "Failed to InitEncode()";
+            return;
           }
           client_.opus_encoder->SetEncodeCallback(
               [this, initial_timestamp =

@@ -19,9 +19,6 @@ class H264VideoEncoder {
   virtual void Release() = 0;
 };
 
-std::shared_ptr<H264VideoEncoder> CreateOpenH264VideoEncoder(
-    const std::string& openh264);
-
 }  // namespace sorac
 
 #endif

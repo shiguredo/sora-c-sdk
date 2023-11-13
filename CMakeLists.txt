@@ -89,7 +89,7 @@ target_sources(sorac
   PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.cpp"
     src/current_time.cpp
-    src/h264_video_encoder.cpp
+    src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
     src/types.cpp

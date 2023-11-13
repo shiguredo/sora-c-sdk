@@ -57,27 +57,60 @@ typedef struct SoracMessageVariant {
   int size;
 } SoracMessageVariant;
 
-// VideoFrameBuffer
-struct SoracVideoFrameBuffer;
-typedef struct SoracVideoFrameBuffer SoracVideoFrameBuffer;
-extern SoracVideoFrameBuffer* sorac_video_frame_buffer_create(int width,
-                                                              int height);
-extern void sorac_video_frame_buffer_release(SoracVideoFrameBuffer* p);
-extern SoracVideoFrameBuffer* sorac_video_frame_buffer_share(
-    SoracVideoFrameBuffer* p);
-extern int sorac_video_frame_buffer_get_width(SoracVideoFrameBuffer* p);
-extern int sorac_video_frame_buffer_get_height(SoracVideoFrameBuffer* p);
-extern uint8_t* sorac_video_frame_buffer_get_y(SoracVideoFrameBuffer* p);
-extern int sorac_video_frame_buffer_get_stride_y(SoracVideoFrameBuffer* p);
-extern uint8_t* sorac_video_frame_buffer_get_u(SoracVideoFrameBuffer* p);
-extern int sorac_video_frame_buffer_get_stride_u(SoracVideoFrameBuffer* p);
-extern uint8_t* sorac_video_frame_buffer_get_v(SoracVideoFrameBuffer* p);
-extern int sorac_video_frame_buffer_get_stride_v(SoracVideoFrameBuffer* p);
+// VideoFrameBufferI420
+struct SoracVideoFrameBufferI420;
+typedef struct SoracVideoFrameBufferI420 SoracVideoFrameBufferI420;
+extern SoracVideoFrameBufferI420* sorac_video_frame_buffer_i420_create(
+    int width,
+    int height);
+extern void sorac_video_frame_buffer_i420_release(SoracVideoFrameBufferI420* p);
+extern SoracVideoFrameBufferI420* sorac_video_frame_buffer_i420_share(
+    SoracVideoFrameBufferI420* p);
+extern int sorac_video_frame_buffer_i420_get_width(
+    SoracVideoFrameBufferI420* p);
+extern int sorac_video_frame_buffer_i420_get_height(
+    SoracVideoFrameBufferI420* p);
+extern uint8_t* sorac_video_frame_buffer_i420_get_y(
+    SoracVideoFrameBufferI420* p);
+extern int sorac_video_frame_buffer_i420_get_stride_y(
+    SoracVideoFrameBufferI420* p);
+extern uint8_t* sorac_video_frame_buffer_i420_get_u(
+    SoracVideoFrameBufferI420* p);
+extern int sorac_video_frame_buffer_i420_get_stride_u(
+    SoracVideoFrameBufferI420* p);
+extern uint8_t* sorac_video_frame_buffer_i420_get_v(
+    SoracVideoFrameBufferI420* p);
+extern int sorac_video_frame_buffer_i420_get_stride_v(
+    SoracVideoFrameBufferI420* p);
+
+// VideoFrameBufferNV12
+struct SoracVideoFrameBufferNV12;
+typedef struct SoracVideoFrameBufferNV12 SoracVideoFrameBufferNV12;
+extern SoracVideoFrameBufferNV12* sorac_video_frame_buffer_nv12_create(
+    int width,
+    int height);
+extern void sorac_video_frame_buffer_nv12_release(SoracVideoFrameBufferNV12* p);
+extern SoracVideoFrameBufferNV12* sorac_video_frame_buffer_nv12_share(
+    SoracVideoFrameBufferNV12* p);
+extern int sorac_video_frame_buffer_nv12_get_width(
+    SoracVideoFrameBufferNV12* p);
+extern int sorac_video_frame_buffer_nv12_get_height(
+    SoracVideoFrameBufferNV12* p);
+extern uint8_t* sorac_video_frame_buffer_nv12_get_y(
+    SoracVideoFrameBufferNV12* p);
+extern int sorac_video_frame_buffer_nv12_get_stride_y(
+    SoracVideoFrameBufferNV12* p);
+extern uint8_t* sorac_video_frame_buffer_nv12_get_uv(
+    SoracVideoFrameBufferNV12* p);
+extern int sorac_video_frame_buffer_nv12_get_stride_uv(
+    SoracVideoFrameBufferNV12* p);
 
 // VideoFrame
 struct SoracVideoFrameRef;
 typedef struct SoracVideoFrameRef SoracVideoFrameRef;
-extern SoracVideoFrameBuffer* sorac_video_frame_ref_get_video_frame_buffer(
+extern SoracVideoFrameBufferI420* sorac_video_frame_ref_get_i420_buffer(
+    SoracVideoFrameRef* p);
+extern SoracVideoFrameBufferNV12* sorac_video_frame_ref_get_nv12_buffer(
     SoracVideoFrameRef* p);
 extern int64_t sorac_video_frame_ref_get_timestamp_us(SoracVideoFrameRef* p);
 

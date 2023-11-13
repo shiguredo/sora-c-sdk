@@ -149,7 +149,10 @@ class CPointer {
 
 CPointer g_cptr;
 std::unordered_map<intptr_t, Signaling*> g_signaling_map;
-std::unordered_map<intptr_t, VideoFrameBuffer*> g_video_frame_buffer_map;
+std::unordered_map<intptr_t, VideoFrameBufferI420*>
+    g_video_frame_buffer_i420_map;
+std::unordered_map<intptr_t, VideoFrameBufferNV12*>
+    g_video_frame_buffer_nv12_map;
 std::unordered_map<intptr_t, rtc::Track*> g_track_map;
 std::unordered_map<intptr_t, rtc::Description::Media*> g_description_media_map;
 std::unordered_map<intptr_t, rtc::DataChannel*> g_data_channel_map;
@@ -205,58 +208,107 @@ using sorac::g_data_channel_map;
 using sorac::g_description_media_map;
 using sorac::g_signaling_map;
 using sorac::g_track_map;
-using sorac::g_video_frame_buffer_map;
+using sorac::g_video_frame_buffer_i420_map;
+using sorac::g_video_frame_buffer_nv12_map;
 
-// VideoFrameBuffer
-SoracVideoFrameBuffer* sorac_video_frame_buffer_create(int width, int height) {
-  auto p = sorac::VideoFrameBuffer::Create(width, height);
-  return (SoracVideoFrameBuffer*)g_cptr.Add(p, g_video_frame_buffer_map);
+// VideoFrameBufferI420
+SoracVideoFrameBufferI420* sorac_video_frame_buffer_i420_create(int width,
+                                                                int height) {
+  auto p = sorac::VideoFrameBufferI420::Create(width, height);
+  return (SoracVideoFrameBufferI420*)g_cptr.Add(p,
+                                                g_video_frame_buffer_i420_map);
 }
-void sorac_video_frame_buffer_release(SoracVideoFrameBuffer* p) {
-  g_cptr.Remove(p, g_video_frame_buffer_map);
+void sorac_video_frame_buffer_i420_release(SoracVideoFrameBufferI420* p) {
+  g_cptr.Remove(p, g_video_frame_buffer_i420_map);
 }
-extern SoracVideoFrameBuffer* sorac_video_frame_buffer_share(
-    SoracVideoFrameBuffer* p) {
-  return (SoracVideoFrameBuffer*)g_cptr.Share(p, g_video_frame_buffer_map);
+extern SoracVideoFrameBufferI420* sorac_video_frame_buffer_i420_share(
+    SoracVideoFrameBufferI420* p) {
+  return (SoracVideoFrameBufferI420*)g_cptr.Share(
+      p, g_video_frame_buffer_i420_map);
 }
-int sorac_video_frame_buffer_get_width(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+int sorac_video_frame_buffer_i420_get_width(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->width;
 }
-int sorac_video_frame_buffer_get_height(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+int sorac_video_frame_buffer_i420_get_height(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->height;
 }
-uint8_t* sorac_video_frame_buffer_get_y(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+uint8_t* sorac_video_frame_buffer_i420_get_y(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->y.get();
 }
-int sorac_video_frame_buffer_get_stride_y(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+int sorac_video_frame_buffer_i420_get_stride_y(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->stride_y;
 }
-uint8_t* sorac_video_frame_buffer_get_u(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+uint8_t* sorac_video_frame_buffer_i420_get_u(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->u.get();
 }
-int sorac_video_frame_buffer_get_stride_u(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+int sorac_video_frame_buffer_i420_get_stride_u(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->stride_u;
 }
-uint8_t* sorac_video_frame_buffer_get_v(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+uint8_t* sorac_video_frame_buffer_i420_get_v(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->v.get();
 }
-int sorac_video_frame_buffer_get_stride_v(SoracVideoFrameBuffer* p) {
-  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_map);
+int sorac_video_frame_buffer_i420_get_stride_v(SoracVideoFrameBufferI420* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_i420_map);
   return video_frame_buffer->stride_v;
 }
 
+// VideoFrameBufferNV12
+SoracVideoFrameBufferNV12* sorac_video_frame_buffer_nv12_create(int width,
+                                                                int height) {
+  auto p = sorac::VideoFrameBufferNV12::Create(width, height);
+  return (SoracVideoFrameBufferNV12*)g_cptr.Add(p,
+                                                g_video_frame_buffer_nv12_map);
+}
+void sorac_video_frame_buffer_nv12_release(SoracVideoFrameBufferNV12* p) {
+  g_cptr.Remove(p, g_video_frame_buffer_nv12_map);
+}
+extern SoracVideoFrameBufferNV12* sorac_video_frame_buffer_nv12_share(
+    SoracVideoFrameBufferNV12* p) {
+  return (SoracVideoFrameBufferNV12*)g_cptr.Share(
+      p, g_video_frame_buffer_nv12_map);
+}
+int sorac_video_frame_buffer_nv12_get_width(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->width;
+}
+int sorac_video_frame_buffer_nv12_get_height(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->height;
+}
+uint8_t* sorac_video_frame_buffer_nv12_get_y(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->y.get();
+}
+int sorac_video_frame_buffer_nv12_get_stride_y(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->stride_y;
+}
+uint8_t* sorac_video_frame_buffer_nv12_get_uv(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->uv.get();
+}
+int sorac_video_frame_buffer_nv12_get_stride_uv(SoracVideoFrameBufferNV12* p) {
+  auto video_frame_buffer = g_cptr.Get(p, g_video_frame_buffer_nv12_map);
+  return video_frame_buffer->stride_uv;
+}
+
 // VideoFrame
-SoracVideoFrameBuffer* sorac_video_frame_ref_get_video_frame_buffer(
+SoracVideoFrameBufferI420* sorac_video_frame_ref_get_i420_buffer(
     SoracVideoFrameRef* p) {
-  return (SoracVideoFrameBuffer*)g_cptr.Ref(
-      ((sorac::VideoFrame*)p)->video_frame_buffer, g_video_frame_buffer_map);
+  return (SoracVideoFrameBufferI420*)g_cptr.Ref(
+      ((sorac::VideoFrame*)p)->i420_buffer, g_video_frame_buffer_i420_map);
+}
+SoracVideoFrameBufferNV12* sorac_video_frame_ref_get_nv12_buffer(
+    SoracVideoFrameRef* p) {
+  return (SoracVideoFrameBufferNV12*)g_cptr.Ref(
+      ((sorac::VideoFrame*)p)->nv12_buffer, g_video_frame_buffer_nv12_map);
 }
 int64_t sorac_video_frame_ref_get_timestamp_us(SoracVideoFrameRef* p) {
   return ((sorac::VideoFrame*)p)->timestamp.count();

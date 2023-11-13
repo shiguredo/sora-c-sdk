@@ -196,7 +196,7 @@ class V4L2Capturer : public SumomoCapturer {
           continue;
         }
 
-        auto fb = sorac::VideoFrameBuffer::Create(width_, height_);
+        auto fb = sorac::VideoFrameBufferI420::Create(width_, height_);
         auto p = (uint8_t*)pool_[buf.index].start;
         auto chroma_height = (fb->height + 1) / 2;
         libyuv::ConvertToI420(p, buf.bytesused, fb->y.get(), fb->stride_y,
@@ -205,7 +205,7 @@ class V4L2Capturer : public SumomoCapturer {
                               height_, libyuv::kRotate0, libyuv::FOURCC_MJPG);
 
         sorac::VideoFrame frame;
-        frame.video_frame_buffer = fb;
+        frame.i420_buffer = fb;
         frame.timestamp = sorac::get_current_time();
         callback_(frame);
 

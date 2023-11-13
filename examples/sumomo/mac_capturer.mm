@@ -283,13 +283,11 @@ static dispatch_queue_t kCapturerQueue = nil;
       (int64_t)(CMTimeGetSeconds(
                     CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) *
                 kMicrosecondsPerSecond));
-  frame.video_frame_buffer = sorac::VideoFrameBuffer::Create(width, height);
-  uint8_t* dst_y = frame.video_frame_buffer->y.get();
-  int dst_stride_y = frame.video_frame_buffer->stride_y;
-  uint8_t* dst_u = frame.video_frame_buffer->u.get();
-  int dst_stride_u = frame.video_frame_buffer->stride_u;
-  uint8_t* dst_v = frame.video_frame_buffer->v.get();
-  int dst_stride_v = frame.video_frame_buffer->stride_v;
+  frame.nv12_buffer = sorac::VideoFrameBufferNV12::Create(width, height);
+  uint8_t* dst_y = frame.nv12_buffer->y.get();
+  int dst_stride_y = frame.nv12_buffer->stride_y;
+  uint8_t* dst_uv = frame.nv12_buffer->uv.get();
+  int dst_stride_uv = frame.nv12_buffer->stride_uv;
 
   CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 
@@ -302,9 +300,8 @@ static dispatch_queue_t kCapturerQueue = nil;
       const uint8_t* src_uv =
           (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
       int src_stride_uv = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-      libyuv::NV12ToI420(src_y, src_stride_y, src_uv, src_stride_uv, dst_y,
-                         dst_stride_y, dst_u, dst_stride_u, dst_v, dst_stride_v,
-                         width, height);
+      libyuv::NV12Copy(src_y, src_stride_y, src_uv, src_stride_uv, dst_y,
+                       dst_stride_y, dst_uv, dst_stride_uv, width, height);
       break;
     }
     case kCVPixelFormatType_32BGRA:
@@ -314,11 +311,13 @@ static dispatch_queue_t kCapturerQueue = nil;
       const size_t stride = CVPixelBufferGetBytesPerRow(pixelBuffer);
 
       if (format == kCVPixelFormatType_32BGRA) {
-        libyuv::ARGBToI420(src, stride, dst_y, dst_stride_y, dst_u,
-                           dst_stride_u, dst_v, dst_stride_v, width, height);
+        libyuv::ARGBToNV12(src, stride, dst_y, dst_stride_y, dst_uv,
+                           dst_stride_uv, width, height);
       } else if (format == kCVPixelFormatType_32ARGB) {
-        libyuv::BGRAToI420(src, stride, dst_y, dst_stride_y, dst_u,
-                           dst_stride_u, dst_v, dst_stride_v, width, height);
+        std::unique_ptr<uint8_t[]> tmp(new uint8_t[stride * height]);
+        libyuv::BGRAToARGB(src, stride, tmp.get(), stride, width, height);
+        libyuv::ARGBToNV12(tmp.get(), stride, dst_y, dst_stride_y, dst_uv,
+                           dst_stride_uv, width, height);
       }
       break;
     }

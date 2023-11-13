@@ -1,4 +1,4 @@
-#include "sorac/h264_video_encoder.hpp"
+#include "sorac/open_h264_video_encoder.hpp"
 
 #include <string.h>
 #include <atomic>
@@ -121,12 +121,12 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
     pic.iPicHeight = 480;
     pic.iColorFormat = EVideoFormatType::videoFormatI420;
     pic.uiTimeStamp = frame.timestamp.count() / 1000;
-    pic.iStride[0] = frame.video_frame_buffer->stride_y;
-    pic.iStride[1] = frame.video_frame_buffer->stride_u;
-    pic.iStride[2] = frame.video_frame_buffer->stride_v;
-    pic.pData[0] = frame.video_frame_buffer->y.get();
-    pic.pData[1] = frame.video_frame_buffer->u.get();
-    pic.pData[2] = frame.video_frame_buffer->v.get();
+    pic.iStride[0] = frame.i420_buffer->stride_y;
+    pic.iStride[1] = frame.i420_buffer->stride_u;
+    pic.iStride[2] = frame.i420_buffer->stride_v;
+    pic.pData[0] = frame.i420_buffer->y.get();
+    pic.pData[1] = frame.i420_buffer->u.get();
+    pic.pData[2] = frame.i420_buffer->v.get();
 
     bool send_key_frame = next_iframe_;
     next_iframe_ = false;

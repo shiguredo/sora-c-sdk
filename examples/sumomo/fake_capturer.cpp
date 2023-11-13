@@ -46,12 +46,12 @@ class FakeCapturer : public SumomoCapturer {
       std::uniform_int_distribution<int> dist(0, 640 * 480 - 1);
       sorac::VideoFrame frame;
       frame.timestamp = timestamp;
-      frame.video_frame_buffer = sorac::VideoFrameBuffer::Create(640, 480);
-      frame.video_frame_buffer->y[dist(*engine_)] = 0xff;
-      frame.video_frame_buffer->y[dist(*engine_)] = 0xff;
-      frame.video_frame_buffer->y[dist(*engine_)] = 0xff;
-      frame.video_frame_buffer->y[dist(*engine_)] = 0xff;
-      frame.video_frame_buffer->y[dist(*engine_)] = 0xff;
+      frame.i420_buffer = sorac::VideoFrameBufferI420::Create(640, 480);
+      frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      frame.i420_buffer->y[dist(*engine_)] = 0xff;
       callback_(frame);
     });
     return 0;
