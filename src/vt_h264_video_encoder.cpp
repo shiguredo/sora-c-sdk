@@ -70,17 +70,6 @@ class VTH264VideoEncoder : public H264VideoEncoder {
       return false;
     }
 
-    //CFBooleanRef hwaccl_enabled = nullptr;
-    //err = VTSessionCopyProperty(vtref_,
-    //                               kVTCompressionPropertyKey_UsingHardwareAcceleratedVideoEncoder,
-    //                               nullptr,
-    //                               &hwaccl_enabled);
-    //if (err == noErr && CFBooleanGetValue(hwaccl_enabled)) {
-    //  printf("Compression session created with hw accl enabled\n");
-    //} else {
-    //  printf("Compression session created with hw accl disabled\n");
-    //}
-
     if (OSStatus err = VTSessionSetProperty(
             vtref_, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
         err != noErr) {
@@ -103,6 +92,7 @@ class VTH264VideoEncoder : public H264VideoEncoder {
       return false;
     }
 
+    // ビットレート
     {
       int value = 100 * 1000;
       CFNumberRef cfnum =
@@ -116,7 +106,7 @@ class VTH264VideoEncoder : public H264VideoEncoder {
       }
     }
 
-    // Set a relatively large value for keyframe emission (7200 frames or 4 minutes).
+    // キーフレーム間隔 (7200 フレームまたは 4 分間)
     {
       int value = 7200;
       CFNumberRef cfnum =
@@ -400,7 +390,7 @@ class VTH264VideoEncoder : public H264VideoEncoder {
     std::chrono::microseconds timestamp;
   };
 
-  VTCompressionSessionRef vtref_;
+  VTCompressionSessionRef vtref_ = nullptr;
   std::function<void(const EncodedImage&)> callback_;
 
   std::atomic<bool> next_iframe_;
