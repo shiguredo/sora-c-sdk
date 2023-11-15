@@ -1,6 +1,7 @@
 /_source
 /_build
 /_install
+/_package
 /run.sh
 /libopenh264-*.so
 /libopenh264-*.dylib
