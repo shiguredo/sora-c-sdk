@@ -46,6 +46,8 @@ jobs:
     runs-on: ${{ matrix.name == 'ubuntu-22.04_x86_64' && 'ubuntu-22.04' || 'ubuntu-20.04' }}
     steps:
       - uses: actions/checkout@v4
+      - run: |
+          apt-get install -y libpulse-dev
       - run: python3 run.py --sumomo --package ${{ matrix.name }}
       - name: Get package name
         run: |
