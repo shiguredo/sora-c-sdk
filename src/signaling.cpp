@@ -16,7 +16,7 @@
 #include "sorac/opus_audio_encoder.hpp"
 
 #if defined(__APPLE__)
-#include "sorac/vt_h264_video_encoder.hpp"
+#include "sorac/vt_h26x_video_encoder.hpp"
 #endif
 
 // https://github.com/paullouisageneau/libdatachannel/issues/990
@@ -40,7 +40,7 @@ struct Client {
   std::shared_ptr<rtc::PeerConnection> pc;
 
   std::shared_ptr<Track> video;
-  std::shared_ptr<H264VideoEncoder> h264_encoder;
+  std::shared_ptr<VideoEncoder> video_encoder;
 
   std::shared_ptr<Track> audio;
   std::shared_ptr<OpusAudioEncoder> opus_encoder;
@@ -122,7 +122,7 @@ class SignalingImpl : public Signaling {
   }
 
   void SendVideoFrame(const VideoFrame& frame) override {
-    client_.h264_encoder->Encode(frame);
+    client_.video_encoder->Encode(frame);
   }
 
   void SendAudioFrame(const AudioFrame& frame) override {
@@ -233,9 +233,10 @@ class SignalingImpl : public Signaling {
             video_lines.assign(it, it2);
           }
         }
-        // mid, payload_type
+        // mid, payload_type, codec
         std::string mid;
         int payload_type;
+        std::string codec;
         {
           auto get_value =
               [&video_lines](const std::string& search) -> std::string {
@@ -252,55 +253,103 @@ class SignalingImpl : public Signaling {
           PLOG_DEBUG << "mid=" << mid;
           auto xs = split_with(get_value("a=msid:"), " ");
           auto rtpmap = get_value("a=rtpmap:");
-          payload_type = std::stoi(split_with(rtpmap, " ")[0]);
-          PLOG_DEBUG << "payload_type=" << payload_type;
+          auto ys = split_with(rtpmap, " ");
+          payload_type = std::stoi(ys[0]);
+          codec = split_with(ys[1], "/")[0];
+          PLOG_DEBUG << "payload_type=" << payload_type << ", codec=" << codec;
         }
 
-        auto video = rtc::Description::Video(mid);
-        video.addH264Codec(payload_type);
-        video.addSSRC(ssrc, cname, msid, track_id);
-        auto track = client_.pc->addTrack(video);
-        auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
-            ssrc, cname, payload_type,
-            rtc::H264RtpPacketizer::defaultClockRate);
-        auto packetizer = std::make_shared<rtc::H264RtpPacketizer>(
-            rtc::NalUnit::Separator::LongStartSequence, rtp_config);
-        auto sr_reporter = std::make_shared<rtc::RtcpSrReporter>(rtp_config);
-        packetizer->addToChain(sr_reporter);
-        auto nack_responder = std::make_shared<rtc::RtcpNackResponder>();
-        packetizer->addToChain(nack_responder);
-        auto pli_handler = std::make_shared<rtc::PliHandler>([this]() {
-          PLOG_DEBUG << "PLI or FIR";
-          client_.h264_encoder->ForceIntraNextFrame();
-        });
-        packetizer->addToChain(pli_handler);
-        track->setMediaHandler(packetizer);
-        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track)]() {
+        std::shared_ptr<rtc::Track> track;
+        std::shared_ptr<rtc::RtcpSrReporter> sr_reporter;
+        if (codec == "H264") {
+          auto video = rtc::Description::Video(mid);
+          video.addH264Codec(payload_type);
+          video.addSSRC(ssrc, cname, msid, track_id);
+          track = client_.pc->addTrack(video);
+          auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
+              ssrc, cname, payload_type,
+              rtc::H264RtpPacketizer::defaultClockRate);
+          auto packetizer = std::make_shared<rtc::H264RtpPacketizer>(
+              rtc::NalUnit::Separator::LongStartSequence, rtp_config);
+          sr_reporter = std::make_shared<rtc::RtcpSrReporter>(rtp_config);
+          packetizer->addToChain(sr_reporter);
+          auto nack_responder = std::make_shared<rtc::RtcpNackResponder>();
+          packetizer->addToChain(nack_responder);
+          auto pli_handler = std::make_shared<rtc::PliHandler>([this]() {
+            PLOG_DEBUG << "PLI or FIR";
+            client_.video_encoder->ForceIntraNextFrame();
+          });
+          packetizer->addToChain(pli_handler);
+          track->setMediaHandler(packetizer);
+        } else {
+          auto video = rtc::Description::Video(mid);
+          video.addH265Codec(payload_type);
+          video.addSSRC(ssrc, cname, msid, track_id);
+          track = client_.pc->addTrack(video);
+          auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
+              ssrc, cname, payload_type,
+              rtc::H265RtpPacketizer::defaultClockRate);
+          auto packetizer = std::make_shared<rtc::H265RtpPacketizer>(
+              rtc::NalUnit::Separator::LongStartSequence, rtp_config);
+          sr_reporter = std::make_shared<rtc::RtcpSrReporter>(rtp_config);
+          packetizer->addToChain(sr_reporter);
+          auto nack_responder = std::make_shared<rtc::RtcpNackResponder>();
+          packetizer->addToChain(nack_responder);
+          auto pli_handler = std::make_shared<rtc::PliHandler>([this]() {
+            PLOG_DEBUG << "PLI or FIR";
+            client_.video_encoder->ForceIntraNextFrame();
+          });
+          packetizer->addToChain(pli_handler);
+          track->setMediaHandler(packetizer);
+        }
+
+        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track),
+                       codec]() {
           PLOG_DEBUG << "Video Track Opened";
           auto track = wtrack.lock();
           if (track == nullptr) {
             return;
           }
 
-          if (config_.h264_encoder_type == soracp::H264EncoderType::OPEN_H264) {
-            client_.h264_encoder = CreateOpenH264VideoEncoder(config_.openh264);
-          } else if (config_.h264_encoder_type ==
-                     soracp::H264EncoderType::VIDEO_TOOLBOX) {
+          if (codec == "H264") {
+            if (config_.h264_encoder_type ==
+                soracp::H264_ENCODER_TYPE_OPEN_H264) {
+              client_.video_encoder =
+                  CreateOpenH264VideoEncoder(config_.openh264);
+            } else if (config_.h264_encoder_type ==
+                       soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-            client_.h264_encoder = CreateVTH264VideoEncoder();
+              client_.video_encoder =
+                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
 #else
-            PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-            return;
+              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+              return;
 #endif
-          } else {
-            PLOG_ERROR << "Unknown H264EncoderType";
-            return;
+            } else {
+              PLOG_ERROR << "Unknown H264EncoderType";
+              return;
+            }
+          } else if (codec == "H265") {
+            if (config_.h265_encoder_type ==
+                soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
+#if defined(__APPLE__)
+              client_.video_encoder =
+                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
+#else
+              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+              return;
+#endif
+            } else {
+              PLOG_ERROR << "Unknown H265EncoderType";
+              return;
+            }
           }
-          if (!client_.h264_encoder->InitEncode()) {
+
+          if (!client_.video_encoder->InitEncode()) {
             PLOG_ERROR << "Failed to InitEncode()";
             return;
           }
-          client_.h264_encoder->SetEncodeCallback(
+          client_.video_encoder->SetEncodeCallback(
               [this, initial_timestamp =
                          get_current_time()](const EncodedImage& image) {
                 auto rtp_config = client_.video->sender->rtpConfig;
@@ -452,8 +501,8 @@ class SignalingImpl : public Signaling {
     };
     auto set_optional_bool = [](nlohmann::json& js, const std::string& key,
                                 soracp::OptionalBool value) {
-      if (value != soracp::OptionalBool::NONE) {
-        js[key] = value == soracp::OptionalBool::TRUE ? true : false;
+      if (value != soracp::OPTIONAL_BOOL_NONE) {
+        js[key] = value == soracp::OPTIONAL_BOOL_TRUE ? true : false;
       }
     };
     auto set_json = [](nlohmann::json& js, const std::string& key,

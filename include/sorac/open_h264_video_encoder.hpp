@@ -4,11 +4,11 @@
 #include <memory>
 #include <string>
 
-#include "h264_video_encoder.hpp"
+#include "video_encoder.hpp"
 
 namespace sorac {
 
-std::shared_ptr<H264VideoEncoder> CreateOpenH264VideoEncoder(
+std::shared_ptr<VideoEncoder> CreateOpenH264VideoEncoder(
     const std::string& openh264);
 
 }

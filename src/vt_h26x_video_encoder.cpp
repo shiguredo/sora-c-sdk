@@ -1,4 +1,4 @@
-#include "sorac/vt_h264_video_encoder.hpp"
+#include "sorac/vt_h26x_video_encoder.hpp"
 
 #include <string.h>
 #include <atomic>
@@ -22,10 +22,10 @@ class Resource {
   std::function<void()> release_;
 };
 
-class VTH264VideoEncoder : public H264VideoEncoder {
+class VTH26xVideoEncoder : public VideoEncoder {
  public:
-  VTH264VideoEncoder() {}
-  ~VTH264VideoEncoder() override { Release(); }
+  VTH26xVideoEncoder(VTH26xVideoEncoderType type) : type_(type) {}
+  ~VTH26xVideoEncoder() override { Release(); }
 
   void ForceIntraNextFrame() override { next_iframe_ = true; }
 
@@ -60,7 +60,9 @@ class VTH264VideoEncoder : public H264VideoEncoder {
 
     OSStatus err = VTCompressionSessionCreate(
         nullptr,  // use default allocator
-        640, 480, kCMVideoCodecType_H264,
+        640, 480,
+        type_ == VTH26xVideoEncoderType::kH264 ? kCMVideoCodecType_H264
+                                               : kCMVideoCodecType_HEVC,
         encoder_specs,  // use hardware accelerated encoder if available
         source_attr,
         nullptr,  // use default compressed data allocator
@@ -76,12 +78,14 @@ class VTH264VideoEncoder : public H264VideoEncoder {
       PLOG_ERROR << "Failed to set real-time property: err=" << err;
       return false;
     }
-    if (OSStatus err =
-            VTSessionSetProperty(vtref_, kVTCompressionPropertyKey_ProfileLevel,
-                                 kVTProfileLevel_H264_Baseline_3_1);
-        err != noErr) {
-      PLOG_ERROR << "Failed to set profile-level property: err=" << err;
-      return false;
+    if (type_ == VTH26xVideoEncoderType::kH264) {
+      if (OSStatus err = VTSessionSetProperty(
+              vtref_, kVTCompressionPropertyKey_ProfileLevel,
+              kVTProfileLevel_H264_Baseline_3_1);
+          err != noErr) {
+        PLOG_ERROR << "Failed to set profile-level property: err=" << err;
+        return false;
+      }
     }
     if (OSStatus err = VTSessionSetProperty(
             vtref_, kVTCompressionPropertyKey_AllowFrameReordering,
@@ -147,7 +151,7 @@ class VTH264VideoEncoder : public H264VideoEncoder {
 
   void Encode(const VideoFrame& frame) override {
     if (frame.nv12_buffer == nullptr) {
-      PLOG_ERROR << "VTH264VideoEncoder only support NV12 buffer.";
+      PLOG_ERROR << "VTH26xVideoEncoder only support NV12 buffer.";
       return;
     }
 
@@ -264,11 +268,11 @@ class VTH264VideoEncoder : public H264VideoEncoder {
                 CMSampleBufferRef buffer,
                 std::chrono::microseconds timestamp) {
     if (status != noErr) {
-      PLOG_ERROR << "H264 encode failed with code: " << status;
+      PLOG_ERROR << "H26x encode failed with code: " << status;
       return;
     }
     if (flags & kVTEncodeInfo_FrameDropped) {
-      PLOG_INFO << "H264 encode dropped frame.";
+      PLOG_INFO << "H26x encode dropped frame.";
       return;
     }
 
@@ -302,15 +306,23 @@ class VTH264VideoEncoder : public H264VideoEncoder {
         int nalu_header_size = 0;
         size_t param_set_count = 0;
         if (OSStatus status =
-                CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
-                    description, 0, nullptr, nullptr, &param_set_count,
-                    &nalu_header_size);
+                type_ == VTH26xVideoEncoderType::kH264
+                    ? CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
+                          description, 0, nullptr, nullptr, &param_set_count,
+                          &nalu_header_size)
+                    : CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(
+                          description, 0, nullptr, nullptr, &param_set_count,
+                          &nalu_header_size);
             status != noErr) {
           PLOG_ERROR << "Failed to get parameter set.";
           return;
         }
         assert(nalu_header_size == NAL_SIZE);
-        assert(param_set_count == 2);
+        if (type_ == VTH26xVideoEncoderType::kH264) {
+          assert(param_set_count == 2);
+        } else {
+          assert(param_set_count == 3);
+        }
 
         size_t header_size = 0;
         // まずサイズだけ計算
@@ -318,9 +330,13 @@ class VTH264VideoEncoder : public H264VideoEncoder {
           size_t param_set_size = 0;
           const uint8_t* param_set = nullptr;
           if (OSStatus status =
-                  CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
-                      description, i, &param_set, &param_set_size, nullptr,
-                      nullptr);
+                  type_ == VTH26xVideoEncoderType::kH264
+                      ? CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
+                            description, i, &param_set, &param_set_size,
+                            nullptr, nullptr)
+                      : CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(
+                            description, i, &param_set, &param_set_size,
+                            nullptr, nullptr);
               status != noErr) {
             PLOG_ERROR << "Failed to get parameter set.";
             return;
@@ -335,9 +351,13 @@ class VTH264VideoEncoder : public H264VideoEncoder {
           size_t param_set_size = 0;
           const uint8_t* param_set = nullptr;
           if (OSStatus status =
-                  CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
-                      description, i, &param_set, &param_set_size, nullptr,
-                      nullptr);
+                  type_ == VTH26xVideoEncoderType::kH264
+                      ? CMVideoFormatDescriptionGetH264ParameterSetAtIndex(
+                            description, i, &param_set, &param_set_size,
+                            nullptr, nullptr)
+                      : CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(
+                            description, i, &param_set, &param_set_size,
+                            nullptr, nullptr);
               status != noErr) {
             PLOG_ERROR << "Failed to get parameter set.";
             return;
@@ -386,9 +406,11 @@ class VTH264VideoEncoder : public H264VideoEncoder {
 
  private:
   struct EncodeParams {
-    VTH264VideoEncoder* encoder;
+    VTH26xVideoEncoder* encoder;
     std::chrono::microseconds timestamp;
   };
+
+  VTH26xVideoEncoderType type_;
 
   VTCompressionSessionRef vtref_ = nullptr;
   std::function<void(const EncodedImage&)> callback_;
@@ -396,8 +418,9 @@ class VTH264VideoEncoder : public H264VideoEncoder {
   std::atomic<bool> next_iframe_;
 };
 
-std::shared_ptr<H264VideoEncoder> CreateVTH264VideoEncoder() {
-  return std::make_shared<VTH264VideoEncoder>();
+std::shared_ptr<VideoEncoder> CreateVTH26xVideoEncoder(
+    VTH26xVideoEncoderType type) {
+  return std::make_shared<VTH26xVideoEncoder>(type);
 }
 
 }  // namespace sorac

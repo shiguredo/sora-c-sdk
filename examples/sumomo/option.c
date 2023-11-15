@@ -15,13 +15,15 @@ static struct option long_opts[] = {
     {"video-device-width", required_argument, 0, 'w'},
     {"video-device-height", required_argument, 0, 'h'},
     {"audio-type", required_argument, 0, 'a'},
-    {"h264-encoder-type", required_argument, 0, 'H'},
+    {"video-codec-type", required_argument, 0, 'i'},
+    {"h264-encoder-type", required_argument, 0, '4'},
+    {"h265-encoder-type", required_argument, 0, '5'},
     {"openh264", required_argument, 0, 'o'},
     {"cacert", required_argument, 0, 'e'},
     {"help", no_argument, 0, 0},
     {0, 0, 0, 0},
 };
-static const char short_opts[] = "s:c:v:n:w:h:a:H:o:e:";
+static const char short_opts[] = "s:c:v:n:w:h:a:i:4:5:o:e:";
 
 int sumomo_option_parse(SumomoOption* option,
                         int argc,
@@ -41,6 +43,7 @@ int sumomo_option_parse(SumomoOption* option,
   option->video_device_width = 640;
   option->video_device_height = 480;
   option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
+  option->video_codec_type = "H264";
   option->cacert = "/etc/ssl/certs/ca-certificates.crt";
 
   int index;
@@ -93,13 +96,31 @@ int sumomo_option_parse(SumomoOption* option,
           *error = 1;
         }
         break;
-      case 'H':
+      case 'i':
+        if (strcmp(optarg, "H264") == 0) {
+          option->video_codec_type = optarg;
+        } else if (strcmp(optarg, "H265") == 0) {
+          option->video_codec_type = optarg;
+        } else {
+          fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
+          *error = 1;
+        }
+        break;
+      case '4':
         if (strcmp(optarg, "openh264") == 0) {
-          option->h264_encoder_type = soracp_H264EncoderType_OPEN_H264;
+          option->h264_encoder_type = soracp_H264_ENCODER_TYPE_OPEN_H264;
         } else if (strcmp(optarg, "videotoolbox") == 0) {
-          option->h264_encoder_type = soracp_H264EncoderType_VIDEO_TOOLBOX;
+          option->h264_encoder_type = soracp_H264_ENCODER_TYPE_VIDEO_TOOLBOX;
         } else {
           fprintf(stderr, "Invalid h264 encoder type: %s\n", optarg);
+          *error = 1;
+        }
+        break;
+      case '5':
+        if (strcmp(optarg, "videotoolbox") == 0) {
+          option->h265_encoder_type = soracp_H265_ENCODER_TYPE_VIDEO_TOOLBOX;
+        } else {
+          fprintf(stderr, "Invalid h265 encoder type: %s\n", optarg);
           *error = 1;
         }
         break;
@@ -124,7 +145,9 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  -w, --video-device-width=WIDTH\n");
       fprintf(stdout, "  -h, --video-device-height=HEIGHT\n");
       fprintf(stdout, "  -a, --audio-type=fake,pulse,macos\n");
-      fprintf(stdout, "  -H, --h264-encoder-type=openh264,videotoolbox\n");
+      fprintf(stdout, "  -i, --video-codec-type=h264\n");
+      fprintf(stdout, "  -4, --h264-encoder-type=openh264,videotoolbox\n");
+      fprintf(stdout, "  -5, --h265-encoder-type=videotoolbox\n");
       fprintf(stdout, "  -o, --openh264=PATH\n");
       fprintf(stdout, "  -e, --cacert=PATH\n");
       fprintf(stdout, "      --help\n");

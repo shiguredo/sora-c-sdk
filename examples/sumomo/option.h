@@ -22,7 +22,9 @@ typedef struct SumomoOption {
   int video_device_width;
   int video_device_height;
   SumomoOptionAudioType audio_type;
+  const char* video_codec_type;
   soracp_H264EncoderType h264_encoder_type;
+  soracp_H265EncoderType h265_encoder_type;
   const char* openh264;
   const char* cacert;
 } SumomoOption;

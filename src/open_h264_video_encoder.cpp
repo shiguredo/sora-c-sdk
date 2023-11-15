@@ -18,7 +18,7 @@
 
 namespace sorac {
 
-class OpenH264VideoEncoder : public H264VideoEncoder {
+class OpenH264VideoEncoder : public VideoEncoder {
  public:
   OpenH264VideoEncoder(const std::string& openh264) {
     bool result = InitOpenH264(openh264);
@@ -224,7 +224,7 @@ class OpenH264VideoEncoder : public H264VideoEncoder {
   DestroyEncoderFunc destroy_encoder_ = nullptr;
 };
 
-std::shared_ptr<H264VideoEncoder> CreateOpenH264VideoEncoder(
+std::shared_ptr<VideoEncoder> CreateOpenH264VideoEncoder(
     const std::string& openh264) {
   return std::make_shared<OpenH264VideoEncoder>(openh264);
 }

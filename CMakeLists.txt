@@ -104,7 +104,7 @@ target_sources(sorac
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.hpp"
       "include/sorac/current_time.hpp"
-      "include/sorac/h264_video_encoder.hpp"
+      "include/sorac/video_encoder.hpp"
       "include/sorac/open_h264_video_encoder.hpp"
       "include/sorac/opus_audio_encoder.hpp"
       "include/sorac/signaling.hpp"
@@ -148,13 +148,13 @@ target_link_libraries(sorac
 if (SORAC_TARGET STREQUAL "macos_arm64")
   target_sources(sorac
     PRIVATE
-      src/vt_h264_video_encoder.cpp
+      src/vt_h26x_video_encoder.cpp
     PUBLIC
       FILE_SET HEADERS
       BASE_DIRS
         "include"
       FILES
-        "include/sorac/vt_h264_video_encoder.hpp"
+        "include/sorac/vt_h26x_video_encoder.hpp"
   )
   target_link_libraries(sorac
     PUBLIC

@@ -1,5 +1,5 @@
-#ifndef SORAC_H264_VIDEO_ENCODER_HPP_
-#define SORAC_H264_VIDEO_ENCODER_HPP_
+#ifndef SORAC_VIDEO_ENCODER_HPP_
+#define SORAC_VIDEO_ENCODER_HPP_
 
 #include <functional>
 #include <string>
@@ -8,9 +8,9 @@
 
 namespace sorac {
 
-class H264VideoEncoder {
+class VideoEncoder {
  public:
-  virtual ~H264VideoEncoder() {}
+  virtual ~VideoEncoder() {}
   virtual void ForceIntraNextFrame() = 0;
   virtual bool InitEncode() = 0;
   virtual void SetEncodeCallback(

@@ -161,6 +161,7 @@ int main(int argc, char* argv[]) {
     soracp_SignalingConfig_set_ca_certificate(&config, opt.cacert);
   }
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
+  soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
 
@@ -171,10 +172,13 @@ int main(int argc, char* argv[]) {
   soracp_SoraConnectConfig_set_role(&sora_config, "sendonly");
   soracp_SoraConnectConfig_set_channel_id(&sora_config, opt.channel_id);
   sora_config.video = true;
-  soracp_SoraConnectConfig_set_video_codec_type(&sora_config, "H264");
+  if (opt.video_codec_type != NULL) {
+    soracp_SoraConnectConfig_set_video_codec_type(&sora_config,
+                                                  opt.video_codec_type);
+  }
   sora_config.audio = true;
-  sora_config.multistream = soracp_OptionalBool_TRUE;
-  sora_config.data_channel_signaling = soracp_OptionalBool_TRUE;
+  sora_config.multistream = soracp_OPTIONAL_BOOL_TRUE;
+  sora_config.data_channel_signaling = soracp_OPTIONAL_BOOL_TRUE;
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");
   soracp_DataChannel_set_direction(&dc, "sendrecv");

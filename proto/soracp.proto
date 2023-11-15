@@ -3,14 +3,19 @@ syntax = "proto3";
 package soracp;
 
 enum OptionalBool {
-    NONE = 0;
-    TRUE = 1;
-    FALSE = 2;
+    OPTIONAL_BOOL_NONE = 0;
+    OPTIONAL_BOOL_TRUE = 1;
+    OPTIONAL_BOOL_FALSE = 2;
 }
 
 enum H264EncoderType {
-    OPEN_H264 = 0;
-    VIDEO_TOOLBOX = 1;
+    H264_ENCODER_TYPE_OPEN_H264 = 0;
+    H264_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
+}
+
+enum H265EncoderType {
+    H265_ENCODER_TYPE_UNAVAILABLE = 0;
+    H265_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
 }
 
 message DataChannel {
@@ -49,6 +54,7 @@ message ForwardingFilter {
 message SignalingConfig {
     repeated string signaling_url_candidates = 1;
     H264EncoderType h264_encoder_type = 11;
+    H265EncoderType h265_encoder_type = 12;
     string openh264 = 2;
     string ca_certificate = 3;
     string proxy_url = 44;
