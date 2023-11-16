@@ -97,9 +97,9 @@ int sumomo_option_parse(SumomoOption* option,
         }
         break;
       case 'i':
-        if (strcmp(optarg, "h264") == 0) {
+        if (strcmp(optarg, "H264") == 0) {
           option->video_codec_type = optarg;
-        } else if (strcmp(optarg, "h265") == 0) {
+        } else if (strcmp(optarg, "H265") == 0) {
           option->video_codec_type = optarg;
         } else {
           fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
@@ -145,7 +145,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  -w, --video-device-width=WIDTH\n");
       fprintf(stdout, "  -h, --video-device-height=HEIGHT\n");
       fprintf(stdout, "  -a, --audio-type=fake,pulse,macos\n");
-      fprintf(stdout, "  -i, --video-codec-type=h264,h265\n");
+      fprintf(stdout, "  -i, --video-codec-type=H264,H265\n");
       fprintf(stdout, "  -4, --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  -5, --h265-encoder-type=videotoolbox\n");
       fprintf(stdout, "  -o, --openh264=PATH\n");
