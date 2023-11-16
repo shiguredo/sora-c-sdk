@@ -525,7 +525,7 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
         if build_platform in ('windows_x86_64',):
             install_cmake_args['platform'] = 'windows-x86_64'
             install_cmake_args['ext'] = 'zip'
-        elif build_platform in ('macos_arm64',):
+        elif build_platform in ('macos_x86_64', 'macos_arm64'):
             install_cmake_args['platform'] = 'macos-universal'
         elif build_platform in ('ubuntu-20.04_x86_64', 'ubuntu-22.04_x86_64'):
             install_cmake_args['platform'] = 'linux-x86_64'
@@ -635,7 +635,7 @@ def main():
         build_platform = 'ubuntu-20.04_x86_64'
     elif target_platform in ('ubuntu-22.04_x86_64',):
         build_platform = 'ubuntu-22.04_x86_64'
-    elif target_platform in ('macos_arm64',):
+    elif target_platform in ('macos_x86_64', 'macos_arm64'):
         build_platform = f'macos_{arch}'
 
     logging.info(f'Build platform: {build_platform}')
