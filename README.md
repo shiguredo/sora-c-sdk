@@ -32,6 +32,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
   - WebRTC と Sora シグナリングを含んだ libsorac は libwebrtc と比較してサイズは約 1/7 です
 - Apache-2.0 ライセンスで OSS として公開しています
   - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
+- H.265 (HEVC) 対応
+  - ハードウェアアクセラレーターを利用
 - OpenH264 対応
   - [cisco/openh264](https://github.com/cisco/openh264)
 - RTCP Feedback Messages PLI 対応
@@ -72,7 +74,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | VP9         | 対応         | 優先実装   |
 | AV1         | 対応         | 優先実装   |
 | H.264 (HWA) | 対応         | 対応       |
-| H.265 (HWA) | 対応         | 対応予定   |
+| H.265 (HWA) | 対応         | 対応       |
 
 | OS / アーキテクチャ | Sora C++ SDK | Sora C SDK |
 | ------------------- | ------------ | ---------- |
@@ -84,7 +86,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | linux / riscv32     | 非対応       | 優先実装   |
 | windows / x86_64    | 対応         | 優先実装   |
 | windows / arm64     | 非対応       | 優先実装   |
-| macos / arm64       | 対応         | 対応予定   |
+| macos / arm64       | 対応         | 対応       |
 | ios / arm64         | 対応         | 優先実装   |
 | android / arm64     | 対応         | 優先実装   |
 
@@ -106,21 +108,18 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Ubuntu 22.04
   - x86_64
-
-### 対応予定
-
 - macOS 14
   - arm64
   - VideoToolbox
     - H.264 HWA
     - H.265 HWA
-- Ubuntu 22.04
-  - arm64
-  - x86
+
+### 対応予定
+
 - [VisionFive 2](https://www.starfivetech.com/en/site/boards)
   - Debian 12.0
   - riscv64
-  - H.264 HWA
+  - H.264 HWA (デコードのみ)
   - H.265 HWA
 
 ## FAQ
@@ -131,7 +130,8 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Sora の機能への積極的な追従は行いません
 - libdatachannel へ積極的な貢献を行います
-- 映像コーデックはハードウェアアクセラレーターを利用します
+- 映像コーデックは内蔵しません
+- 基本的に映像コーデックはハードウェアアクセラレーターを利用します
 
 ## 優先実装
 
