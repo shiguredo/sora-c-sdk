@@ -168,9 +168,18 @@ class MacosRecorder : public SumomoRecorder {
         return -1;
       }
 
+      UInt32 frame_samples = (UInt32)(rec_stream_format_.mSampleRate *
+                                      rec_stream_format_.mChannelsPerFrame *
+                                      RECORDING_FRAME_TIME_MS / 1000);
+      UInt32 buffer_size = frame_samples;
+      if (frame_samples < range.mMinimum) {
+        buffer_size = (UInt32)range.mMinimum;
+      } else if (frame_samples > range.mMaximum) {
+        buffer_size = (UInt32)range.mMaximum;
+      }
+
       pa.mSelector = kAudioDevicePropertyBufferSize;
       size = sizeof(UInt32);
-      UInt32 buffer_size = (UInt32)range.mMaximum;
       if (OSStatus err = AudioObjectSetPropertyData(rec_device_id_, &pa, 0,
                                                     NULL, size, &buffer_size);
           err != noErr) {
