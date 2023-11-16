@@ -9,68 +9,45 @@ on:
       - "NOTICE"
 
 jobs:
-  build-macos:
+  build-unix:
     strategy:
       fail-fast: false
       matrix:
-        name:
-          - macos_arm64
-    name: Build sora-c-sdk for ${{ matrix.name }}
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - run: python3 run.py --sumomo --package ${{ matrix.name }}
-      - name: Get package name
-        run: |
-          source _package/${{ matrix.name }}/release/sorac.env
-          echo "name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
-        id: package_name
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.package_name.outputs.name }}
-          path: _package/${{ matrix.name }}/release/${{ steps.package_name.outputs.name }}
-      - name: Upload Environment
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.name }}.env
-          path: _package/${{ matrix.name }}/release/sorac.env
-  build-ubuntu:
-    strategy:
-      fail-fast: false
-      matrix:
-        name:
-          - ubuntu-20.04_x86_64
-          - ubuntu-22.04_x86_64
-    name: Build sora-c-sdk for ${{ matrix.name }}
-    runs-on: ${{ matrix.name == 'ubuntu-22.04_x86_64' && 'ubuntu-22.04' || 'ubuntu-20.04' }}
+        m:
+          - name: macos_arm64
+            runs-on: macos-13
+          - name: ubuntu-20.04_x86_64
+            runs-on: ubuntu-20.04
+          - name: ubuntu-22.04_x86_64
+            runs-on: ubuntu-22.04
+    name: Build sora-c-sdk for ${{ matrix.m.name }}
+    runs-on: ${{ matrix.m.runs-on }}
     steps:
       - uses: actions/checkout@v4
       - run: |
           sudo apt-get update
           sudo apt-get install -y libpulse-dev
-      - run: python3 run.py --sumomo --package ${{ matrix.name }}
+      - run: python3 run.py --sumomo --package ${{ matrix.m.name }}
       - name: Get package name
         run: |
-          source _package/${{ matrix.name }}/release/sorac.env
+          source _package/${{ matrix.m.name }}/release/sorac.env
           echo "name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
         id: package_name
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.package_name.outputs.name }}
-          path: _package/${{ matrix.name }}/release/${{ steps.package_name.outputs.name }}
+          path: _package/${{ matrix.m.name }}/release/${{ steps.package_name.outputs.name }}
       - name: Upload Environment
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.name }}.env
-          path: _package/${{ matrix.name }}/release/sorac.env
+          name: ${{ matrix.m.name }}.env
+          path: _package/${{ matrix.m.name }}/release/sorac.env
   create-release:
     name: Create Release
     if: contains(github.ref, 'tags/202')
     needs:
-      - build-macos
-      - build-ubuntu
+      - build-unix
     runs-on: ubuntu-latest
     steps:
       - uses: ./.github/actions/download
