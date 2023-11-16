@@ -551,6 +551,7 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
             macos_cmake_args.append(f'-DCMAKE_CXX_COMPILER_TARGET={target}')
             macos_cmake_args.append(f'-DCMAKE_OBJCXX_COMPILER_TARGET={target}')
             macos_cmake_args.append(f'-DCMAKE_SYSROOT={sysroot}')
+            macos_cmake_args.append('-DCMAKE_C_FLAGS=-Wno-error,-Wdocumentation')
 
         # MbedTLS
         install_mbedtls_args = {
