@@ -420,6 +420,7 @@ def install_protobuf(version, source_dir, install_dir, platform: str):
     for file in os.scandir(os.path.join(install_dir, 'protobuf', 'bin')):
         if file.is_file:
             os.chmod(file.path, file.stat().st_mode | stat.S_IXUSR)
+    cmd(['ls', '-lha', os.path.join(install_dir, 'protobuf', 'bin')])
 
 
 @versioned
