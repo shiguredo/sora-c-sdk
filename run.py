@@ -549,6 +549,18 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
             'install_dir': install_dir,
             'cmake_args': [],
         }
+        if build_platform in ('macos_x86_64', 'macos_arm64'):
+            sysroot = cmdcap(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
+            target = 'x86_64-apple-darwin' if target_platform in ('macos_x86_64',) else 'aarch64-apple-darwin'
+            arch = 'x86_64' if target_platform in ('macos_x86_64',) else 'arm64'
+            cmake_args = []
+            cmake_args.append(f'-DCMAKE_SYSTEM_PROCESSOR={arch}')
+            cmake_args.append(f'-DCMAKE_OSX_ARCHITECTURES={arch}')
+            cmake_args.append(f'-DCMAKE_C_COMPILER_TARGET={target}')
+            cmake_args.append(f'-DCMAKE_CXX_COMPILER_TARGET={target}')
+            cmake_args.append(f'-DCMAKE_OBJCXX_COMPILER_TARGET={target}')
+            cmake_args.append(f'-DCMAKE_SYSROOT={sysroot}')
+            install_mbedtls_args['cmake_args'] = cmake_args
         install_mbedtls(**install_mbedtls_args)
 
         # protobuf
