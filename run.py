@@ -442,8 +442,7 @@ def install_protoc_gen_jsonif(version, source_dir, install_dir, platform: str):
     # なぜか実行属性が消えてるので入れてやる
     for file in os.scandir(os.path.join(jsonif_install_dir, 'bin')):
         if file.is_file:
-            os.chmod(file.path, file.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    cmd(['ls', '-lha', os.path.join(jsonif_install_dir, 'bin')])
+            os.chmod(file.path, file.stat().st_mode | stat.S_IXUSR)
 
 
 @versioned
@@ -625,12 +624,19 @@ def main():
 
     args = parser.parse_args()
     target_platform = args.target
+
+    arch = platform.machine()
+    if arch in ('AMD64', 'x86_64'):
+        arch = 'x86_64'
+    elif arch in ('aarch64', 'arm64'):
+        arch = 'arm64'
+
     if target_platform in ('ubuntu-20.04_x86_64',):
         build_platform = 'ubuntu-20.04_x86_64'
     elif target_platform in ('ubuntu-22.04_x86_64',):
         build_platform = 'ubuntu-22.04_x86_64'
     elif target_platform in ('macos_arm64',):
-        build_platform = 'macos_arm64'
+        build_platform = f'macos_{arch}'
 
     logging.info(f'Build platform: {build_platform}')
     logging.info(f'Target platform: {target_platform}')
