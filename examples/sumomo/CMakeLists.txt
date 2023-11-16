@@ -65,3 +65,5 @@ target_link_libraries(sumomo PRIVATE Sorac::sorac)
 # FindLibYUV.cmake を書くのが面倒なので直接インクルードとリンクする
 target_include_directories(sumomo PRIVATE ${LIBYUV_DIR}/include)
 target_link_libraries(sumomo PRIVATE ${LIBYUV_DIR}/lib/libyuv.a libjpeg-turbo::jpeg-static)
+
+install(TARGETS sumomo RUNTIME DESTINATION bin)

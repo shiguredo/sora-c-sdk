@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import logging
 import os
@@ -639,6 +640,10 @@ def main():
     args = parser.parse_args()
     target_platform = args.target
 
+    if args.package and not args.sumomo:
+        print('You must specify --package together with --sumomo.')
+        sys.exit(1)
+
     arch = platform.machine()
     if arch in ('AMD64', 'x86_64'):
         arch = 'x86_64'
@@ -796,6 +801,7 @@ def main():
             with cd(sumomo_build_dir):
                 cmake_args = []
                 cmake_args.append(f'-DCMAKE_BUILD_TYPE={configuration}')
+                cmake_args.append(f"-DCMAKE_INSTALL_PREFIX={cmake_path(os.path.join(install_dir, 'sumomo'))}")
                 cmake_args.append(f"-DSORAC_DIR={cmake_path(os.path.join(install_dir, 'sorac'))}")
                 cmake_args.append(f"-DSUMOMO_TARGET={target_platform}")
                 cmake_args.append(f"-DLIBJPEG_TURBO_DIR={cmake_path(os.path.join(install_dir, 'libjpeg-turbo'))}")
@@ -813,6 +819,7 @@ def main():
 
                 cmd(['cmake', os.path.join(BASE_DIR, 'examples', 'sumomo')] + cmake_args)
                 cmd(['cmake', '--build', '.', f'-j{multiprocessing.cpu_count()}', '--config', configuration])
+                cmd(['cmake', '--install', '.'])
 
     if args.package:
         mkdir_p(package_dir)
@@ -838,13 +845,18 @@ def main():
         content_type = 'application/zip' if is_windows else 'application/gzip'
 
         with cd(install_dir):
-            archive_name = f'sora-cpp-sdk-{sora_c_sdk_version}_{target_platform}.{ext}'
+            archive_name = f'sora-c-sdk-{sora_c_sdk_version}_{target_platform}.{ext}'
             archive_path = os.path.join(package_dir, archive_name)
             archive(archive_path, enum_all_files('sorac', '.'), is_windows)
+
+            sumomo_archive_name = f'sumomo-{sora_c_sdk_version}_{target_platform}.{ext}'
+            sumomo_archive_path = os.path.join(package_dir, sumomo_archive_name)
+            archive(sumomo_archive_path, enum_all_files('sumomo', '.'), is_windows)
 
             with open(os.path.join(package_dir, 'sorac.env'), 'w') as f:
                 f.write(f'CONTENT_TYPE={content_type}\n')
                 f.write(f'PACKAGE_NAME={archive_name}\n')
+                f.write(f'SUMOMO_PACKAGE_NAME={sumomo_archive_name}\n')
 
 
 if __name__ == '__main__':
