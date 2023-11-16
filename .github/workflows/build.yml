@@ -16,10 +16,13 @@ jobs:
         m:
           - name: macos_arm64
             runs-on: macos-13
+            linux: false
           - name: ubuntu-20.04_x86_64
             runs-on: ubuntu-20.04
+            linux: true
           - name: ubuntu-22.04_x86_64
             runs-on: ubuntu-22.04
+            linux: true
     name: Build sora-c-sdk for ${{ matrix.m.name }}
     runs-on: ${{ matrix.m.runs-on }}
     steps:
@@ -27,6 +30,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install -y libpulse-dev
+        if: matrix.m.linux == true
       - run: python3 run.py --sumomo --package ${{ matrix.m.name }}
       - name: Get package name
         run: |
