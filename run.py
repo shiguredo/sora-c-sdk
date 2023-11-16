@@ -446,7 +446,7 @@ def install_protoc_gen_jsonif(version, source_dir, install_dir, platform: str):
 
 
 @versioned
-def install_libjpeg_turbo(version, source_dir, build_dir, install_dir):
+def install_libjpeg_turbo(version, source_dir, build_dir, install_dir, cmake_args):
     rm_rf(os.path.join(source_dir, 'libjpeg-turbo'))
     rm_rf(os.path.join(build_dir, 'libjpeg-turbo'))
     rm_rf(os.path.join(install_dir, 'libjpeg-turbo'))
@@ -456,14 +456,14 @@ def install_libjpeg_turbo(version, source_dir, build_dir, install_dir):
     with cd(os.path.join(build_dir, 'libjpeg-turbo')):
         cmd(['cmake', os.path.join(source_dir, 'libjpeg-turbo'),
             f"-DCMAKE_INSTALL_PREFIX={os.path.join(install_dir, 'libjpeg-turbo')}",
-             "-DCMAKE_BUILD_TYPE=Release"])
+             "-DCMAKE_BUILD_TYPE=Release"] + cmake_args)
         cmd(['cmake', '--build', os.path.join(build_dir, 'libjpeg-turbo'),
              f'-j{multiprocessing.cpu_count()}', '--config', 'Release'])
         cmd(['cmake', '--install', os.path.join(build_dir, 'libjpeg-turbo')])
 
 
 @versioned
-def install_libyuv(version, source_dir, build_dir, install_dir):
+def install_libyuv(version, source_dir, build_dir, install_dir, cmake_args):
     rm_rf(os.path.join(source_dir, 'libyuv'))
     rm_rf(os.path.join(build_dir, 'libyuv'))
     rm_rf(os.path.join(install_dir, 'libyuv'))
@@ -474,7 +474,7 @@ def install_libyuv(version, source_dir, build_dir, install_dir):
             f"-DCMAKE_INSTALL_PREFIX={os.path.join(install_dir, 'libyuv')}",
              "-DCMAKE_BUILD_TYPE=Release",
              f"-DCMAKE_PREFIX_PATH={os.path.join(install_dir, 'libjpeg-turbo')}"
-             ])
+             ] + cmake_args)
         cmd(['cmake', '--build', os.path.join(build_dir, 'libyuv'),
              f'-j{multiprocessing.cpu_count()}', '--config', 'Release'])
         cmd(['cmake', '--install', os.path.join(build_dir, 'libyuv')])
@@ -540,6 +540,18 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
         else:
             add_path(os.path.join(install_dir, 'cmake', 'bin'))
 
+        macos_cmake_args = []
+        if build_platform in ('macos_x86_64', 'macos_arm64'):
+            sysroot = cmdcap(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
+            target = 'x86_64-apple-darwin' if target_platform in ('macos_x86_64',) else 'aarch64-apple-darwin'
+            arch = 'x86_64' if target_platform in ('macos_x86_64',) else 'arm64'
+            macos_cmake_args.append(f'-DCMAKE_SYSTEM_PROCESSOR={arch}')
+            macos_cmake_args.append(f'-DCMAKE_OSX_ARCHITECTURES={arch}')
+            macos_cmake_args.append(f'-DCMAKE_C_COMPILER_TARGET={target}')
+            macos_cmake_args.append(f'-DCMAKE_CXX_COMPILER_TARGET={target}')
+            macos_cmake_args.append(f'-DCMAKE_OBJCXX_COMPILER_TARGET={target}')
+            macos_cmake_args.append(f'-DCMAKE_SYSROOT={sysroot}')
+
         # MbedTLS
         install_mbedtls_args = {
             'version': version['MBEDTLS_VERSION'],
@@ -547,20 +559,8 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
             'source_dir': source_dir,
             'build_dir': build_dir,
             'install_dir': install_dir,
-            'cmake_args': [],
+            'cmake_args': macos_cmake_args,
         }
-        if build_platform in ('macos_x86_64', 'macos_arm64'):
-            sysroot = cmdcap(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
-            target = 'x86_64-apple-darwin' if target_platform in ('macos_x86_64',) else 'aarch64-apple-darwin'
-            arch = 'x86_64' if target_platform in ('macos_x86_64',) else 'arm64'
-            cmake_args = []
-            cmake_args.append(f'-DCMAKE_SYSTEM_PROCESSOR={arch}')
-            cmake_args.append(f'-DCMAKE_OSX_ARCHITECTURES={arch}')
-            cmake_args.append(f'-DCMAKE_C_COMPILER_TARGET={target}')
-            cmake_args.append(f'-DCMAKE_CXX_COMPILER_TARGET={target}')
-            cmake_args.append(f'-DCMAKE_OBJCXX_COMPILER_TARGET={target}')
-            cmake_args.append(f'-DCMAKE_SYSROOT={sysroot}')
-            install_mbedtls_args['cmake_args'] = cmake_args
         install_mbedtls(**install_mbedtls_args)
 
         # protobuf
@@ -608,6 +608,7 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
             'source_dir': source_dir,
             'build_dir': build_dir,
             'install_dir': install_dir,
+            'cmake_args': macos_cmake_args,
         }
         install_libjpeg_turbo(**install_libjpeg_turbo_args)
 
@@ -618,6 +619,7 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
             'source_dir': source_dir,
             'build_dir': build_dir,
             'install_dir': install_dir,
+            'cmake_args': macos_cmake_args,
         }
         install_libyuv(**install_libyuv_args)
 
