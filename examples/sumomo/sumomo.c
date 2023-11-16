@@ -176,9 +176,11 @@ int main(int argc, char* argv[]) {
     soracp_SoraConnectConfig_set_video_codec_type(&sora_config,
                                                   opt.video_codec_type);
   }
-  sora_config.audio = true;
-  sora_config.multistream = soracp_OPTIONAL_BOOL_TRUE;
-  sora_config.data_channel_signaling = soracp_OPTIONAL_BOOL_TRUE;
+  soracp_SoraConnectConfig_set_audio(&sora_config, true);
+  soracp_SoraConnectConfig_set_multistream(&sora_config,
+                                           soracp_OPTIONAL_BOOL_TRUE);
+  soracp_SoraConnectConfig_set_data_channel_signaling(
+      &sora_config, soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");
   soracp_DataChannel_set_direction(&dc, "sendrecv");
