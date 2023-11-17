@@ -9,6 +9,16 @@ GitHub Actions でビルドを行い確認していますので、まずは GitH
 GitHub Actions のビルドが失敗していたり、
 ビルド済みバイナリがうまく動作しない場合は Discord へご連絡ください。
 
+## サンプルである Sumomo はどうやってビルドしますか？
+
+```bash
+$ python3 run.py macos_arm64 --sumomo
+```
+
+```bash
+$ python3 run.py ubuntu-22.04_x86_64 --sumomo
+```
+
 ## 送受信 (sendrecv) に対応予定はありますか？
 
 送信のみ (sendonly) と 受信のみ (recvonly) の対応になります。
