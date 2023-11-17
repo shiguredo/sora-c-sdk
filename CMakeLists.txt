@@ -152,7 +152,7 @@ target_link_libraries(sorac
 
 if (SORAC_TARGET STREQUAL "macos_arm64")
   enable_language(OBJCXX)
-  target_link_options(sumomo PRIVATE -ObjC)
+  target_link_options(sorac PRIVATE -ObjC)
   target_sources(sorac
     PRIVATE
       src/vt_h26x_video_encoder.cpp

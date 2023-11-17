@@ -1,4 +1,4 @@
-#include "mac_version.h"
+#include "mac_version.hpp"
 
 #import <Foundation/Foundation.h>
 #include <TargetConditionals.h>
