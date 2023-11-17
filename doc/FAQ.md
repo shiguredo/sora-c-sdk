@@ -9,10 +9,20 @@ GitHub Actions でビルドを行い確認していますので、まずは GitH
 GitHub Actions のビルドが失敗していたり、
 ビルド済みバイナリがうまく動作しない場合は Discord へご連絡ください。
 
-## サンプルである Sumomo はどうやってビルドしますか？
+## Sora C SDK はどうやってビルドすればいいですか？
 
 ```bash
-$ python3 run.py macos_arm64 --sumomo
+$ python3 run.py ubuntu-22.04_x86_64
+```
+
+```bash
+$ python3 run.py macos_arm64
+```
+
+## サンプルである Sumomo はどうやってビルドすればいいですか？
+
+```bash
+$ python3 run.py ubuntu-22.04_x86_64 --sumomo
 ```
 
 ```bash
@@ -24,3 +34,4 @@ $ python3 run.py ubuntu-22.04_x86_64 --sumomo
 送信のみ (sendonly) と 受信のみ (recvonly) の対応になります。
 
 優先実装として送受信 (sendrecv) への対応を予定しています。
+```
