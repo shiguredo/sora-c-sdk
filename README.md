@@ -108,6 +108,8 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Ubuntu 22.04
   - x86_64
+- Ubuntu 20.04
+  - x86_64
 - macOS 14
   - arm64
   - VideoToolbox
