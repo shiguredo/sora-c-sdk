@@ -14,10 +14,13 @@
 #include "sorac/current_time.hpp"
 #include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
+#include "sorac/version.hpp"
 
 #if defined(__APPLE__)
 #include "sorac/vt_h26x_video_encoder.hpp"
 #endif
+
+#include "util.hpp"
 
 // https://github.com/paullouisageneau/libdatachannel/issues/990
 namespace rtc {
@@ -47,49 +50,6 @@ struct Client {
 
   std::map<std::string, std::shared_ptr<rtc::DataChannel>> dcs;
 };
-
-static std::string generate_random_string(int length, std::string pattern) {
-  if (pattern.size() == 0) {
-    return "";
-  }
-
-  std::random_device random;
-  // % を計算する時にマイナス値があると危険なので unsigned 型であることを保証する
-  typedef std::make_unsigned<std::random_device::result_type>::type
-      unsigned_type;
-  std::string r;
-  for (int i = 0; i < length; i++) {
-    r += pattern[(unsigned_type)random() % pattern.size()];
-  }
-  return r;
-}
-
-static std::string generate_random_string(int length) {
-  return generate_random_string(
-      length, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-}
-
-static std::vector<std::string> split_with(const std::string& str,
-                                           const std::string& token) {
-  int sp = 0;
-  std::vector<std::string> lines;
-  while (true) {
-    auto ep = str.find(token, sp);
-    if (ep == std::string::npos) {
-      if (str.size() - sp > 0) {
-        lines.push_back(str.substr(sp));
-      }
-      break;
-    }
-    lines.push_back(str.substr(sp, ep - sp));
-    sp = ep + token.size();
-  }
-  return lines;
-}
-
-static bool starts_with(const std::string& str, const std::string& s) {
-  return str.substr(0, s.size()) == s;
-}
 
 class SignalingImpl : public Signaling {
  public:
@@ -486,6 +446,8 @@ class SignalingImpl : public Signaling {
         {"type", "connect"},
         {"role", sc.role},
         {"channel_id", sc.channel_id},
+        {"sora_client", Version::GetClientName()},
+        {"environment", Version::GetEnvironment()},
     };
     auto set_if = [](nlohmann::json& js, const std::string& key, auto value,
                      bool cond) {

@@ -625,6 +625,64 @@ def install_deps(target_platform: str, build_platform: str, source_dir, shared_s
         install_libyuv(**install_libyuv_args)
 
 
+class LibVersion(object):
+    sora_c_sdk: str
+    sora_c_sdk_commit: str
+    libdatachannel: str
+    opus: str
+    mbedtls: str
+    nlohmann_json: str
+    libjuice: str
+    libsrtp: str
+    plog: str
+    usrsctp: str
+
+    def to_cmake(self):
+        return [f'-DSORA_C_SDK_VERSION={self.sora_c_sdk}',
+                f'-DSORA_C_SDK_COMMIT={self.sora_c_sdk_commit}',
+                f'-DLIBDATACHANNEL_VERSION={self.libdatachannel}',
+                f'-DOPUS_VERSION={self.opus}',
+                f'-DMBEDTLS_VERSION={self.mbedtls}',
+                f'-DNLOHMANN_JSON_VERSION={self.nlohmann_json}',
+                f'-DLIBJUICE_VERSION={self.libjuice}',
+                f'-DLIBSRTP_VERSION={self.libsrtp}',
+                f'-DPLOG_VERSION={self.plog}',
+                f'-DUSRSCTP_VERSION={self.usrsctp}']
+
+    @staticmethod
+    def create(version, base_dir, libdatachannel_dir):
+        libv = LibVersion()
+        with cd(base_dir):
+            libv.sora_c_sdk_commit = cmdcap(['git', 'rev-parse', 'HEAD'])
+        with cd(libdatachannel_dir):
+            # 以下のような出力が得られるので、ここから必要な部分を取り出す
+            #  bc889afb4c5bf1c0d8ee29ef35eaaf4c8bef8a5d deps/json (bc889afb)
+            #  5f753cad49059cea4eb492eb5c11a3bbb4dd6324 deps/libjuice (v1.3.3)
+            #  a566a9cfcd619e8327784aa7cff4a1276dc1e895 deps/libsrtp (a566a9c)
+            #  e21baecd4753f14da64ede979c5a19302618b752 deps/plog (e21baec)
+            #  5ca29ac7d8055802c7657191325c06386640ac24 deps/usrsctp (5ca29ac)
+            r = cmdcap(['git', 'submodule', 'status'])
+            lines = r.split('\n')
+            for line in lines:
+                name, commit = line.strip().split(' ')[1:3]
+                commit = commit.strip('()')
+                if '/json' in name:
+                    libv.nlohmann_json = commit
+                elif '/libjuice' in name:
+                    libv.libjuice = commit
+                elif '/libsrtp' in name:
+                    libv.libsrtp = commit
+                elif '/plog' in name:
+                    libv.plog = commit
+                elif '/usrsctp' in name:
+                    libv.usrsctp = commit
+        libv.sora_c_sdk = version['SORA_C_SDK_VERSION']
+        libv.libdatachannel = version['LIBDATACHANNEL_VERSION']
+        libv.opus = version['OPUS_VERSION']
+        libv.mbedtls = version['MBEDTLS_VERSION']
+        return libv
+
+
 AVAILABLE_TARGETS = ['windows_x86_64', 'macos_x86_64', 'macos_arm64', 'ubuntu-20.04_x86_64',
                      'ubuntu-22.04_x86_64', 'ios', 'android']
 
@@ -685,16 +743,12 @@ def main():
         cmake_args = []
         cmake_args.append(f'-DCMAKE_BUILD_TYPE={configuration}')
         cmake_args.append(f"-DCMAKE_INSTALL_PREFIX={cmake_path(os.path.join(install_dir, 'sorac'))}")
+        cmake_args.append(f"-DSORAC_TARGET={target_platform}")
+        libver = LibVersion.create(read_version_file(os.path.join(BASE_DIR, 'VERSION')),
+                                   BASE_DIR, os.path.join(shared_source_dir, 'libdatachannel'))
+        cmake_args += libver.to_cmake()
         cmake_args.append(f"-DPROTOBUF_DIR={cmake_path(os.path.join(install_dir, 'protobuf'))}")
         cmake_args.append(f"-DPROTOC_GEN_JSONIF_DIR={cmake_path(os.path.join(install_dir, 'protoc-gen-jsonif'))}")
-        with cd(BASE_DIR):
-            version = read_version_file('VERSION')
-            sora_c_sdk_version = version['SORA_C_SDK_VERSION']
-            sora_c_sdk_commit = cmdcap(['git', 'rev-parse', 'HEAD'])
-            # android_native_api_level = version['ANDROID_NATIVE_API_LEVEL']
-        cmake_args.append(f"-DSORAC_VERSION={sora_c_sdk_version}")
-        cmake_args.append(f"-DSORAC_COMMIT={sora_c_sdk_commit}")
-        cmake_args.append(f"-DSORAC_TARGET={target_platform}")
         if target_platform in ('macos_x86_64', 'macos_arm64'):
             sysroot = cmdcap(['xcrun', '--sdk', 'macosx', '--show-sdk-path'])
             target = 'x86_64-apple-darwin' if target_platform in ('macos_x86_64',) else 'aarch64-apple-darwin'

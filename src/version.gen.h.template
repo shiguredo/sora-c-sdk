@@ -1,0 +1,26 @@
+#ifndef VERSION_GEN_H_
+#define VERSION_GEN_H_
+
+#define SORA_C_SDK_VERSION          "@SORA_C_SDK_VERSION@"
+#define SORA_C_SDK_COMMIT           "@SORA_C_SDK_COMMIT@"
+#define LIBDATACHANNEL_VERSION      "@LIBDATACHANNEL_VERSION@"
+#define OPUS_VERSION                "@OPUS_VERSION@"
+#define MBEDTLS_VERSION             "@MBEDTLS_VERSION@"
+#define NLOHMANN_JSON_VERSION       "@NLOHMANN_JSON_VERSION@"
+#define LIBJUICE_VERSION            "@LIBJUICE_VERSION@"
+#define LIBSRTP_VERSION             "@LIBSRTP_VERSION@"
+#define PLOG_VERSION                "@PLOG_VERSION@"
+#define USRSCTP_VERSION             "@USRSCTP_VERSION@"
+
+#define SORAC_ALL_VERSION \
+    "sora-c-sdk " SORA_C_SDK_VERSION " / " \
+    "libdatachannel " LIBDATACHANNEL_VERSION " / " \
+    "opus " OPUS_VERSION " / " \
+    "mbedtls " MBEDTLS_VERSION " / " \
+    "nlohmann-json " NLOHMANN_JSON_VERSION " / " \
+    "libjuice " LIBJUICE_VERSION " / " \
+    "libsrtp " LIBSRTP_VERSION " / " \
+    "plog " PLOG_VERSION " / " \
+    "usrsctp " USRSCTP_VERSION
+
+#endif

@@ -9,15 +9,17 @@
                 "${workspaceFolder}/_source/libdatachannel/deps/plog/include",
                 "${workspaceFolder}/_source/opus/include",
 
+                "${workspaceFolder}/_build/ubuntu-20.04_x86_64/release/sorac",
+                "${workspaceFolder}/_build/ubuntu-20.04_x86_64/release/sorac/proto/sorac",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/mbedtls/include",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/openh264/include",
-                "${workspaceFolder}/_build/ubuntu-20.04_x86_64/release/sorac/proto/sorac",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libjpeg-turbo/include",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libyuv/include",
 
+                "${workspaceFolder}/_build/macos_arm64/release/sorac",
+                "${workspaceFolder}/_build/macos_arm64/release/sorac/proto/sorac",
                 "${workspaceFolder}/_install/macos_arm64/release/mbedtls/include",
                 "${workspaceFolder}/_install/macos_arm64/release/openh264/include",
-                "${workspaceFolder}/_build/macos_arm64/release/sorac/proto/sorac",
                 "${workspaceFolder}/_install/macos_arm64/release/libjpeg-turbo/include",
                 "${workspaceFolder}/_install/macos_arm64/release/libyuv/include"
             ],

@@ -62,6 +62,9 @@ endfunction()
 
 add_library(sorac STATIC)
 
+configure_file(src/version.gen.h.template ${CMAKE_CURRENT_BINARY_DIR}/version.gen.h)
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac")
 if (WIN32)
@@ -92,8 +95,10 @@ target_sources(sorac
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
-    src/types.cpp
     src/sorac.cpp
+    src/types.cpp
+    src/util.cpp
+    src/version.cpp
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS
@@ -146,9 +151,12 @@ target_link_libraries(sorac
 )
 
 if (SORAC_TARGET STREQUAL "macos_arm64")
+  enable_language(OBJCXX)
+  target_link_options(sumomo PRIVATE -ObjC)
   target_sources(sorac
     PRIVATE
       src/vt_h26x_video_encoder.cpp
+      src/mac_version.mm
     PUBLIC
       FILE_SET HEADERS
       BASE_DIRS
