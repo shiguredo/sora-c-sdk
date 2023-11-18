@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
   soracp_SignalingConfig_set_video_encoder_initial_bitrate(
-      &config, opt.video_bit_rate == 0 ? 100 : opt.video_bit_rate);
+      &config, opt.video_bit_rate == 0 ? 500 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
 
