@@ -29,7 +29,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
   void ForceIntraNextFrame() override { next_iframe_ = true; }
 
-  bool InitEncode() override {
+  bool InitEncode(const Settings& settings) override {
     Release();
 
     OSType pixel_format_value = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
@@ -60,7 +60,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
     OSStatus err = VTCompressionSessionCreate(
         nullptr,  // use default allocator
-        640, 480,
+        settings.width, settings.height,
         type_ == VTH26xVideoEncoderType::kH264 ? kCMVideoCodecType_H264
                                                : kCMVideoCodecType_HEVC,
         encoder_specs,  // use hardware accelerated encoder if available
@@ -98,7 +98,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
     // ビットレート
     {
-      int value = 100 * 1000;
+      int value = settings.bitrate_kbps * 1000;
       CFNumberRef cfnum =
           CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &value);
       Resource cfnum_resource([cfnum]() { CFRelease(cfnum); });

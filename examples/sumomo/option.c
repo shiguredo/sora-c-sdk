@@ -10,12 +10,14 @@
 static struct option long_opts[] = {
     {"signaling-url", required_argument, 0, 0},
     {"channel-id", required_argument, 0, 0},
-    {"video-type", required_argument, 0, 0},
-    {"video-device-name", required_argument, 0, 0},
-    {"video-device-width", required_argument, 0, 0},
-    {"video-device-height", required_argument, 0, 0},
-    {"audio-type", required_argument, 0, 0},
     {"video-codec-type", required_argument, 0, 0},
+    {"video-bit-rate", required_argument, 0, 0},
+    {"metadata", required_argument, 0, 0},
+    {"capture-type", required_argument, 0, 0},
+    {"capture-device-name", required_argument, 0, 0},
+    {"capture-device-width", required_argument, 0, 0},
+    {"capture-device-height", required_argument, 0, 0},
+    {"audio-type", required_argument, 0, 0},
     {"h264-encoder-type", required_argument, 0, 0},
     {"h265-encoder-type", required_argument, 0, 0},
     {"openh264", required_argument, 0, 0},
@@ -34,14 +36,14 @@ int sumomo_option_parse(SumomoOption* option,
   }
   *error = 0;
   memset(option, 0, sizeof(SumomoOption));
-  option->video_type = SUMOMO_OPTION_VIDEO_TYPE_FAKE;
+  option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE;
 #if defined(__linux__)
-  option->video_device_name = "/dev/video0";
+  option->capture_device_name = "/dev/video0";
 #elif defined(__APPLE__)
-  option->video_device_name = "0";
+  option->capture_device_name = "0";
 #endif
-  option->video_device_width = 640;
-  option->video_device_height = 480;
+  option->capture_device_width = 640;
+  option->capture_device_height = 480;
   option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
   option->video_codec_type = "H264";
   option->cacert = "/etc/ssl/certs/ca-certificates.crt";
@@ -58,23 +60,41 @@ int sumomo_option_parse(SumomoOption* option,
           option->signaling_url = optarg;
         } else if (OPT_IS("channel-id")) {
           option->channel_id = optarg;
-        } else if (OPT_IS("video-type")) {
+        } else if (OPT_IS("video-codec-type")) {
+          if (strcmp(optarg, "H264") == 0) {
+            option->video_codec_type = optarg;
+          } else if (strcmp(optarg, "H265") == 0) {
+            option->video_codec_type = optarg;
+          } else {
+            fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
+            *error = 1;
+          }
+        } else if (OPT_IS("video-bit-rate")) {
+          option->video_bit_rate = atoi(optarg);
+          if (option->video_bit_rate < 0 || option->video_bit_rate > 5000) {
+            fprintf(stderr, "Invalid video bit rate: %d\n",
+                    option->video_bit_rate);
+            *error = 1;
+          }
+        } else if (OPT_IS("metadata")) {
+          option->metadata = optarg;
+        } else if (OPT_IS("capture-type")) {
           if (strcmp(optarg, "fake") == 0) {
-            option->video_type = SUMOMO_OPTION_VIDEO_TYPE_FAKE;
+            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE;
           } else if (strcmp(optarg, "v4l2") == 0) {
-            option->video_type = SUMOMO_OPTION_VIDEO_TYPE_V4L2;
+            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_V4L2;
           } else if (strcmp(optarg, "mac") == 0) {
-            option->video_type = SUMOMO_OPTION_VIDEO_TYPE_MAC;
+            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_MAC;
           } else {
             fprintf(stderr, "Invalid video type: %s\n", optarg);
             *error = 1;
           }
-        } else if (OPT_IS("video-device-name")) {
-          option->video_device_name = optarg;
-        } else if (OPT_IS("video-device-width")) {
-          option->video_device_width = atoi(optarg);
-        } else if (OPT_IS("video-device-height")) {
-          option->video_device_height = atoi(optarg);
+        } else if (OPT_IS("capture-device-name")) {
+          option->capture_device_name = optarg;
+        } else if (OPT_IS("capture-device-width")) {
+          option->capture_device_width = atoi(optarg);
+        } else if (OPT_IS("capture-device-height")) {
+          option->capture_device_height = atoi(optarg);
         } else if (OPT_IS("audio-type")) {
           if (strcmp(optarg, "fake") == 0) {
             option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
@@ -84,15 +104,6 @@ int sumomo_option_parse(SumomoOption* option,
             option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_MACOS;
           } else {
             fprintf(stderr, "Invalid audio type: %s\n", optarg);
-            *error = 1;
-          }
-        } else if (OPT_IS("video-codec-type")) {
-          if (strcmp(optarg, "H264") == 0) {
-            option->video_codec_type = optarg;
-          } else if (strcmp(optarg, "H265") == 0) {
-            option->video_codec_type = optarg;
-          } else {
-            fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
             *error = 1;
           }
         } else if (OPT_IS("h264-encoder-type")) {
@@ -130,12 +141,14 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "Options:\n");
       fprintf(stdout, "  --signaling-url=URL [required]\n");
       fprintf(stdout, "  --channel-id=ID [required]\n");
-      fprintf(stdout, "  --video-type=fake,v4l2,mac\n");
-      fprintf(stdout, "  --video-device-name=NAME\n");
-      fprintf(stdout, "  --video-device-width=WIDTH\n");
-      fprintf(stdout, "  --video-device-height=HEIGHT\n");
-      fprintf(stdout, "  --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  --video-codec-type=H264,H265\n");
+      fprintf(stdout, "  --video-bit-rate=0-5000 [kbps]\n");
+      fprintf(stdout, "  --metadata=JSON\n");
+      fprintf(stdout, "  --capture-type=fake,v4l2,mac\n");
+      fprintf(stdout, "  --capture-device-name=NAME\n");
+      fprintf(stdout, "  --capture-device-width=WIDTH\n");
+      fprintf(stdout, "  --capture-device-height=HEIGHT\n");
+      fprintf(stdout, "  --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  --h265-encoder-type=videotoolbox\n");
       fprintf(stdout, "  --openh264=PATH\n");

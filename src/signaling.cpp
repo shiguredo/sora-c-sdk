@@ -44,6 +44,7 @@ struct Client {
 
   std::shared_ptr<Track> video;
   std::shared_ptr<VideoEncoder> video_encoder;
+  std::optional<VideoEncoder::Settings> video_encoder_settings;
 
   std::shared_ptr<Track> audio;
   std::shared_ptr<OpusAudioEncoder> opus_encoder;
@@ -82,6 +83,43 @@ class SignalingImpl : public Signaling {
   }
 
   void SendVideoFrame(const VideoFrame& frame) override {
+    int width = frame.i420_buffer != nullptr ? frame.i420_buffer->width
+                                             : frame.nv12_buffer->width;
+    int height = frame.i420_buffer != nullptr ? frame.i420_buffer->height
+                                              : frame.nv12_buffer->height;
+    if (!client_.video_encoder_settings ||
+        client_.video_encoder_settings->width != width ||
+        client_.video_encoder_settings->height != height) {
+      client_.video_encoder->Release();
+      VideoEncoder::Settings settings;
+      settings.width = width;
+      settings.height = height;
+      settings.bitrate_kbps = config_.video_encoder_initial_bitrate;
+      if (!client_.video_encoder->InitEncode(settings)) {
+        PLOG_ERROR << "Failed to InitEncode()";
+        return;
+      }
+      client_.video_encoder_settings = settings;
+      client_.video_encoder->SetEncodeCallback([this, initial_timestamp =
+                                                          get_current_time()](
+                                                   const EncodedImage& image) {
+        auto rtp_config = client_.video->sender->rtpConfig;
+        auto elapsed_seconds =
+            double((image.timestamp - initial_timestamp).count()) /
+            (1000 * 1000);
+        rtp_config->timestamp = rtp_config->startTimestamp +
+                                rtp_config->secondsToTimestamp(elapsed_seconds);
+        auto report_elapsed_timestamp =
+            rtp_config->timestamp -
+            client_.video->sender->lastReportedTimestamp();
+        if (rtp_config->timestampToSeconds(report_elapsed_timestamp) > 0.2) {
+          client_.video->sender->setNeedsToReport();
+        }
+        std::vector<std::byte> buf((std::byte*)image.buf.get(),
+                                   (std::byte*)image.buf.get() + image.size);
+        client_.video->track->send(buf);
+      });
+    }
     client_.video_encoder->Encode(frame);
   }
 
@@ -263,76 +301,50 @@ class SignalingImpl : public Signaling {
           track->setMediaHandler(packetizer);
         }
 
-        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track),
-                       codec]() {
-          PLOG_DEBUG << "Video Track Opened";
-          auto track = wtrack.lock();
-          if (track == nullptr) {
-            return;
-          }
+        track->onOpen(
+            [this, wtrack = std::weak_ptr<rtc::Track>(track), codec]() {
+              PLOG_DEBUG << "Video Track Opened";
+              auto track = wtrack.lock();
+              if (track == nullptr) {
+                return;
+              }
 
-          if (codec == "H264") {
-            if (config_.h264_encoder_type ==
-                soracp::H264_ENCODER_TYPE_OPEN_H264) {
-              client_.video_encoder =
-                  CreateOpenH264VideoEncoder(config_.openh264);
-            } else if (config_.h264_encoder_type ==
-                       soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
+              if (codec == "H264") {
+                if (config_.h264_encoder_type ==
+                    soracp::H264_ENCODER_TYPE_OPEN_H264) {
+                  client_.video_encoder =
+                      CreateOpenH264VideoEncoder(config_.openh264);
+                } else if (config_.h264_encoder_type ==
+                           soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-              client_.video_encoder =
-                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
+                  client_.video_encoder =
+                      CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
 #else
-              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-              return;
+                  PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+                  return;
 #endif
-            } else {
-              PLOG_ERROR << "Unknown H264EncoderType";
-              return;
-            }
-          } else if (codec == "H265") {
-            if (config_.h265_encoder_type ==
-                soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
-#if defined(__APPLE__)
-              client_.video_encoder =
-                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
-#else
-              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-              return;
-#endif
-            } else {
-              PLOG_ERROR << "Unknown H265EncoderType";
-              return;
-            }
-          }
-
-          if (!client_.video_encoder->InitEncode()) {
-            PLOG_ERROR << "Failed to InitEncode()";
-            return;
-          }
-          client_.video_encoder->SetEncodeCallback(
-              [this, initial_timestamp =
-                         get_current_time()](const EncodedImage& image) {
-                auto rtp_config = client_.video->sender->rtpConfig;
-                auto elapsed_seconds =
-                    double((image.timestamp - initial_timestamp).count()) /
-                    (1000 * 1000);
-                rtp_config->timestamp =
-                    rtp_config->startTimestamp +
-                    rtp_config->secondsToTimestamp(elapsed_seconds);
-                auto report_elapsed_timestamp =
-                    rtp_config->timestamp -
-                    client_.video->sender->lastReportedTimestamp();
-                if (rtp_config->timestampToSeconds(report_elapsed_timestamp) >
-                    0.2) {
-                  client_.video->sender->setNeedsToReport();
+                } else {
+                  PLOG_ERROR << "Unknown H264EncoderType";
+                  return;
                 }
-                std::vector<std::byte> buf(
-                    (std::byte*)image.buf.get(),
-                    (std::byte*)image.buf.get() + image.size);
-                client_.video->track->send(buf);
-              });
-          on_track_(track);
-        });
+              } else if (codec == "H265") {
+                if (config_.h265_encoder_type ==
+                    soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
+#if defined(__APPLE__)
+                  client_.video_encoder =
+                      CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
+#else
+                  PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+                  return;
+#endif
+                } else {
+                  PLOG_ERROR << "Unknown H265EncoderType";
+                  return;
+                }
+              }
+
+              on_track_(track);
+            });
         client_.video = std::make_shared<Track>();
         client_.video->track = track;
         client_.video->sender = sr_reporter;

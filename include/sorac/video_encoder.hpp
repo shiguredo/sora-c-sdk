@@ -10,9 +10,15 @@ namespace sorac {
 
 class VideoEncoder {
  public:
+  struct Settings {
+    int width;
+    int height;
+    int bitrate_kbps;
+  };
+
   virtual ~VideoEncoder() {}
   virtual void ForceIntraNextFrame() = 0;
-  virtual bool InitEncode() = 0;
+  virtual bool InitEncode(const Settings& settings) = 0;
   virtual void SetEncodeCallback(
       std::function<void(const EncodedImage&)> callback) = 0;
   virtual void Encode(const VideoFrame& frame) = 0;

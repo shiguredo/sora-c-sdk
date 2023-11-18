@@ -61,6 +61,7 @@ message SignalingConfig {
     string proxy_username = 45;
     string proxy_password = 46;
     string proxy_agent = 47;
+    int32 video_encoder_initial_bitrate = 4;
 }
 
 message SoraConnectConfig {

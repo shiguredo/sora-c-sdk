@@ -47,21 +47,21 @@ void on_track(SoracTrack* track, void* userdata) {
 
   if (strcmp(buf, "video") == 0) {
     state->video_track = sorac_track_share(track);
-    if (state->opt->video_type == SUMOMO_OPTION_VIDEO_TYPE_V4L2) {
+    if (state->opt->capture_type == SUMOMO_OPTION_CAPTURE_TYPE_V4L2) {
 #if defined(__linux__)
       state->capturer = sumomo_v4l2_capturer_create(
-          state->opt->video_device_name, state->opt->video_device_width,
-          state->opt->video_device_height);
+          state->opt->capture_device_name, state->opt->capture_device_width,
+          state->opt->capture_device_height);
 #else
       fprintf(stderr,
               "V4L2 capturer cannot be used on environments other than Linux");
       exit(1);
 #endif
-    } else if (state->opt->video_type == SUMOMO_OPTION_VIDEO_TYPE_MAC) {
+    } else if (state->opt->capture_type == SUMOMO_OPTION_CAPTURE_TYPE_MAC) {
 #if defined(__APPLE__)
       state->capturer = sumomo_mac_capturer_create(
-          state->opt->video_device_name, state->opt->video_device_width,
-          state->opt->video_device_height);
+          state->opt->capture_device_name, state->opt->capture_device_width,
+          state->opt->capture_device_height);
 #else
       fprintf(stderr,
               "V4L2 capturer cannot be used on environments other than Linux");
@@ -130,14 +130,6 @@ int main(int argc, char* argv[]) {
   if (r != 0) {
     return error;
   }
-  printf("signaling_url: %s\n", opt.signaling_url);
-  printf("channel_id: %s\n", opt.channel_id);
-  printf("video_type: %d\n", opt.video_type);
-  printf("video_device_name: %s\n", opt.video_device_name);
-  printf("video_device_width: %d\n", opt.video_device_width);
-  printf("video_device_height: %d\n", opt.video_device_height);
-  printf("audio_type: %d\n", opt.audio_type);
-  printf("openh264: %s\n", opt.openh264);
 
   sorac_plog_init();
 
@@ -162,6 +154,8 @@ int main(int argc, char* argv[]) {
   }
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
+  soracp_SignalingConfig_set_video_encoder_initial_bitrate(
+      &config, opt.video_bit_rate == 0 ? 100 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
 
@@ -175,6 +169,13 @@ int main(int argc, char* argv[]) {
   if (opt.video_codec_type != NULL) {
     soracp_SoraConnectConfig_set_video_codec_type(&sora_config,
                                                   opt.video_codec_type);
+  }
+  if (opt.video_bit_rate != 0) {
+    soracp_SoraConnectConfig_set_video_bit_rate(&sora_config,
+                                                opt.video_bit_rate);
+  }
+  if (opt.metadata != NULL) {
+    soracp_SoraConnectConfig_set_metadata(&sora_config, opt.metadata);
   }
   soracp_SoraConnectConfig_set_audio(&sora_config, true);
   soracp_SoraConnectConfig_set_multistream(&sora_config,

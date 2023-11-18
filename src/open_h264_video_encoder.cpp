@@ -33,7 +33,7 @@ class OpenH264VideoEncoder : public VideoEncoder {
 
   void ForceIntraNextFrame() override { next_iframe_ = true; }
 
-  bool InitEncode() override {
+  bool InitEncode(const Settings& settings) override {
     Release();
 
     if (create_encoder_(&encoder_) != 0) {
@@ -45,9 +45,9 @@ class OpenH264VideoEncoder : public VideoEncoder {
     SEncParamExt encoder_params;
     encoder_->GetDefaultParams(&encoder_params);
     encoder_params.iUsageType = CAMERA_VIDEO_REAL_TIME;
-    encoder_params.iPicWidth = 640;
-    encoder_params.iPicHeight = 480;
-    encoder_params.iTargetBitrate = 100 * 1000;
+    encoder_params.iPicWidth = settings.width;
+    encoder_params.iPicHeight = settings.height;
+    encoder_params.iTargetBitrate = settings.bitrate_kbps * 1000;
     // Keep unspecified. WebRTC's max codec bitrate is not the same setting
     // as OpenH264's iMaxBitrate. More details in https://crbug.com/webrtc/11543
     encoder_params.iMaxBitrate = UNSPECIFIED_BIT_RATE;

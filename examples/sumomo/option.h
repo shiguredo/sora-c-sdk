@@ -3,11 +3,11 @@
 
 #include <sorac/sorac.h>
 
-typedef enum SumomoOptionVideoType {
-  SUMOMO_OPTION_VIDEO_TYPE_FAKE,
-  SUMOMO_OPTION_VIDEO_TYPE_V4L2,
-  SUMOMO_OPTION_VIDEO_TYPE_MAC,
-} SumomoOptionVideoType;
+typedef enum SumomoOptionCaptureType {
+  SUMOMO_OPTION_CAPTURE_TYPE_FAKE,
+  SUMOMO_OPTION_CAPTURE_TYPE_V4L2,
+  SUMOMO_OPTION_CAPTURE_TYPE_MAC,
+} SumomoOptionCaptureType;
 typedef enum SumomoOptionAudioType {
   SUMOMO_OPTION_AUDIO_TYPE_FAKE,
   SUMOMO_OPTION_AUDIO_TYPE_PULSE,
@@ -17,12 +17,15 @@ typedef enum SumomoOptionAudioType {
 typedef struct SumomoOption {
   const char* signaling_url;
   const char* channel_id;
-  SumomoOptionVideoType video_type;
-  const char* video_device_name;
-  int video_device_width;
-  int video_device_height;
-  SumomoOptionAudioType audio_type;
   const char* video_codec_type;
+  int video_bit_rate;
+  const char* metadata;
+
+  SumomoOptionCaptureType capture_type;
+  const char* capture_device_name;
+  int capture_device_width;
+  int capture_device_height;
+  SumomoOptionAudioType audio_type;
   soracp_H264EncoderType h264_encoder_type;
   soracp_H265EncoderType h265_encoder_type;
   const char* openh264;
