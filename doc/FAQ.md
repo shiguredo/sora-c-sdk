@@ -35,7 +35,9 @@ $ python3 run.py ubuntu-22.04_x86_64 --sumomo
 
 優先実装として送受信 (sendrecv) への対応を予定しています。
 
-## Sumomo 利用時に OS 組み込みの証明書を使いたいです
+## Sumomo 利用時に OS 組み込みの証明書を利用できますか？
+
+Sumomo にある `--cacert` に指定する事で利用可能です。
 
 ### Ubuntu
 
@@ -56,3 +58,9 @@ $ apt install ca-certificates
 ```bash
 $ /usr/bin/security export -t certs -f pemseq -k /System/Library/Keychains/SystemRootCertificates.keychain > cacert.pem
 ```
+
+## 帯域が不安定になった場合にビットレートを自動で下げてくれますか？
+
+Sora C SDK で利用している libdatachannel ではメディアトランスポートの輻輳制御の機能が搭載されていません。
+
+libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
