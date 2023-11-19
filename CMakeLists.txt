@@ -99,6 +99,7 @@ target_sources(sorac
     src/types.cpp
     src/util.cpp
     src/version.cpp
+    src/srtp_keying_material_exporter.cpp
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS
@@ -149,6 +150,15 @@ target_link_libraries(sorac
     dl
     Threads::Threads
 )
+
+# libdatachannel の src/impl 内のヘッダーを利用するためのハック
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/_source/libdatachannel/src)
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/_source/libdatachannel/include/rtc)
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/_source/libdatachannel/deps/usrsctp/usrsctplib)
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/_source/libdatachannel/deps/libjuice/include)
+target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/_source/libdatachannel/deps/libsrtp/include)
+target_include_directories(sorac PRIVATE ${MbedTLS_ROOT}/include)
+target_compile_definitions(sorac PRIVATE USE_MBEDTLS=1)
 
 if (SORAC_TARGET STREQUAL "macos_arm64")
   enable_language(OBJCXX)

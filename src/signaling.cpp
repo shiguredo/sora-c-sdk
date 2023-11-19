@@ -20,6 +20,7 @@
 #include "sorac/vt_h26x_video_encoder.hpp"
 #endif
 
+#include "sorac/srtp_keying_material_exporter.hpp"
 #include "util.hpp"
 
 // https://github.com/paullouisageneau/libdatachannel/issues/990
@@ -301,50 +302,72 @@ class SignalingImpl : public Signaling {
           track->setMediaHandler(packetizer);
         }
 
-        track->onOpen(
-            [this, wtrack = std::weak_ptr<rtc::Track>(track), codec]() {
-              PLOG_DEBUG << "Video Track Opened";
-              auto track = wtrack.lock();
-              if (track == nullptr) {
-                return;
-              }
+        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track),
+                       codec]() {
+          PLOG_DEBUG << "Video Track Opened";
+          auto track = wtrack.lock();
+          if (track == nullptr) {
+            return;
+          }
 
-              if (codec == "H264") {
-                if (config_.h264_encoder_type ==
-                    soracp::H264_ENCODER_TYPE_OPEN_H264) {
-                  client_.video_encoder =
-                      CreateOpenH264VideoEncoder(config_.openh264);
-                } else if (config_.h264_encoder_type ==
-                           soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
+          if (codec == "H264") {
+            if (config_.h264_encoder_type ==
+                soracp::H264_ENCODER_TYPE_OPEN_H264) {
+              client_.video_encoder =
+                  CreateOpenH264VideoEncoder(config_.openh264);
+            } else if (config_.h264_encoder_type ==
+                       soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-                  client_.video_encoder =
-                      CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
+              client_.video_encoder =
+                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
 #else
-                  PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-                  return;
+              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+              return;
 #endif
-                } else {
-                  PLOG_ERROR << "Unknown H264EncoderType";
-                  return;
-                }
-              } else if (codec == "H265") {
-                if (config_.h265_encoder_type ==
-                    soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
+            } else {
+              PLOG_ERROR << "Unknown H264EncoderType";
+              return;
+            }
+          } else if (codec == "H265") {
+            if (config_.h265_encoder_type ==
+                soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-                  client_.video_encoder =
-                      CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
+              client_.video_encoder =
+                  CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
 #else
-                  PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-                  return;
+              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
+              return;
 #endif
-                } else {
-                  PLOG_ERROR << "Unknown H265EncoderType";
-                  return;
-                }
-              }
+            } else {
+              PLOG_ERROR << "Unknown H265EncoderType";
+              return;
+            }
+          }
 
-              on_track_(track);
-            });
+          auto km = ExportSrtpKeyingMaterial(client_.pc);
+          if (!km) {
+            PLOG_ERROR << "Failed to export SRTP keying material";
+          } else {
+            auto to_hex = [](const std::vector<uint8_t>& buf) {
+              std::string str;
+              const char hex[] = "0123456789abcdef";
+              for (auto n : buf) {
+                str += hex[(n >> 3) & 0xf];
+                str += hex[n & 0xe];
+              }
+              return str;
+            };
+            std::stringstream ss;
+            ss << "SRTP_CLIENT_KEY " << to_hex(km->client_write_key) << "\n";
+            ss << "SRTP_CLIENT_SALT " << to_hex(km->client_write_salt) << "\n";
+            ss << "SRTP_SERVER_KEY " << to_hex(km->server_write_key) << "\n";
+            ss << "SRTP_SERVER_SALT " << to_hex(km->server_write_salt) << "\n";
+            PLOG_DEBUG << "Succeeded to export SRTP keying material\n"
+                       << ss.str();
+          }
+
+          on_track_(track);
+        });
         client_.video = std::make_shared<Track>();
         client_.video->track = track;
         client_.video->sender = sr_reporter;
