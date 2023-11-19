@@ -113,16 +113,16 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - macOS 14
   - arm64
   - VideoToolbox
-    - H.264 HWA
-    - H.265 HWA
+    - H.264 HWA (Encoder/Decoder)
+    - H.265 HWA (Encoder/Decoder)
 
 ### 対応予定
 
 - [VisionFive 2](https://www.starfivetech.com/en/site/boards)
   - Debian 12.0
   - riscv64
-  - H.264 HWA (デコードのみ)
-  - H.265 HWA
+  - H.264 HWA (Decoder)
+  - H.265 HWA (Encoder/Decoder)
 
 ## FAQ
 
@@ -162,7 +162,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - AAC HWA 対応
     - Sora の対応も含みます
     - [RTP Payload Format for MPEG\-4 Audio/Visual Streams](https://datatracker.ietf.org/doc/html/rfc6416)
-  - VP8 / VP9 / AV1 / VP9 / H.264 / H.265 HWA 対応
+  - VP8 / VP9 / AV1 / H.264 / H.265 の HWA 対応
     - AMD [Advanced Media Framework (AMF) SDK](https://github.com/GPUOpen-LibrariesAndSDKs/AMF)
     - Intel [oneVPL](https://github.com/oneapi-src/oneVPL)
     - NVIDIA [Video Codec SDK](https://developer.nvidia.com/video-codec-sdk)

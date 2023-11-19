@@ -19,10 +19,10 @@ $ python3 run.py ubuntu-22.04_x86_64
 $ python3 run.py macos_arm64
 ```
 
-## サンプルである Sumomo はどうやってビルドすればいいですか？
+## サンプルの Sumomo はどうやってビルドすればいいですか？
 
 ```bash
-$ python3 run.py ubuntu-22.04_x86_64 --sumomo
+$ python3 run.py macos_arm64 --sumomo
 ```
 
 ```bash
@@ -64,3 +64,18 @@ $ /usr/bin/security export -t certs -f pemseq -k /System/Library/Keychains/Syste
 Sora C SDK で利用している libdatachannel ではメディアトランスポートの輻輳制御の機能が搭載されていません。
 
 libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
+
+## Sumomo の使い方を教えてください
+
+### macOS arm64
+
+```bash
+./sumomo \
+    --signaling-url wss://sora.example.com/signaling \
+    --channel-id sumomo \
+    --capture-type mac \
+    --video-codec-type H265 \
+    --h265-encoder-type videotoolbox \
+    --audio-type macos \
+    --cacert cacert.pem
+```
