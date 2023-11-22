@@ -161,17 +161,25 @@ GitHub アカウントを持っていればすぐに利用可能です。
 **詳細は Discord やメールなどでお気軽にお問い合わせください**
 
 - [WebRTC's Statistics](https://www.w3.org/TR/webrtc-stats/)
+  - libdatachannel 側への貢献を含みます
 - [Google congestion control (GCC)](https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-congestion-03)
+  - libdatachannel 側への貢献を含みます
 - [RTP Extensions for Transport-wide Congestion Control](https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01)
   - [Transport-Wide Congestion Control](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/transport-wide-cc-02)
+  - libdatachannel 側への貢献を含みます
 - [RTCP XR](https://datatracker.ietf.org/doc/html/rfc3611)
+  - libdatachannel 側への貢献を含みます
 - [RTP Retransmission Payload Format](https://datatracker.ietf.org/doc/html/rfc4588)
+  - libdatachannel 側への貢献を含みます
 - [RTP ULPFEC](https://datatracker.ietf.org/doc/html/rfc5109)
+  - libdatachannel 側への貢献を含みます
 - [RTP FlexFEC](https://datatracker.ietf.org/doc/html/rfc8627)
+  - libdatachannel 側への貢献を含みます
 - RTP header extensions
   - [Absolute Capture Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/)
   - [Absolute Send Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/)
   - [Video Layers Allocation](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/video-layers-allocation00/)
+  - libdatachannel 側への貢献を含みます
 - HWA を利用したコーデック
   - AAC HWA 対応
     - Sora の対応も含みます
@@ -184,9 +192,11 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - 次世代コーデック
   - H.266 対応
     - Sora の対応も含みます
+    - libdatachannel 側への貢献を含みます
     - [RTP Payload Format for Versatile Video Coding \(VVC\)](https://datatracker.ietf.org/doc/html/rfc9328)
   - EVC 対応
     - Sora の対応も含みます
+    - libdatachannel 側への貢献を含みます
     - [RTP Payload Format for Essential Video Coding \(EVC\)](https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-evc)
 - プラットフォーム
   - iOS 対応
