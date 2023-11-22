@@ -93,6 +93,19 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 基本的には [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 バイナリサイズやフットプリント、アップデート頻度を抑えたい場合のみ Sora C SDK を利用してください。
 
+### Sora 機能
+
+| 機能                | Sora C++ SDK | Sora C SDK |
+| ------------------- | ------------ | ---------- |
+| sendrecv (送受信)   | 対応         | 非対応     |
+| sendonly (送信のみ) | 対応         | 対応       |
+| recvonly (受信のみ) | 対応         | 対応予定   |
+| マルチストリーム    | 対応         | 対応       |
+| サイマルキャスト    | 対応         | 対応予定   |
+| スポットライト      | 対応         | 非対応     |
+
+Sora C SDK は Sora の機能への積極な追従を行いません。
+
 ## 対応 Sora
 
 WebRTC SFU Sora 2023.2.0 以降
@@ -132,8 +145,12 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Sora の機能への積極的な追従は行いません
 - libdatachannel へ積極的な貢献を行います
+  - https://github.com/paullouisageneau/libdatachannel/pull/1009
+  - https://github.com/paullouisageneau/libdatachannel/pull/1015
+  - https://github.com/paullouisageneau/libdatachannel/pull/1037
+  - https://github.com/paullouisageneau/libdatachannel/pull/1041
 - 映像コーデックは内蔵しません
-- 基本的に映像コーデックはハードウェアアクセラレーターを利用します
+  - 映像コーデックはハードウェアアクセラレーター、または外部コーデックライブラリを利用します
 
 ## 優先実装
 
@@ -143,9 +160,6 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 **詳細は Discord やメールなどでお気軽にお問い合わせください**
 
-- Sora 機能
-  - 送受信 (sendrecv) 対応
-  - 受信 (recvonly) 対応
 - [WebRTC's Statistics](https://www.w3.org/TR/webrtc-stats/)
 - [Google congestion control (GCC)](https://datatracker.ietf.org/doc/html/draft-alvestrand-rmcat-congestion-03)
 - [RTP Extensions for Transport-wide Congestion Control](https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01)
