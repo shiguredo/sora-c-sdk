@@ -21,10 +21,13 @@ class Signaling {
 
   virtual void SetOnTrack(
       std::function<void(std::shared_ptr<rtc::Track>)> on_track) = 0;
-
   virtual void SetOnDataChannel(
       std::function<void(std::shared_ptr<rtc::DataChannel>)>
           on_data_channel) = 0;
+
+  virtual void SetOnNotify(
+      std::function<void(const std::string&)> on_notify) = 0;
+  virtual void SetOnPush(std::function<void(const std::string&)> on_push) = 0;
 };
 
 std::shared_ptr<Signaling> CreateSignaling(

@@ -1,9 +1,22 @@
 #include "util.hpp"
 
+#include <array>
+#include <functional>
 #include <random>
 
 namespace sorac {
 
+uint32_t generate_random_number(uint32_t max) {
+  // std::random_device random;
+  // std::array<std::uint32_t, std::mt19937::state_size> seq;
+  // std::generate(seq.begin(), seq.end(), std::ref(random));
+  // std::seed_seq seed_seq(seq.begin(), seq.end());
+  // std::mt19937 engine(seed_seq);
+  // std::uniform_int_distribution<uint32_t> dist(0, max);
+  // return dist(engine);
+  std::random_device random;
+  return random() % max;
+}
 std::string generate_random_string(int length) {
   return generate_random_string(
       length, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");

@@ -6,6 +6,7 @@
 
 namespace sorac {
 
+uint32_t generate_random_number(uint32_t max = UINT32_MAX);
 std::string generate_random_string(int length);
 std::string generate_random_string(int length, std::string pattern);
 std::vector<std::string> split_with(const std::string& str,

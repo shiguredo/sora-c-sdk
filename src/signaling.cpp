@@ -139,6 +139,14 @@ class SignalingImpl : public Signaling {
     on_data_channel_ = on_data_channel;
   }
 
+  void SetOnNotify(std::function<void(const std::string&)> on_notify) override {
+    on_notify_ = on_notify;
+  }
+
+  void SetOnPush(std::function<void(const std::string&)> on_push) override {
+    on_push_ = on_push;
+  }
+
  private:
   void OnMessage(rtc::message_variant data) {
     if (!std::holds_alternative<std::string>(data)) {
@@ -186,6 +194,66 @@ class SignalingImpl : public Signaling {
           return;
         }
 
+        auto wdc = std::weak_ptr<rtc::DataChannel>(dc);
+        if (dc->label() == "stats") {
+          dc->onMessage([this, wdc](rtc::message_variant data) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            if (!std::holds_alternative<std::string>(data)) {
+              PLOG_ERROR << "onMessage: unexpected binary data, label="
+                         << dc->label();
+              return;
+            }
+            std::string message = std::get<std::string>(data);
+            nlohmann::json js = nlohmann::json::parse(message);
+            if (js["type"] == "stats-req") {
+              nlohmann::json js = {{"type", "stats"},
+                                   {"reports", nlohmann::json::array()}};
+              PLOG_DEBUG << "stats: " << js.dump();
+              dc->send(js.dump());
+            }
+          });
+        } else if (dc->label() == "notify") {
+          dc->onMessage([this, wdc](rtc::message_variant data) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            if (!std::holds_alternative<std::string>(data)) {
+              PLOG_ERROR << "onMessage: unexpected binary data, label="
+                         << dc->label();
+              return;
+            }
+            std::string message = std::get<std::string>(data);
+            PLOG_DEBUG << "onMessage: label=" << dc->label()
+                       << ", message=" << message;
+
+            if (on_notify_) {
+              on_notify_(message);
+            }
+          });
+        } else if (dc->label() == "push") {
+          dc->onMessage([this, wdc](rtc::message_variant data) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            if (!std::holds_alternative<std::string>(data)) {
+              PLOG_ERROR << "onMessage: unexpected binary data, label="
+                         << dc->label();
+              return;
+            }
+            std::string message = std::get<std::string>(data);
+            PLOG_DEBUG << "onMessage: label=" << dc->label()
+                       << ", message=" << message;
+
+            if (on_push_) {
+              on_push_(message);
+            }
+          });
+        }
         client_.dcs[dc->label()] = dc;
       });
       client_.pc->onGatheringStateChange(
@@ -217,7 +285,7 @@ class SignalingImpl : public Signaling {
       auto track_id = "trackid-" + generate_random_string(24);
       // video
       {
-        int ssrc = 1;
+        uint32_t ssrc = generate_random_number();
         // m=video から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> video_lines;
         {
@@ -351,7 +419,7 @@ class SignalingImpl : public Signaling {
       }
       // audio
       {
-        int ssrc = 2;
+        uint32_t ssrc = generate_random_number();
         // m=audio から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> audio_lines;
         {
@@ -445,10 +513,24 @@ class SignalingImpl : public Signaling {
       }
 
       client_.pc->setRemoteDescription(rtc::Description(sdp, "offer"));
+    } else if (js["type"] == "stats-req") {
+      nlohmann::json js = {{"type", "stats"},
+                           {"reports", nlohmann::json::array()}};
+      PLOG_DEBUG << "stats: " << js.dump();
+      ws_->send(js.dump());
     } else if (js["type"] == "ping") {
-      nlohmann::json js = {{"type", "pong"}};
+      nlohmann::json js = {{"type", "pong"},
+                           {"stats", nlohmann::json::array()}};
       PLOG_DEBUG << "pong: " << js.dump();
       ws_->send(js.dump());
+    } else if (js["type"] == "notify") {
+      if (on_notify_) {
+        on_notify_(message);
+      }
+    } else if (js["type"] == "push") {
+      if (on_push_) {
+        on_push_(message);
+      }
     }
   }
 
@@ -590,6 +672,8 @@ class SignalingImpl : public Signaling {
   soracp::SoraConnectConfig sora_config_;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
   std::function<void(std::shared_ptr<rtc::DataChannel>)> on_data_channel_;
+  std::function<void(const std::string&)> on_notify_;
+  std::function<void(const std::string&)> on_push_;
 };
 
 std::shared_ptr<Signaling> CreateSignaling(
