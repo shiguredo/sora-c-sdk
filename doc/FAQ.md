@@ -22,11 +22,11 @@ $ python3 run.py macos_arm64
 ## サンプルの Sumomo はどうやってビルドすればいいですか？
 
 ```bash
-$ python3 run.py macos_arm64 --sumomo
+$ python3 run.py ubuntu-22.04_x86_64 --sumomo
 ```
 
 ```bash
-$ python3 run.py ubuntu-22.04_x86_64 --sumomo
+$ python3 run.py macos_arm64 --sumomo
 ```
 
 ## 送受信 (sendrecv) に対応予定はありますか？
