@@ -49,7 +49,8 @@ struct Client {
   std::shared_ptr<Track> audio;
   std::shared_ptr<OpusAudioEncoder> opus_encoder;
 
-  std::map<std::string, std::shared_ptr<rtc::DataChannel>> dcs;
+  nlohmann::json data_channel_metadata;
+  std::map<std::string, std::shared_ptr<sorac::DataChannel>> dcs;
 };
 
 class SignalingImpl : public Signaling {
@@ -134,7 +135,7 @@ class SignalingImpl : public Signaling {
     on_track_ = on_track;
   }
 
-  void SetOnDataChannel(std::function<void(std::shared_ptr<rtc::DataChannel>)>
+  void SetOnDataChannel(std::function<void(std::shared_ptr<sorac::DataChannel>)>
                             on_data_channel) override {
     on_data_channel_ = on_data_channel;
   }
@@ -165,6 +166,7 @@ class SignalingImpl : public Signaling {
         s.password = ice_server["credential"].get<std::string>();
         config.iceServers.push_back(s);
       }
+      client_.data_channel_metadata = js["data_channels"];
       client_.pc = std::make_shared<rtc::PeerConnection>(config);
       client_.pc->onLocalDescription([this](rtc::Description desc) {
         auto sdp = desc.generateSdp();
@@ -184,9 +186,19 @@ class SignalingImpl : public Signaling {
         PLOG_DEBUG << "onLocalCandidate: send=" << js.dump();
         ws_->send(js.dump());
       });
-      client_.pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> dc) {
-        PLOG_DEBUG << "onDataChannel: label=" << dc->label();
-        if (dc->label()[0] == '#') {
+      client_.pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> rdc) {
+        auto label = rdc->label();
+        PLOG_DEBUG << "onDataChannel: label=" << label;
+        bool compress = false;
+        for (const auto& d : client_.data_channel_metadata) {
+          if (d["label"] == label) {
+            compress = d["compress"].get<bool>();
+            break;
+          }
+        }
+        std::shared_ptr<DataChannel> dc = CreateDataChannel(rdc, compress);
+
+        if (label[0] == '#') {
           // ユーザー定義ラベルなのでコールバックを呼ぶ
           if (on_data_channel_) {
             on_data_channel_(dc);
@@ -194,59 +206,44 @@ class SignalingImpl : public Signaling {
           return;
         }
 
-        auto wdc = std::weak_ptr<rtc::DataChannel>(dc);
-        if (dc->label() == "stats") {
-          dc->onMessage([this, wdc](rtc::message_variant data) {
+        auto wdc = std::weak_ptr<sorac::DataChannel>(dc);
+        if (label == "stats") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
             auto dc = wdc.lock();
             if (dc == nullptr) {
               return;
             }
-            if (!std::holds_alternative<std::string>(data)) {
-              PLOG_ERROR << "onMessage: unexpected binary data, label="
-                         << dc->label();
-              return;
-            }
-            std::string message = std::get<std::string>(data);
-            nlohmann::json js = nlohmann::json::parse(message);
+            nlohmann::json js = nlohmann::json::parse(buf, buf + size);
             if (js["type"] == "stats-req") {
               nlohmann::json js = {{"type", "stats"},
                                    {"reports", nlohmann::json::array()}};
               PLOG_DEBUG << "stats: " << js.dump();
-              dc->send(js.dump());
+              std::string str = js.dump();
+              dc->Send((const uint8_t*)str.data(), str.size());
             }
           });
-        } else if (dc->label() == "notify") {
-          dc->onMessage([this, wdc](rtc::message_variant data) {
+        } else if (label == "notify") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
             auto dc = wdc.lock();
             if (dc == nullptr) {
               return;
             }
-            if (!std::holds_alternative<std::string>(data)) {
-              PLOG_ERROR << "onMessage: unexpected binary data, label="
-                         << dc->label();
-              return;
-            }
-            std::string message = std::get<std::string>(data);
-            PLOG_DEBUG << "onMessage: label=" << dc->label()
+            auto message = std::string((const char*)buf, size);
+            PLOG_DEBUG << "onMessage: label=" << dc->GetLabel()
                        << ", message=" << message;
 
             if (on_notify_) {
               on_notify_(message);
             }
           });
-        } else if (dc->label() == "push") {
-          dc->onMessage([this, wdc](rtc::message_variant data) {
+        } else if (label == "push") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
             auto dc = wdc.lock();
             if (dc == nullptr) {
               return;
             }
-            if (!std::holds_alternative<std::string>(data)) {
-              PLOG_ERROR << "onMessage: unexpected binary data, label="
-                         << dc->label();
-              return;
-            }
-            std::string message = std::get<std::string>(data);
-            PLOG_DEBUG << "onMessage: label=" << dc->label()
+            auto message = std::string((const char*)buf, size);
+            PLOG_DEBUG << "onMessage: label=" << dc->GetLabel()
                        << ", message=" << message;
 
             if (on_push_) {
@@ -254,7 +251,7 @@ class SignalingImpl : public Signaling {
             }
           });
         }
-        client_.dcs[dc->label()] = dc;
+        client_.dcs[label] = dc;
       });
       client_.pc->onGatheringStateChange(
           [](rtc::PeerConnection::GatheringState state) {
@@ -671,7 +668,7 @@ class SignalingImpl : public Signaling {
   soracp::SignalingConfig config_;
   soracp::SoraConnectConfig sora_config_;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
-  std::function<void(std::shared_ptr<rtc::DataChannel>)> on_data_channel_;
+  std::function<void(std::shared_ptr<sorac::DataChannel>)> on_data_channel_;
   std::function<void(const std::string&)> on_notify_;
   std::function<void(const std::string&)> on_push_;
 };

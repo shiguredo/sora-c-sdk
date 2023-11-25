@@ -50,13 +50,6 @@ typedef enum SoracMessageType {
   SORAC_MESSAGE_STRING = 1,
 } SoracMessageType;
 
-// rtc::message_variant
-typedef struct SoracMessageVariant {
-  SoracMessageType type;
-  const char* data;
-  int size;
-} SoracMessageVariant;
-
 // VideoFrameBufferI420
 struct SoracVideoFrameBufferI420;
 typedef struct SoracVideoFrameBufferI420 SoracVideoFrameBufferI420;
@@ -142,7 +135,7 @@ extern void sorac_track_release(SoracTrack* p);
 extern SoracTrack* sorac_track_share(SoracTrack* p);
 extern SoracDescriptionMedia* sorac_track_clone_description(SoracTrack* p);
 
-// rtc::DataChannel
+// sorac::DataChannel
 struct SoracDataChannel;
 typedef struct SoracDataChannel SoracDataChannel;
 typedef void (*sorac_data_channel_on_open_func)(void* userdata);
@@ -150,27 +143,28 @@ typedef void (*sorac_data_channel_on_available_func)(void* userdata);
 typedef void (*sorac_data_channel_on_closed_func)(void* userdata);
 typedef void (*sorac_data_channel_on_error_func)(const char* error,
                                                  void* userdata);
-typedef void (*sorac_data_channel_on_message_func)(
-    const SoracMessageVariant* message,
-    void* userdata);
+typedef void (*sorac_data_channel_on_message_func)(const uint8_t* buf,
+                                                   size_t size,
+                                                   void* userdata);
 extern void sorac_data_channel_release(SoracDataChannel* p);
 extern SoracDataChannel* sorac_data_channel_share(SoracDataChannel* p);
-extern void sorac_data_channel_on_open(SoracDataChannel* p,
-                                       sorac_data_channel_on_open_func on_open,
-                                       void* userdata);
-extern void sorac_data_channel_on_available(
+extern void sorac_data_channel_set_on_open(
+    SoracDataChannel* p,
+    sorac_data_channel_on_open_func on_open,
+    void* userdata);
+extern void sorac_data_channel_set_on_available(
     SoracDataChannel* p,
     sorac_data_channel_on_available_func on_available,
     void* userdata);
-extern void sorac_data_channel_on_closed(
+extern void sorac_data_channel_set_on_closed(
     SoracDataChannel* p,
     sorac_data_channel_on_closed_func on_closed,
     void* userdata);
-extern void sorac_data_channel_on_error(
+extern void sorac_data_channel_set_on_error(
     SoracDataChannel* p,
     sorac_data_channel_on_error_func on_error,
     void* userdata);
-extern void sorac_data_channel_on_message(
+extern void sorac_data_channel_set_on_message(
     SoracDataChannel* p,
     sorac_data_channel_on_message_func on_message,
     void* userdata);
@@ -179,7 +173,8 @@ extern void sorac_data_channel_get_label(SoracDataChannel* p,
                                          int size,
                                          SoracError* error);
 extern bool sorac_data_channel_send(SoracDataChannel* p,
-                                    const SoracMessageVariant* message);
+                                    const uint8_t* buf,
+                                    size_t size);
 
 // Signaling
 struct SoracSignaling;

@@ -14,6 +14,9 @@ std::vector<std::string> split_with(const std::string& str,
 bool starts_with(const std::string& str, const std::string& s);
 std::string trim(const std::string& str, const std::string& trim_chars);
 
+std::string zlib_compress(const uint8_t* input_buf, size_t input_size);
+std::string zlib_uncompress(const uint8_t* input_buf, size_t input_size);
+
 }  // namespace sorac
 
 #endif

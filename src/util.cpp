@@ -4,6 +4,9 @@
 #include <functional>
 #include <random>
 
+// zlib
+#include <zlib.h>
+
 namespace sorac {
 
 uint32_t generate_random_number(uint32_t max) {
@@ -67,6 +70,48 @@ std::string trim(const std::string& str, const std::string& trim_chars) {
   }
   auto ep = str.find_last_not_of(trim_chars);
   return str.substr(sp, ep - sp + 1);
+}
+
+std::string zlib_compress(const uint8_t* input_buf, size_t input_size) {
+  std::string output;
+  output.resize(16 * 1024);
+  uLongf output_size;
+  while (true) {
+    output_size = output.size();
+    int ret = compress2((Bytef*)output.data(), &output_size, input_buf,
+                        input_size, Z_DEFAULT_COMPRESSION);
+    if (ret == Z_BUF_ERROR) {
+      output.resize(output.size() * 2);
+      continue;
+    }
+    if (ret != Z_OK) {
+      throw std::exception();
+    }
+    break;
+  }
+  output.resize(output_size);
+  return output;
+}
+
+std::string zlib_uncompress(const uint8_t* input_buf, size_t input_size) {
+  std::string output;
+  output.resize(16 * 1024);
+  uLongf output_size;
+  while (true) {
+    output_size = output.size();
+    int ret =
+        uncompress((Bytef*)output.data(), &output_size, input_buf, input_size);
+    if (ret == Z_BUF_ERROR) {
+      output.resize(output.size() * 2);
+      continue;
+    }
+    if (ret != Z_OK) {
+      throw std::exception();
+    }
+    break;
+  }
+  output.resize(output_size);
+  return output;
 }
 
 }  // namespace sorac

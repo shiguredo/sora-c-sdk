@@ -11,6 +11,7 @@ add_subdirectory(_source/opus opus EXCLUDE_FROM_ALL)
 # add_subdirectory(_source/libdatachannel/deps/plog plog EXCLUDE_FROM_ALL)
 
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
 
 # 指定したライブラリを自身の静的ライブラリにバンドルする
 function(bundle_static_library target static_libs bundled_target)
@@ -92,6 +93,7 @@ target_sources(sorac
   PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.cpp"
     src/current_time.cpp
+    src/data_channel.cpp
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
@@ -109,12 +111,14 @@ target_sources(sorac
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.hpp"
       "include/sorac/current_time.hpp"
-      "include/sorac/video_encoder.hpp"
+      "include/sorac/data_channel.hpp"
       "include/sorac/open_h264_video_encoder.hpp"
       "include/sorac/opus_audio_encoder.hpp"
       "include/sorac/signaling.hpp"
-      "include/sorac/types.hpp"
       "include/sorac/sorac.h"
+      "include/sorac/types.hpp"
+      "include/sorac/version.hpp"
+      "include/sorac/video_encoder.hpp"
 )
 target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(sorac PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac")
@@ -148,6 +152,7 @@ target_link_libraries(sorac
   PUBLIC
     dl
     Threads::Threads
+    ZLIB::ZLIB
 )
 
 if (SORAC_TARGET STREQUAL "macos_arm64")

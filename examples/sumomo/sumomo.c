@@ -102,10 +102,8 @@ void on_data_channel_error(const char* error, void* userdata) {
   printf("DataChannel error: %s\n", error);
 }
 
-void on_data_channel_message(const SoracMessageVariant* message,
-                             void* userdata) {
-  printf("DataChannel message: %.*s\n", (int)message->size,
-         (const char*)message->data);
+void on_data_channel_message(const uint8_t* buf, size_t size, void* userdata) {
+  printf("DataChannel message: %.*s\n", (int)size, (const char*)buf);
 }
 
 void on_data_channel(SoracDataChannel* data_channel, void* userdata) {
@@ -117,10 +115,10 @@ void on_data_channel(SoracDataChannel* data_channel, void* userdata) {
   sorac_data_channel_get_label(data_channel, label, sizeof(label), NULL);
   printf("on_data_channel: label=%s\n", label);
   state->data_channel = sorac_data_channel_share(data_channel);
-  sorac_data_channel_on_error(state->data_channel, on_data_channel_error,
-                              state);
-  sorac_data_channel_on_message(state->data_channel, on_data_channel_message,
-                                state);
+  sorac_data_channel_set_on_error(state->data_channel, on_data_channel_error,
+                                  state);
+  sorac_data_channel_set_on_message(state->data_channel,
+                                    on_data_channel_message, state);
 }
 
 int main(int argc, char* argv[]) {
@@ -191,11 +189,9 @@ int main(int argc, char* argv[]) {
   while (true) {
     sleep(5);
     if (state.data_channel != NULL) {
-      SoracMessageVariant m;
-      m.type = SORAC_MESSAGE_STRING;
-      m.data = "hello";
-      m.size = strlen(m.data);
-      sorac_data_channel_send(state.data_channel, &m);
+      const char data[] = "hello";
+      size_t size = strlen(data);
+      sorac_data_channel_send(state.data_channel, (const uint8_t*)data, size);
     }
   }
 

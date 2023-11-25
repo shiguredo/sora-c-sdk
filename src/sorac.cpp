@@ -155,7 +155,7 @@ std::unordered_map<intptr_t, VideoFrameBufferNV12*>
     g_video_frame_buffer_nv12_map;
 std::unordered_map<intptr_t, rtc::Track*> g_track_map;
 std::unordered_map<intptr_t, rtc::Description::Media*> g_description_media_map;
-std::unordered_map<intptr_t, rtc::DataChannel*> g_data_channel_map;
+std::unordered_map<intptr_t, sorac::DataChannel*> g_data_channel_map;
 
 void CopyString(std::string s, char* buf, int size, SoracError* error) {
   if (buf == nullptr) {
@@ -183,20 +183,6 @@ void CopyString(std::string s, char* buf, int size, SoracError* error) {
     error->type = SORAC_ERROR_OK;
     error->buffer_size = int(s.size() + 1);
   }
-}
-
-SoracMessageVariant ToMessageVariant(const rtc::message_variant& message) {
-  SoracMessageVariant m;
-  if (std::holds_alternative<std::string>(message)) {
-    m.type = SORAC_MESSAGE_STRING;
-    m.data = std::get<std::string>(message).c_str();
-    m.size = std::get<std::string>(message).size();
-  } else {
-    m.type = SORAC_MESSAGE_BINARY;
-    m.data = (const char*)std::get<rtc::binary>(message).data();
-    m.size = std::get<rtc::binary>(message).size();
-  }
-  return m;
 }
 
 }  // namespace sorac
@@ -367,50 +353,51 @@ SoracDescriptionMedia* sorac_track_clone_description(SoracTrack* p) {
                                             g_description_media_map);
 }
 
-// rtc::DataChannel
+// sorac::DataChannel
 void sorac_data_channel_release(SoracDataChannel* p) {
   g_cptr.Remove(p, g_data_channel_map);
 }
 SoracDataChannel* sorac_data_channel_share(SoracDataChannel* p) {
   return (SoracDataChannel*)g_cptr.Share(p, g_data_channel_map);
 }
-void sorac_data_channel_on_open(SoracDataChannel* p,
-                                sorac_data_channel_on_open_func on_open,
-                                void* userdata) {
+void sorac_data_channel_set_on_open(SoracDataChannel* p,
+                                    sorac_data_channel_on_open_func on_open,
+                                    void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  data_channel->onOpen([on_open, userdata]() { on_open(userdata); });
+  data_channel->SetOnOpen([on_open, userdata]() { on_open(userdata); });
 }
-void sorac_data_channel_on_available(
+void sorac_data_channel_set_on_available(
     SoracDataChannel* p,
     sorac_data_channel_on_available_func on_available,
     void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  data_channel->onAvailable(
+  data_channel->SetOnAvailable(
       [on_available, userdata]() { on_available(userdata); });
 }
-void sorac_data_channel_on_closed(SoracDataChannel* p,
-                                  sorac_data_channel_on_closed_func on_closed,
-                                  void* userdata) {
+void sorac_data_channel_set_on_closed(
+    SoracDataChannel* p,
+    sorac_data_channel_on_closed_func on_closed,
+    void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  data_channel->onClosed([on_closed, userdata]() { on_closed(userdata); });
+  data_channel->SetOnClosed([on_closed, userdata]() { on_closed(userdata); });
 }
-void sorac_data_channel_on_error(SoracDataChannel* p,
-                                 sorac_data_channel_on_error_func on_error,
-                                 void* userdata) {
+void sorac_data_channel_set_on_error(SoracDataChannel* p,
+                                     sorac_data_channel_on_error_func on_error,
+                                     void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  data_channel->onError([on_error, userdata](const std::string& message) {
+  data_channel->SetOnError([on_error, userdata](const std::string& message) {
     on_error(message.c_str(), userdata);
   });
 }
-void sorac_data_channel_on_message(
+void sorac_data_channel_set_on_message(
     SoracDataChannel* p,
     sorac_data_channel_on_message_func on_message,
     void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  data_channel->onMessage([on_message, userdata](rtc::message_variant message) {
-    SoracMessageVariant m = sorac::ToMessageVariant(message);
-    on_message(&m, userdata);
-  });
+  data_channel->SetOnMessage(
+      [on_message, userdata](const uint8_t* buf, size_t size) {
+        on_message(buf, size, userdata);
+      });
 }
 void sorac_data_channel_get_label(SoracDataChannel* p,
                                   char* buf,
@@ -420,20 +407,15 @@ void sorac_data_channel_get_label(SoracDataChannel* p,
     memset(error, 0, sizeof(SoracError));
   }
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  auto label = data_channel->label();
+  auto label = data_channel->GetLabel();
   sorac::CopyString(label, buf, size, error);
 }
 bool sorac_data_channel_send(SoracDataChannel* p,
-                             const SoracMessageVariant* m) {
+                             const uint8_t* buf,
+                             size_t size) {
   rtc::message_variant message;
-  if (m->type == SORAC_MESSAGE_STRING) {
-    message = std::string(m->data, m->size);
-  } else {
-    message = rtc::binary((const std::byte*)m->data,
-                          (const std::byte*)m->data + m->size);
-  }
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
-  return data_channel->send(message);
+  return data_channel->Send(buf, size);
 }
 
 // Signaling
@@ -476,7 +458,7 @@ void sorac_signaling_set_on_data_channel(
   auto signaling = g_cptr.Get(p, g_signaling_map);
   signaling->SetOnDataChannel(
       [on_data_channel,
-       userdata](std::shared_ptr<rtc::DataChannel> data_channel) {
+       userdata](std::shared_ptr<sorac::DataChannel> data_channel) {
         auto cdatachannel =
             (SoracDataChannel*)g_cptr.Ref(data_channel, g_data_channel_map);
         on_data_channel(cdatachannel, userdata);
