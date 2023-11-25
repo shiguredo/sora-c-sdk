@@ -49,7 +49,8 @@ struct Client {
   std::shared_ptr<Track> audio;
   std::shared_ptr<OpusAudioEncoder> opus_encoder;
 
-  std::map<std::string, std::shared_ptr<rtc::DataChannel>> dcs;
+  nlohmann::json data_channel_metadata;
+  std::map<std::string, std::shared_ptr<sorac::DataChannel>> dcs;
 };
 
 class SignalingImpl : public Signaling {
@@ -134,9 +135,17 @@ class SignalingImpl : public Signaling {
     on_track_ = on_track;
   }
 
-  void SetOnDataChannel(std::function<void(std::shared_ptr<rtc::DataChannel>)>
+  void SetOnDataChannel(std::function<void(std::shared_ptr<sorac::DataChannel>)>
                             on_data_channel) override {
     on_data_channel_ = on_data_channel;
+  }
+
+  void SetOnNotify(std::function<void(const std::string&)> on_notify) override {
+    on_notify_ = on_notify;
+  }
+
+  void SetOnPush(std::function<void(const std::string&)> on_push) override {
+    on_push_ = on_push;
   }
 
  private:
@@ -157,6 +166,7 @@ class SignalingImpl : public Signaling {
         s.password = ice_server["credential"].get<std::string>();
         config.iceServers.push_back(s);
       }
+      client_.data_channel_metadata = js["data_channels"];
       client_.pc = std::make_shared<rtc::PeerConnection>(config);
       client_.pc->onLocalDescription([this](rtc::Description desc) {
         auto sdp = desc.generateSdp();
@@ -176,9 +186,19 @@ class SignalingImpl : public Signaling {
         PLOG_DEBUG << "onLocalCandidate: send=" << js.dump();
         ws_->send(js.dump());
       });
-      client_.pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> dc) {
-        PLOG_DEBUG << "onDataChannel: label=" << dc->label();
-        if (dc->label()[0] == '#') {
+      client_.pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> rdc) {
+        auto label = rdc->label();
+        PLOG_DEBUG << "onDataChannel: label=" << label;
+        bool compress = false;
+        for (const auto& d : client_.data_channel_metadata) {
+          if (d["label"] == label) {
+            compress = d["compress"].get<bool>();
+            break;
+          }
+        }
+        std::shared_ptr<DataChannel> dc = CreateDataChannel(rdc, compress);
+
+        if (label[0] == '#') {
           // ユーザー定義ラベルなのでコールバックを呼ぶ
           if (on_data_channel_) {
             on_data_channel_(dc);
@@ -186,7 +206,52 @@ class SignalingImpl : public Signaling {
           return;
         }
 
-        client_.dcs[dc->label()] = dc;
+        auto wdc = std::weak_ptr<sorac::DataChannel>(dc);
+        if (label == "stats") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            nlohmann::json js = nlohmann::json::parse(buf, buf + size);
+            if (js["type"] == "stats-req") {
+              nlohmann::json js = {{"type", "stats"},
+                                   {"reports", nlohmann::json::array()}};
+              PLOG_DEBUG << "stats: " << js.dump();
+              std::string str = js.dump();
+              dc->Send((const uint8_t*)str.data(), str.size());
+            }
+          });
+        } else if (label == "notify") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            auto message = std::string((const char*)buf, size);
+            PLOG_DEBUG << "onMessage: label=" << dc->GetLabel()
+                       << ", message=" << message;
+
+            if (on_notify_) {
+              on_notify_(message);
+            }
+          });
+        } else if (label == "push") {
+          dc->SetOnMessage([this, wdc](const uint8_t* buf, size_t size) {
+            auto dc = wdc.lock();
+            if (dc == nullptr) {
+              return;
+            }
+            auto message = std::string((const char*)buf, size);
+            PLOG_DEBUG << "onMessage: label=" << dc->GetLabel()
+                       << ", message=" << message;
+
+            if (on_push_) {
+              on_push_(message);
+            }
+          });
+        }
+        client_.dcs[label] = dc;
       });
       client_.pc->onGatheringStateChange(
           [](rtc::PeerConnection::GatheringState state) {
@@ -217,7 +282,7 @@ class SignalingImpl : public Signaling {
       auto track_id = "trackid-" + generate_random_string(24);
       // video
       {
-        int ssrc = 1;
+        uint32_t ssrc = generate_random_number();
         // m=video から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> video_lines;
         {
@@ -351,7 +416,7 @@ class SignalingImpl : public Signaling {
       }
       // audio
       {
-        int ssrc = 2;
+        uint32_t ssrc = generate_random_number();
         // m=audio から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> audio_lines;
         {
@@ -445,10 +510,30 @@ class SignalingImpl : public Signaling {
       }
 
       client_.pc->setRemoteDescription(rtc::Description(sdp, "offer"));
+    } else if (js["type"] == "switched") {
+      auto v = js["ignore_disconnect_websocket"];
+      if (v.is_boolean() && v.get<bool>()) {
+        ws_->close();
+        ws_ = nullptr;
+      }
+    } else if (js["type"] == "stats-req") {
+      nlohmann::json js = {{"type", "stats"},
+                           {"reports", nlohmann::json::array()}};
+      PLOG_DEBUG << "stats: " << js.dump();
+      ws_->send(js.dump());
     } else if (js["type"] == "ping") {
-      nlohmann::json js = {{"type", "pong"}};
+      nlohmann::json js = {{"type", "pong"},
+                           {"stats", nlohmann::json::array()}};
       PLOG_DEBUG << "pong: " << js.dump();
       ws_->send(js.dump());
+    } else if (js["type"] == "notify") {
+      if (on_notify_) {
+        on_notify_(message);
+      }
+    } else if (js["type"] == "push") {
+      if (on_push_) {
+        on_push_(message);
+      }
     }
   }
 
@@ -579,7 +664,6 @@ class SignalingImpl : public Signaling {
   }
 
   void OnClosed() {
-    client_ = Client();
     ws_ = nullptr;
   }
 
@@ -589,7 +673,9 @@ class SignalingImpl : public Signaling {
   soracp::SignalingConfig config_;
   soracp::SoraConnectConfig sora_config_;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
-  std::function<void(std::shared_ptr<rtc::DataChannel>)> on_data_channel_;
+  std::function<void(std::shared_ptr<sorac::DataChannel>)> on_data_channel_;
+  std::function<void(const std::string&)> on_notify_;
+  std::function<void(const std::string&)> on_push_;
 };
 
 std::shared_ptr<Signaling> CreateSignaling(

@@ -8,6 +8,7 @@ list(APPEND CMAKE_PREFIX_PATH ${LIBJPEG_TURBO_DIR})
 
 find_package(Sorac REQUIRED)
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
 find_package(libjpeg-turbo REQUIRED)
 
 add_executable(sumomo)

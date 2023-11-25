@@ -98,14 +98,12 @@ void on_track(SoracTrack* track, void* userdata) {
   }
 }
 
-void on_data_channel_error(const char* error, void* userdata) {
-  printf("DataChannel error: %s\n", error);
+void on_data_channel_error(const char* error, int len, void* userdata) {
+  printf("DataChannel error: %.*s\n", len, error);
 }
 
-void on_data_channel_message(const SoracMessageVariant* message,
-                             void* userdata) {
-  printf("DataChannel message: %.*s\n", (int)message->size,
-         (const char*)message->data);
+void on_data_channel_message(const uint8_t* buf, size_t size, void* userdata) {
+  printf("DataChannel message: %.*s\n", (int)size, (const char*)buf);
 }
 
 void on_data_channel(SoracDataChannel* data_channel, void* userdata) {
@@ -117,10 +115,18 @@ void on_data_channel(SoracDataChannel* data_channel, void* userdata) {
   sorac_data_channel_get_label(data_channel, label, sizeof(label), NULL);
   printf("on_data_channel: label=%s\n", label);
   state->data_channel = sorac_data_channel_share(data_channel);
-  sorac_data_channel_on_error(state->data_channel, on_data_channel_error,
-                              state);
-  sorac_data_channel_on_message(state->data_channel, on_data_channel_message,
-                                state);
+  sorac_data_channel_set_on_error(state->data_channel, on_data_channel_error,
+                                  state);
+  sorac_data_channel_set_on_message(state->data_channel,
+                                    on_data_channel_message, state);
+}
+
+void on_notify(const char* message, int len, void* userdata) {
+  printf("on_notify: %.*s\n", len, message);
+}
+
+void on_push(const char* message, int len, void* userdata) {
+  printf("on_push: %.*s\n", len, message);
 }
 
 int main(int argc, char* argv[]) {
@@ -160,8 +166,9 @@ int main(int argc, char* argv[]) {
   state.signaling = signaling;
 
   sorac_signaling_set_on_track(signaling, on_track, &state);
-
   sorac_signaling_set_on_data_channel(signaling, on_data_channel, &state);
+  sorac_signaling_set_on_notify(signaling, on_notify, &state);
+  sorac_signaling_set_on_push(signaling, on_push, &state);
 
   soracp_SoraConnectConfig_set_role(&sora_config, "sendonly");
   soracp_SoraConnectConfig_set_channel_id(&sora_config, opt.channel_id);
@@ -182,20 +189,20 @@ int main(int argc, char* argv[]) {
                                            soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_set_data_channel_signaling(
       &sora_config, soracp_OPTIONAL_BOOL_TRUE);
+
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");
   soracp_DataChannel_set_direction(&dc, "sendrecv");
   soracp_SoraConnectConfig_set_data_channels(&sora_config, 0, &dc);
+
   sorac_signaling_connect(state.signaling, &sora_config);
 
   while (true) {
     sleep(5);
     if (state.data_channel != NULL) {
-      SoracMessageVariant m;
-      m.type = SORAC_MESSAGE_STRING;
-      m.data = "hello";
-      m.size = strlen(m.data);
-      sorac_data_channel_send(state.data_channel, &m);
+      const char data[] = "hello";
+      size_t size = strlen(data);
+      sorac_data_channel_send(state.data_channel, (const uint8_t*)data, size);
     }
   }
 
