@@ -98,8 +98,8 @@ void on_track(SoracTrack* track, void* userdata) {
   }
 }
 
-void on_data_channel_error(const char* error, void* userdata) {
-  printf("DataChannel error: %s\n", error);
+void on_data_channel_error(const char* error, int len, void* userdata) {
+  printf("DataChannel error: %.*s\n", len, error);
 }
 
 void on_data_channel_message(const uint8_t* buf, size_t size, void* userdata) {
@@ -119,6 +119,14 @@ void on_data_channel(SoracDataChannel* data_channel, void* userdata) {
                                   state);
   sorac_data_channel_set_on_message(state->data_channel,
                                     on_data_channel_message, state);
+}
+
+void on_notify(const char* message, int len, void* userdata) {
+  printf("on_notify: %.*s\n", len, message);
+}
+
+void on_push(const char* message, int len, void* userdata) {
+  printf("on_push: %.*s\n", len, message);
 }
 
 int main(int argc, char* argv[]) {
@@ -158,8 +166,9 @@ int main(int argc, char* argv[]) {
   state.signaling = signaling;
 
   sorac_signaling_set_on_track(signaling, on_track, &state);
-
   sorac_signaling_set_on_data_channel(signaling, on_data_channel, &state);
+  sorac_signaling_set_on_notify(signaling, on_notify, &state);
+  sorac_signaling_set_on_push(signaling, on_push, &state);
 
   soracp_SoraConnectConfig_set_role(&sora_config, "sendonly");
   soracp_SoraConnectConfig_set_channel_id(&sora_config, opt.channel_id);

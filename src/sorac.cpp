@@ -386,7 +386,7 @@ void sorac_data_channel_set_on_error(SoracDataChannel* p,
                                      void* userdata) {
   auto data_channel = g_cptr.Get(p, g_data_channel_map);
   data_channel->SetOnError([on_error, userdata](const std::string& message) {
-    on_error(message.c_str(), userdata);
+    on_error(message.c_str(), (int)message.size(), userdata);
   });
 }
 void sorac_data_channel_set_on_message(
@@ -463,5 +463,21 @@ void sorac_signaling_set_on_data_channel(
             (SoracDataChannel*)g_cptr.Ref(data_channel, g_data_channel_map);
         on_data_channel(cdatachannel, userdata);
       });
+}
+void sorac_signaling_set_on_notify(SoracSignaling* p,
+                                   sorac_signaling_on_notify_func on_notify,
+                                   void* userdata) {
+  auto signaling = g_cptr.Get(p, g_signaling_map);
+  signaling->SetOnNotify([on_notify, userdata](const std::string& message) {
+    on_notify(message.c_str(), (int)message.size(), userdata);
+  });
+}
+void sorac_signaling_set_on_push(SoracSignaling* p,
+                                 sorac_signaling_on_push_func on_push,
+                                 void* userdata) {
+  auto signaling = g_cptr.Get(p, g_signaling_map);
+  signaling->SetOnPush([on_push, userdata](const std::string& message) {
+    on_push(message.c_str(), (int)message.size(), userdata);
+  });
 }
 }

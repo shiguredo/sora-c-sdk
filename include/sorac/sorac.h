@@ -142,6 +142,7 @@ typedef void (*sorac_data_channel_on_open_func)(void* userdata);
 typedef void (*sorac_data_channel_on_available_func)(void* userdata);
 typedef void (*sorac_data_channel_on_closed_func)(void* userdata);
 typedef void (*sorac_data_channel_on_error_func)(const char* error,
+                                                 int len,
                                                  void* userdata);
 typedef void (*sorac_data_channel_on_message_func)(const uint8_t* buf,
                                                    size_t size,
@@ -184,23 +185,36 @@ typedef void (*sorac_signaling_on_track_func)(SoracTrack* track,
 typedef void (*sorac_signaling_on_data_channel_func)(
     SoracDataChannel* data_channel,
     void* userdata);
+typedef void (*sorac_signaling_on_notify_func)(const char* message,
+                                               int len,
+                                               void* userdata);
+typedef void (*sorac_signaling_on_push_func)(const char* message,
+                                             int len,
+                                             void* userdata);
 extern SoracSignaling* sorac_signaling_create(
     const soracp_SignalingConfig* config);
 extern void sorac_signaling_release(SoracSignaling* p);
 extern void sorac_signaling_connect(
     SoracSignaling* p,
     const soracp_SoraConnectConfig* sora_config);
-extern void sorac_signaling_set_on_track(SoracSignaling* p,
-                                         sorac_signaling_on_track_func on_track,
-                                         void* userdata);
 extern void sorac_signaling_send_video_frame(SoracSignaling* p,
                                              SoracVideoFrameRef* frame);
 extern void sorac_signaling_send_audio_frame(SoracSignaling* p,
                                              SoracAudioFrameRef* frame);
+extern void sorac_signaling_set_on_track(SoracSignaling* p,
+                                         sorac_signaling_on_track_func on_track,
+                                         void* userdata);
 extern void sorac_signaling_set_on_data_channel(
     SoracSignaling* p,
     sorac_signaling_on_data_channel_func on_data_channel,
     void* userdata);
+extern void sorac_signaling_set_on_notify(
+    SoracSignaling* p,
+    sorac_signaling_on_notify_func on_notify,
+    void* userdata);
+extern void sorac_signaling_set_on_push(SoracSignaling* p,
+                                        sorac_signaling_on_push_func on_push,
+                                        void* userdata);
 
 #ifdef __cplusplus
 }
