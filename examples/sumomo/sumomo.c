@@ -189,10 +189,12 @@ int main(int argc, char* argv[]) {
                                            soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_set_data_channel_signaling(
       &sora_config, soracp_OPTIONAL_BOOL_TRUE);
+
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");
   soracp_DataChannel_set_direction(&dc, "sendrecv");
   soracp_SoraConnectConfig_set_data_channels(&sora_config, 0, &dc);
+
   sorac_signaling_connect(state.signaling, &sora_config);
 
   while (true) {

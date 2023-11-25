@@ -510,6 +510,12 @@ class SignalingImpl : public Signaling {
       }
 
       client_.pc->setRemoteDescription(rtc::Description(sdp, "offer"));
+    } else if (js["type"] == "switched") {
+      auto v = js["ignore_disconnect_websocket"];
+      if (v.is_boolean() && v.get<bool>()) {
+        ws_->close();
+        ws_ = nullptr;
+      }
     } else if (js["type"] == "stats-req") {
       nlohmann::json js = {{"type", "stats"},
                            {"reports", nlohmann::json::array()}};
@@ -658,7 +664,6 @@ class SignalingImpl : public Signaling {
   }
 
   void OnClosed() {
-    client_ = Client();
     ws_ = nullptr;
   }
 
