@@ -149,6 +149,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - https://github.com/paullouisageneau/libdatachannel/pull/1015
   - https://github.com/paullouisageneau/libdatachannel/pull/1037
   - https://github.com/paullouisageneau/libdatachannel/pull/1041
+  - https://github.com/paullouisageneau/libdatachannel/pull/1061
 - 映像コーデックは内蔵しません
   - 映像コーデックはハードウェアアクセラレーター、または外部コーデックライブラリを利用します
 
