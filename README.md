@@ -57,8 +57,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | フットプリント              | 大きい       | 小さい         |
 | アップデート頻度            | 積極的       | 控えめ         |
 | 暗号ライブラリ              | BoringSSL    | Mbed TLS       |
-| SRTP ライブラリ             | libwebrtc    | libsrtp        |
-| SCTP ライブラリ             | libwebrtc    | usrsctp        |
+| SRTP ライブラリ             | (libsrtp    | libsrtp        |
+| SCTP ライブラリ             | dcsctp    | usrsctp        |
 | ICE ライブラリ              | libwebrtc    | libjuice       |
 | WebSocket ライブラリ        | Boost        | libdatachannel |
 
