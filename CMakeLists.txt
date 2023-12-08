@@ -112,6 +112,7 @@ target_sources(sorac
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.hpp"
+      include/sorac/bitrate.hpp
       include/sorac/current_time.hpp
       include/sorac/data_channel.hpp
       include/sorac/open_h264_video_encoder.hpp
