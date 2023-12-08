@@ -98,7 +98,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
     // ビットレート
     {
-      int value = settings.bitrate_kbps * 1000;
+      int value = settings.bitrate.count();
       CFNumberRef cfnum =
           CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &value);
       Resource cfnum_resource([cfnum]() { CFRelease(cfnum); });
