@@ -47,7 +47,7 @@ class OpenH264VideoEncoder : public VideoEncoder {
     encoder_params.iUsageType = CAMERA_VIDEO_REAL_TIME;
     encoder_params.iPicWidth = settings.width;
     encoder_params.iPicHeight = settings.height;
-    encoder_params.iTargetBitrate = settings.bitrate_kbps * 1000;
+    encoder_params.iTargetBitrate = settings.bitrate.count();
     // Keep unspecified. WebRTC's max codec bitrate is not the same setting
     // as OpenH264's iMaxBitrate. More details in https://crbug.com/webrtc/11543
     encoder_params.iMaxBitrate = UNSPECIFIED_BIT_RATE;
@@ -122,8 +122,8 @@ class OpenH264VideoEncoder : public VideoEncoder {
     }
 
     SSourcePicture pic = {};
-    pic.iPicWidth = 640;
-    pic.iPicHeight = 480;
+    pic.iPicWidth = frame.width();
+    pic.iPicHeight = frame.height();
     pic.iColorFormat = EVideoFormatType::videoFormatI420;
     pic.uiTimeStamp = frame.timestamp.count() / 1000;
     pic.iStride[0] = frame.i420_buffer->stride_y;
@@ -135,6 +135,7 @@ class OpenH264VideoEncoder : public VideoEncoder {
 
     bool send_key_frame = next_iframe_.exchange(false);
     if (send_key_frame) {
+      PLOG_DEBUG << "KeyFrame generated";
       encoder_->ForceIntraFrame(true);
     }
 

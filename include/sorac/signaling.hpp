@@ -3,13 +3,15 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
 // libdatachannel
 #include <rtc/rtc.hpp>
 
-#include "soracp.json.c.hpp"
-#include "types.hpp"
 #include "data_channel.hpp"
+#include "soracp.json.c.hpp"
+#include "soracp.json.h"
+#include "types.hpp"
 
 namespace sorac {
 
@@ -29,6 +31,8 @@ class Signaling {
   virtual void SetOnNotify(
       std::function<void(const std::string&)> on_notify) = 0;
   virtual void SetOnPush(std::function<void(const std::string&)> on_push) = 0;
+
+  virtual soracp::RtpEncodingParameters GetRtpEncodingParameters() const = 0;
 };
 
 std::shared_ptr<Signaling> CreateSignaling(

@@ -9,6 +9,7 @@
 #include "fake_capturer.h"
 #include "fake_recorder.h"
 #include "option.h"
+#include "util.h"
 
 #if defined(__linux__)
 #include "pulse_recorder.h"
@@ -26,14 +27,36 @@ typedef struct State {
   SumomoRecorder* recorder;
   SumomoCapturer* capturer;
   SoracDataChannel* data_channel;
+  soracp_RtpEncodingParameters rtp_encoding_parameters;
 } State;
 
-void on_video_frame(SoracVideoFrameRef* frame, void* userdata) {
+void on_capture_frame_scaled(SoracVideoFrameRef* frame, void* userdata) {
   State* state = (State*)userdata;
   sorac_signaling_send_video_frame(state->signaling, frame);
 }
 
-void on_audio_frame(SoracAudioFrameRef* frame, void* userdata) {
+void on_capture_frame(SoracVideoFrameRef* frame, void* userdata) {
+  State* state = (State*)userdata;
+  sorac_signaling_get_rtp_encoding_parameters(state->signaling,
+                                              &state->rtp_encoding_parameters);
+  if (!state->rtp_encoding_parameters.enable_parameters) {
+    sorac_signaling_send_video_frame(state->signaling, frame);
+  } else {
+    // 動的な確保が面倒なので適当に固定で持っておく
+    const char* rids[10];
+    int rids_len = state->rtp_encoding_parameters.parameters_len;
+    if (rids_len > sizeof(rids) / sizeof(rids[0])) {
+      rids_len = sizeof(rids) / sizeof(rids[0]);
+    }
+    for (int i = 0; i < rids_len; i++) {
+      rids[i] = state->rtp_encoding_parameters.parameters[i].rid;
+    }
+    sumomo_util_scale_simulcast(rids, rids_len, frame, on_capture_frame_scaled,
+                                state);
+  }
+}
+
+void on_record_frame(SoracAudioFrameRef* frame, void* userdata) {
   State* state = (State*)userdata;
   sorac_signaling_send_audio_frame(state->signaling, frame);
 }
@@ -70,7 +93,8 @@ void on_track(SoracTrack* track, void* userdata) {
     } else {
       state->capturer = sumomo_fake_capturer_create();
     }
-    sumomo_capturer_set_frame_callback(state->capturer, on_video_frame, state);
+    sumomo_capturer_set_frame_callback(state->capturer, on_capture_frame,
+                                       state);
     sumomo_capturer_start(state->capturer);
   } else if (strcmp(buf, "audio") == 0) {
     state->audio_track = sorac_track_share(track);
@@ -93,7 +117,7 @@ void on_track(SoracTrack* track, void* userdata) {
     } else {
       state->recorder = sumomo_fake_recorder_create();
     }
-    sumomo_recorder_set_frame_callback(state->recorder, on_audio_frame, state);
+    sumomo_recorder_set_frame_callback(state->recorder, on_record_frame, state);
     sumomo_recorder_start(state->recorder);
   }
 }
@@ -140,6 +164,7 @@ int main(int argc, char* argv[]) {
   sorac_plog_init();
 
   State state = {0};
+  soracp_RtpEncodingParameters_init(&state.rtp_encoding_parameters);
   soracp_SignalingConfig config;
   soracp_SoraConnectConfig sora_config;
   soracp_DataChannel dc;
@@ -160,7 +185,7 @@ int main(int argc, char* argv[]) {
   }
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
-  soracp_SignalingConfig_set_video_encoder_initial_bitrate(
+  soracp_SignalingConfig_set_video_encoder_initial_bitrate_kbps(
       &config, opt.video_bit_rate == 0 ? 500 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
@@ -189,6 +214,12 @@ int main(int argc, char* argv[]) {
                                            soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_set_data_channel_signaling(
       &sora_config, soracp_OPTIONAL_BOOL_TRUE);
+  soracp_SoraConnectConfig_set_simulcast(
+      &sora_config, opt.simulcast == SUMOMO_OPTIONAL_BOOL_NONE
+                        ? soracp_OPTIONAL_BOOL_NONE
+                    : opt.simulcast == SUMOMO_OPTIONAL_BOOL_FALSE
+                        ? soracp_OPTIONAL_BOOL_FALSE
+                        : soracp_OPTIONAL_BOOL_TRUE);
 
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");

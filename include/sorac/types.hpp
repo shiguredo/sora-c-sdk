@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
+#include <string>
 
 namespace sorac {
 
@@ -34,12 +36,22 @@ struct VideoFrame {
   std::shared_ptr<VideoFrameBufferI420> i420_buffer;
   std::shared_ptr<VideoFrameBufferNV12> nv12_buffer;
   std::chrono::microseconds timestamp;
+  std::optional<std::string> rid;
+  int base_width;
+  int base_height;
+  int width() const {
+    return i420_buffer != nullptr ? i420_buffer->width : nv12_buffer->width;
+  }
+  int height() const {
+    return i420_buffer != nullptr ? i420_buffer->height : nv12_buffer->height;
+  }
 };
 
 struct EncodedImage {
-  std::unique_ptr<uint8_t[]> buf;
+  std::shared_ptr<uint8_t[]> buf;
   int size;
   std::chrono::microseconds timestamp;
+  std::optional<std::string> rid;
 };
 
 struct AudioFrame {

@@ -220,6 +220,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
     });
     bool send_key_frame = next_iframe_.exchange(false);
     if (send_key_frame) {
+      PLOG_DEBUG << "KeyFrame generated";
       CFTypeRef keys[] = {kVTEncodeFrameOptionKey_ForceKeyFrame};
       CFTypeRef values[] = {kCFBooleanTrue};
       frame_properties = CFDictionaryCreate(

@@ -97,6 +97,8 @@ target_sources(sorac
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
+    src/simulcast_encoder_adapter.cpp
+    src/simulcast_media_handler.cpp
     src/sorac.cpp
     src/types.cpp
     src/util.cpp
@@ -110,15 +112,17 @@ target_sources(sorac
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.hpp"
-      "include/sorac/current_time.hpp"
-      "include/sorac/data_channel.hpp"
-      "include/sorac/open_h264_video_encoder.hpp"
-      "include/sorac/opus_audio_encoder.hpp"
-      "include/sorac/signaling.hpp"
-      "include/sorac/sorac.h"
-      "include/sorac/types.hpp"
-      "include/sorac/version.hpp"
-      "include/sorac/video_encoder.hpp"
+      include/sorac/current_time.hpp
+      include/sorac/data_channel.hpp
+      include/sorac/open_h264_video_encoder.hpp
+      include/sorac/opus_audio_encoder.hpp
+      include/sorac/signaling.hpp
+      include/sorac/simulcast_encoder_adapter.hpp
+      include/sorac/simulcast_media_handler.hpp
+      include/sorac/sorac.h
+      include/sorac/types.hpp
+      include/sorac/version.hpp
+      include/sorac/video_encoder.hpp
 )
 target_include_directories(sorac PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(sorac PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac")

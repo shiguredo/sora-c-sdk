@@ -10,6 +10,7 @@
 static struct option long_opts[] = {
     {"signaling-url", required_argument, 0, 0},
     {"channel-id", required_argument, 0, 0},
+    {"simulcast", required_argument, 0, 0},
     {"video-codec-type", required_argument, 0, 0},
     {"video-bit-rate", required_argument, 0, 0},
     {"metadata", required_argument, 0, 0},
@@ -60,6 +61,17 @@ int sumomo_option_parse(SumomoOption* option,
           option->signaling_url = optarg;
         } else if (OPT_IS("channel-id")) {
           option->channel_id = optarg;
+        } else if (OPT_IS("simulcast")) {
+          if (strcmp(optarg, "true") == 0) {
+            option->simulcast = SUMOMO_OPTIONAL_BOOL_TRUE;
+          } else if (strcmp(optarg, "false") == 0) {
+            option->simulcast = SUMOMO_OPTIONAL_BOOL_FALSE;
+          } else if (strcmp(optarg, "none") == 0) {
+            option->simulcast = SUMOMO_OPTIONAL_BOOL_NONE;
+          } else {
+            fprintf(stderr, "Invalid simulcast: %s\n", optarg);
+            *error = 1;
+          }
         } else if (OPT_IS("video-codec-type")) {
           if (strcmp(optarg, "H264") == 0) {
             option->video_codec_type = optarg;
@@ -141,6 +153,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "Options:\n");
       fprintf(stdout, "  --signaling-url=URL [required]\n");
       fprintf(stdout, "  --channel-id=ID [required]\n");
+      fprintf(stdout, "  --simulcast=true,false,none\n");
       fprintf(stdout, "  --video-codec-type=H264,H265\n");
       fprintf(stdout, "  --video-bit-rate=0-5000 [kbps]\n");
       fprintf(stdout, "  --metadata=JSON\n");

@@ -106,6 +106,16 @@ extern SoracVideoFrameBufferI420* sorac_video_frame_ref_get_i420_buffer(
 extern SoracVideoFrameBufferNV12* sorac_video_frame_ref_get_nv12_buffer(
     SoracVideoFrameRef* p);
 extern int64_t sorac_video_frame_ref_get_timestamp_us(SoracVideoFrameRef* p);
+extern void sorac_video_frame_ref_set_rid(SoracVideoFrameRef* p,
+                                          const char* rid,  // nullable
+                                          int len);
+// rid が nullopt なら false が返される
+extern bool sorac_video_frame_ref_get_rid(SoracVideoFrameRef* p,
+                                          char* buf,
+                                          int size,
+                                          SoracError* error);
+extern int sorac_video_frame_ref_get_width(SoracVideoFrameRef* p);
+extern int sorac_video_frame_ref_get_height(SoracVideoFrameRef* p);
 
 // AudioFrame
 struct SoracAudioFrameRef;
@@ -215,6 +225,9 @@ extern void sorac_signaling_set_on_notify(
 extern void sorac_signaling_set_on_push(SoracSignaling* p,
                                         sorac_signaling_on_push_func on_push,
                                         void* userdata);
+extern void sorac_signaling_get_rtp_encoding_parameters(
+    SoracSignaling* p,
+    soracp_RtpEncodingParameters* params);
 
 #ifdef __cplusplus
 }

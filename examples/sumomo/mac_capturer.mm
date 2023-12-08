@@ -284,6 +284,8 @@ static dispatch_queue_t kCapturerQueue = nil;
                     CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) *
                 kMicrosecondsPerSecond));
   frame.nv12_buffer = sorac::VideoFrameBufferNV12::Create(width, height);
+  frame.base_width = width;
+  frame.base_height = height;
   uint8_t* dst_y = frame.nv12_buffer->y.get();
   int dst_stride_y = frame.nv12_buffer->stride_y;
   uint8_t* dst_uv = frame.nv12_buffer->uv.get();
@@ -377,7 +379,8 @@ class MacCapturer : public SumomoCapturer {
       ((sumomo::MacCapturer*)p)
           ->SetFrameCallback(
               [on_frame, userdata](const sorac::VideoFrame& frame) {
-                on_frame((SoracVideoFrameRef*)&frame, userdata);
+                sorac::VideoFrame f = frame;
+                on_frame((SoracVideoFrameRef*)&f, userdata);
               });
     };
     this->start = [](SumomoCapturer* p) {

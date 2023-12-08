@@ -3,6 +3,12 @@
 
 #include <sorac/sorac.h>
 
+typedef enum SumomoOptionalBool {
+  SUMOMO_OPTIONAL_BOOL_NONE,
+  SUMOMO_OPTIONAL_BOOL_FALSE,
+  SUMOMO_OPTIONAL_BOOL_TRUE,
+} SumomoOptionalBool;
+
 typedef enum SumomoOptionCaptureType {
   SUMOMO_OPTION_CAPTURE_TYPE_FAKE,
   SUMOMO_OPTION_CAPTURE_TYPE_V4L2,
@@ -17,6 +23,7 @@ typedef enum SumomoOptionAudioType {
 typedef struct SumomoOption {
   const char* signaling_url;
   const char* channel_id;
+  SumomoOptionalBool simulcast;
   const char* video_codec_type;
   int video_bit_rate;
   const char* metadata;

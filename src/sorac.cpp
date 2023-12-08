@@ -299,6 +299,35 @@ SoracVideoFrameBufferNV12* sorac_video_frame_ref_get_nv12_buffer(
 int64_t sorac_video_frame_ref_get_timestamp_us(SoracVideoFrameRef* p) {
   return ((sorac::VideoFrame*)p)->timestamp.count();
 }
+void sorac_video_frame_ref_set_rid(SoracVideoFrameRef* p,
+                                   const char* rid,  // nullable
+                                   int len) {
+  if (rid == nullptr) {
+    ((sorac::VideoFrame*)p)->rid = std::nullopt;
+  } else {
+    ((sorac::VideoFrame*)p)->rid = std::string(rid, len);
+  }
+}
+bool sorac_video_frame_ref_get_rid(SoracVideoFrameRef* p,
+                                   char* buf,
+                                   int size,
+                                   SoracError* error) {
+  if (error != nullptr) {
+    memset(error, 0, sizeof(SoracError));
+  }
+  auto rid = ((sorac::VideoFrame*)p)->rid;
+  if (rid == std::nullopt) {
+    return false;
+  }
+  sorac::CopyString(*rid, buf, size, error);
+  return true;
+}
+int sorac_video_frame_ref_get_width(SoracVideoFrameRef* p) {
+  return ((sorac::VideoFrame*)p)->width();
+}
+int sorac_video_frame_ref_get_height(SoracVideoFrameRef* p) {
+  return ((sorac::VideoFrame*)p)->height();
+}
 
 // AudioFrame
 extern int sorac_audio_frame_ref_get_sample_rate(SoracAudioFrameRef* p) {
@@ -479,5 +508,12 @@ void sorac_signaling_set_on_push(SoracSignaling* p,
   signaling->SetOnPush([on_push, userdata](const std::string& message) {
     on_push(message.c_str(), (int)message.size(), userdata);
   });
+}
+void sorac_signaling_get_rtp_encoding_parameters(
+    SoracSignaling* p,
+    soracp_RtpEncodingParameters* params) {
+  auto signaling = g_cptr.Get(p, g_signaling_map);
+  auto u = signaling->GetRtpEncodingParameters();
+  soracp_RtpEncodingParameters_from_cpp(u, params);
 }
 }

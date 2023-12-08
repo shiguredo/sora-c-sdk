@@ -58,7 +58,7 @@ class FakeRecorder : public SumomoRecorder {
                           int start, float* p, int count) {
           float hum_period = sample_rate / frequency;
           for (int i = start; i < start + count; ++i) {
-            float a = volume * sin(i * 2 * M_PI / hum_period);
+            float a = 0.1 * volume * sin(i * 2 * M_PI / hum_period);
             *p += a;
             ++p;
           }
