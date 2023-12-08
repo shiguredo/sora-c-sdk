@@ -15,7 +15,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ## Sora C SDK について
 
-**現在開発中です**
+**現在リリース準備中です**
 
 [WebRTC SFU Sora](https://sora.shiguredo.jp/) 向けの C のクライアント向け SDK です。
 [libwebrtc](https://webrtc.googlesource.com/src) を利用せず、
@@ -34,33 +34,38 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
   - [Apache License, Version 2\.0](https://www.apache.org/licenses/LICENSE-2.0.html)
 - H.265 (HEVC) 対応
   - ハードウェアアクセラレーターを利用
+- H.264 (AVC) 対応
+  - ハードウェアアクセラレーターを利用
 - OpenH264 対応
   - [cisco/openh264](https://github.com/cisco/openh264)
+- Simulcast 対応
+  - [RFC 8108 \- Sending Multiple RTP Streams in a Single RTP Session](https://datatracker.ietf.org/doc/html/rfc8108.html)
+  - [RFC 8852 \- RTP Stream Identifier Source Description \(SDES\)](https://datatracker.ietf.org/doc/html/rfc8852)
+  - [RFC 8853 \- Using Simulcast in Session Description Protocol \(SDP\) and RTP Sessions](https://datatracker.ietf.org/doc/html/rfc8853)
 - RTCP Feedback Messages PLI 対応
-  - [RFC 4585: Extended RTP Profile for Real\-time Transport Control Protocol \(RTCP\)\-Based Feedback \(RTP/AVPF\)](https://www.rfc-editor.org/rfc/rfc4585.html)
+  - [RFC 4585 \- Extended RTP Profile for Real\-time Transport Control Protocol \(RTCP\)\-Based Feedback \(RTP/AVPF\)](https://datatracker.ietf.org/doc/html/rfc4585)
 - Reduced-Size RTCP 対応
-  - [RFC 5506: Support for Reduced\-Size Real\-Time Transport Control Protocol \(RTCP\): Opportunities and Consequences](https://www.rfc-editor.org/rfc/rfc5506)
+  - [RFC 5506 \- Support for Reduced\-Size Real\-Time Transport Control Protocol \(RTCP\): Opportunities and Consequences](https://datatracker.ietf.org/doc/html/rfc5506)
 - RTCP CNAME 対応
-  - [RFC 3550: RTP: A Transport Protocol for Real\-Time Applications](https://www.rfc-editor.org/rfc/rfc3550.html)
-  - [RFC 7022: Guidelines for Choosing RTP Control Protocol \(RTCP\) Canonical Names \(CNAMEs\)](https://www.rfc-editor.org/rfc/rfc7022)
+  - [RFC 7022 \- Guidelines for Choosing RTP Control Protocol \(RTCP\) Canonical Names \(CNAMEs\)](https://datatracker.ietf.org/doc/html/rfc7022)
 - SCTP Zero Checksum 対応
   - [Zero Checksum for the Stream Control Transmission Protocol](https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-sctp-zero-checksum)
 
 ## Sora C++ SDK との比較
 
-| 項目                        | Sora C++ SDK | Sora C SDK     |
-| --------------------------- | ------------ | -------------- |
-| ライセンス                  | Apache-2.0   | Apache-2.0     |
-| WebRTC ライブラリ           | libwebrtc    | libdatachannel |
-| WebRTC ライブラリライセンス | BSD-3-Clause | MPL-2.0        |
-| バイナリサイズ              | 大きい       | 小さい         |
-| フットプリント              | 大きい       | 小さい         |
-| アップデート頻度            | 積極的       | 控えめ         |
-| 暗号ライブラリ              | BoringSSL    | Mbed TLS       |
-| SRTP ライブラリ             | libsrtp    | libsrtp        |
-| SCTP ライブラリ             | libwebrtc (dcsctp)    | usrsctp        |
-| ICE ライブラリ              | libwebrtc    | libjuice       |
-| WebSocket ライブラリ        | Boost        | libdatachannel |
+| 項目                        | Sora C++ SDK       | Sora C SDK     |
+| --------------------------- | ------------------ | -------------- |
+| ライセンス                  | Apache-2.0         | Apache-2.0     |
+| WebRTC ライブラリ           | libwebrtc          | libdatachannel |
+| WebRTC ライブラリライセンス | BSD-3-Clause       | MPL-2.0        |
+| バイナリサイズ              | 大きい             | 小さい         |
+| フットプリント              | 大きい             | 小さい         |
+| アップデート頻度            | 積極的             | 控えめ         |
+| 暗号ライブラリ              | BoringSSL          | Mbed TLS       |
+| SRTP ライブラリ             | libsrtp            | libsrtp        |
+| SCTP ライブラリ             | libwebrtc (dcsctp) | usrsctp        |
+| ICE ライブラリ              | libwebrtc          | libjuice       |
+| WebSocket ライブラリ        | Boost              | libdatachannel |
 
 | プロトコル | Sora C++ SDK | Sora C SDK |
 | ---------- | ------------ | ---------- |
@@ -95,14 +100,16 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ### Sora 機能
 
-| 機能                | Sora C++ SDK | Sora C SDK |
-| ------------------- | ------------ | ---------- |
-| sendrecv (送受信)   | 対応         | 非対応     |
-| sendonly (送信のみ) | 対応         | 対応       |
-| recvonly (受信のみ) | 対応         | 対応予定   |
-| マルチストリーム    | 対応         | 対応       |
-| サイマルキャスト    | 対応         | 対応予定   |
-| スポットライト      | 対応         | 非対応     |
+| 機能                         | Sora C++ SDK | Sora C SDK |
+| ---------------------------- | ------------ | ---------- |
+| sendrecv (送受信)            | 対応         | 非対応     |
+| sendonly (送信のみ)          | 対応         | 対応       |
+| recvonly (受信のみ)          | 対応         | 対応予定   |
+| データチャネルシグナリング   | 対応         | 対応       |
+| マルチストリーム             | 対応         | 対応       |
+| サイマルキャスト             | 対応         | 対応       |
+| スポットライト               | 対応         | 非対応     |
+| データチャネルメッセージング | 対応         | 対応       |
 
 Sora C SDK は Sora の機能への積極な追従を行いません。
 
@@ -150,6 +157,11 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - https://github.com/paullouisageneau/libdatachannel/pull/1037
   - https://github.com/paullouisageneau/libdatachannel/pull/1041
   - https://github.com/paullouisageneau/libdatachannel/pull/1061
+- usrsctp への貢献を行います
+  - https://github.com/sctplab/usrsctp/pull/689
+  - https://github.com/sctplab/usrsctp/pull/690
+- Mbed TLS や OpenSSL への貢献を行います
+- libsrtp への貢献を行います
 - 映像コーデックは内蔵しません
   - 映像コーデックはハードウェアアクセラレーター、または外部コーデックライブラリを利用します
 
