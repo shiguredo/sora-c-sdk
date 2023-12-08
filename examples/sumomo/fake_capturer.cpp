@@ -21,7 +21,8 @@ class FakeCapturer : public SumomoCapturer {
       ((sumomo::FakeCapturer*)p)
           ->SetFrameCallback(
               [on_frame, userdata](const sorac::VideoFrame& frame) {
-                on_frame((SoracVideoFrameRef*)&frame, userdata);
+                sorac::VideoFrame f = frame;
+                on_frame((SoracVideoFrameRef*)&f, userdata);
               });
     };
     this->start = [](SumomoCapturer* p) {
@@ -52,6 +53,8 @@ class FakeCapturer : public SumomoCapturer {
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      frame.base_width = 640;
+      frame.base_height = 480;
       callback_(frame);
     });
     return 0;

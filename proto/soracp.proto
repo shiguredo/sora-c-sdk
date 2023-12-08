@@ -61,7 +61,7 @@ message SignalingConfig {
     string proxy_username = 45;
     string proxy_password = 46;
     string proxy_agent = 47;
-    int32 video_encoder_initial_bitrate = 4;
+    int32 video_encoder_initial_bitrate_kbps = 4;
 }
 
 message SoraConnectConfig {
@@ -93,4 +93,23 @@ message SoraConnectConfig {
     string signaling_notify_metadata = 49;
     bool enable_forwarding_filter = 50;
     ForwardingFilter forwarding_filter = 51;
+}
+
+message RtpEncodingParameter {
+  string rid = 10;
+  bool active = 20;
+  bool enable_scale_resolution_down_by = 30;
+  double scale_resolution_down_by = 31;
+  bool enable_max_bitrate_bps = 40;
+  int32 max_bitrate_bps = 41;
+  bool enable_max_framerate = 50;
+  double max_framerate = 51;
+  bool adaptive_ptime = 60;
+  bool enable_scalability_mode = 70;
+  string scalability_mode = 71;
+}
+
+message RtpEncodingParameters {
+    bool enable_parameters = 10;
+    repeated RtpEncodingParameter parameters = 11;
 }

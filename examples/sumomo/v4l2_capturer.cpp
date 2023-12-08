@@ -43,7 +43,8 @@ class V4L2Capturer : public SumomoCapturer {
       ((sumomo::V4L2Capturer*)p)
           ->SetFrameCallback(
               [on_frame, userdata](const sorac::VideoFrame& frame) {
-                on_frame((SoracVideoFrameRef*)&frame, userdata);
+                sorac::VideoFrame f = frame;
+                on_frame((SoracVideoFrameRef*)&f, userdata);
               });
     };
     this->start = [](SumomoCapturer* p) {
@@ -207,6 +208,8 @@ class V4L2Capturer : public SumomoCapturer {
         sorac::VideoFrame frame;
         frame.i420_buffer = fb;
         frame.timestamp = sorac::get_current_time();
+        frame.base_width = width_;
+        frame.base_height = height_;
         callback_(frame);
 
         if (ioctl(device_fd_, VIDIOC_QBUF, &buf) < 0) {

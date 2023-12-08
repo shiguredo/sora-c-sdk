@@ -4,6 +4,7 @@
 #include <functional>
 #include <string>
 
+#include "bitrate.hpp"
 #include "types.hpp"
 
 namespace sorac {
@@ -13,7 +14,7 @@ class VideoEncoder {
   struct Settings {
     int width;
     int height;
-    int bitrate_kbps;
+    Bps bitrate;
   };
 
   virtual ~VideoEncoder() {}

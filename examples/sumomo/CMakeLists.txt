@@ -17,10 +17,11 @@ target_sources(sumomo
     capturer.cpp
     fake_capturer.cpp
     fake_recorder.cpp
-    steady_frame_thread.cpp
-    sumomo.c
     option.c
     recorder.cpp
+    steady_frame_thread.cpp
+    sumomo.c
+    util.cpp
 )
 
 if (SUMOMO_TARGET STREQUAL "ubuntu-20.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubuntu-22.04_x86_64")
