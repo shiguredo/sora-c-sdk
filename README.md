@@ -73,27 +73,51 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | TURN-TCP   | 対応         | 非対応     |
 | TURN-TLS   | 対応         | 非対応     |
 
-| コーデック  | Sora C++ SDK | Sora C SDK |
-| ----------- | ------------ | ---------- |
-| VP8         | 対応         | 優先実装   |
-| VP9         | 対応         | 優先実装   |
-| AV1         | 対応         | 優先実装   |
-| H.264 (HWA) | 対応         | 対応       |
-| H.265 (HWA) | 対応         | 対応       |
+| 音声コーデック | Sora C++ SDK | Sora C SDK |
+| -------------- | ------------ | ---------- |
+| Opus           | 対応         | 対応       |
+| Lyra           | 対応         | 非対応     |
+| AAC            | 非対応       | 優先実装   |
 
-| OS / アーキテクチャ | Sora C++ SDK | Sora C SDK |
-| ------------------- | ------------ | ---------- |
-| linux / x86_64      | 対応         | 対応       |
-| linux / x86         | 非対応       | 優先実装   |
-| linux / arm64       | 対応         | 優先実装   |
-| linux / arm         | 非対応       | 優先実装   |
-| linux / riscv64     | 非対応       | 対応予定   |
-| linux / riscv32     | 非対応       | 優先実装   |
-| windows / x86_64    | 対応         | 優先実装   |
-| windows / arm64     | 非対応       | 優先実装   |
-| macos / arm64       | 対応         | 対応       |
-| ios / arm64         | 対応         | 優先実装   |
-| android / arm64     | 対応         | 優先実装   |
+| 映像コーデック | Sora C++ SDK | Sora C SDK |
+| -------------- | ------------ | ---------- |
+| VP8            | 対応         | 優先実装   |
+| VP9            | 対応         | 優先実装   |
+| AV1            | 対応         | 優先実装   |
+| H.264 (HWA)    | 対応         | 対応       |
+| H.265 (HWA)    | 対応         | 対応       |
+
+| OS / アーキテクチャ     | Sora C++ SDK | Sora C SDK |
+| ----------------------- | ------------ | ---------- |
+| Ubuntu / x86_64         | 対応         | 対応       |
+| Ubuntu / x86            | 非対応       | 非対応     |
+| Ubuntu / riscv64        | 非対応       | 対応予定   |
+| Ubuntu / riscv32        | 非対応       | 優先実装   |
+| Ubuntu Core / arm64     | 対応         | 優先実装   |
+| Ubuntu Core / arm       | 非対応       | 優先実装   |
+| Raspberry Pi OS / arm64 | 対応         | 優先実装   |
+| Raspberry Pi OS / arm   | 対応         | 優先実装   |
+| Windows / x86_64        | 対応         | 優先実装   |
+| Windows / arm64         | 非対応       | 優先実装   |
+| macOS / arm64           | 対応         | 対応       |
+| iOS / arm64             | 対応         | 優先実装   |
+| Android / arm64         | 対応         | 優先実装   |
+
+| Raspberry Pi          | Sora C++ SDK | Sora C SDK |
+| --------------------- | ------------ | ---------- |
+| Raspberry Pi Zero W   | 非対応       | 対応予定   |
+| Raspberry Pi Zero WH  | 非対応       | 対応予定   |
+| Raspberry Pi Zero 2 W | 非対応       | 対応予定   |
+
+Raspberry Pi Zero シリーズ以外の対応予定はありません。
+
+| NVIDIA Jetson            | Sora C++ SDK | Sora C SDK |
+| ------------------------ | ------------ | ---------- |
+| NVIDIA Jetson AGX Orin   | 対応         | 非対応     |
+| NVIDIA Jetson AGX Xavier | 対応         | 非対応     |
+| NVIDIA Jetson Xavier NX  | 対応         | 非対応     |
+
+NVIDIA Jetson シリーズへの対応予定はありません。
 
 基本的には [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 バイナリサイズやフットプリント、アップデート頻度を抑えたい場合のみ Sora C SDK を利用してください。
@@ -111,7 +135,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | スポットライト               | 対応         | 非対応     |
 | データチャネルメッセージング | 対応         | 対応       |
 
-Sora C SDK は Sora の機能への積極な追従を行いません。
+Sora C SDK は Sora の機能への積極な対応を行いません。
 
 ## 対応 Sora
 
@@ -138,11 +162,14 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 ### 対応予定
 
-- [VisionFive 2](https://www.starfivetech.com/en/site/boards)
+- [Raspberry Pi Zero 対応](https://www.raspberrypi.com/)
+  - Raspberry Pi OS
+  - arm64 / arm
+  - H.264 HWA (Encoder)
+- [VisionFive 2 対応](https://www.starfivetech.com/en/site/boards)
   - Debian 12.0
   - riscv64
-  - H.264 HWA (Decoder)
-  - H.265 HWA (Encoder/Decoder)
+  - H.265 HWA (Encoder)
 
 ## FAQ
 
@@ -150,7 +177,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 ## 方針
 
-- Sora の機能への積極的な追従は行いません
+- Sora の機能への積極的な対応は行いません
 - libdatachannel へ積極的な貢献を行います
   - https://github.com/paullouisageneau/libdatachannel/pull/1009
   - https://github.com/paullouisageneau/libdatachannel/pull/1015
@@ -214,9 +241,6 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - プラットフォーム
   - iOS 対応
   - Android 対応
-  - [Raspberry Pi OS 対応](https://www.raspberrypi.com/software/)
-    - arm64
-    - arm
   - [Windows IoT 対応](https://learn.microsoft.com/ja-jp/previous-versions/windows/iot-core/windows-iot)
     - x86
     - arm64
