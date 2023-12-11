@@ -157,8 +157,8 @@ GitHub アカウントを持っていればすぐに利用可能です。
 - macOS 14
   - arm64
   - VideoToolbox
-    - H.264 HWA (Encoder/Decoder)
-    - H.265 HWA (Encoder/Decoder)
+    - H.264 HWA (Encoder)
+    - H.265 HWA (Encoder)
 
 ### 対応予定
 
