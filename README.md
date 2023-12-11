@@ -90,13 +90,13 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | OS / アーキテクチャ     | Sora C++ SDK | Sora C SDK |
 | ----------------------- | ------------ | ---------- |
 | Ubuntu / x86_64         | 対応         | 対応       |
-| Ubuntu / x86            | 非対応       | 非対応     |
-| Ubuntu / riscv64        | 非対応       | 対応予定   |
-| Ubuntu / riscv32        | 非対応       | 優先実装   |
-| Ubuntu Core / arm64     | 対応         | 優先実装   |
-| Ubuntu Core / arm       | 非対応       | 優先実装   |
-| Raspberry Pi OS / arm64 | 対応         | 優先実装   |
-| Raspberry Pi OS / arm   | 対応         | 優先実装   |
+| Ubuntu / x86            | 非対応       | 優先実装   |
+| Ubuntu / arm64          | 対応         | 優先実装   |
+| Ubuntu / arm            | 非対応       | 優先実装   |
+| Debian / riscv64        | 非対応       | 対応予定   |
+| Debian / riscv32        | 非対応       | 優先実装   |
+| Raspberry Pi OS / arm64 | 非対応       | 対応予定   |
+| Raspberry Pi OS / arm32 | 非対応       | 対応予定   |
 | Windows / x86_64        | 対応         | 優先実装   |
 | Windows / arm64         | 非対応       | 優先実装   |
 | macOS / arm64           | 対応         | 対応       |
@@ -228,7 +228,6 @@ GitHub アカウントを持っていればすぐに利用可能です。
     - AMD [Advanced Media Framework (AMF) SDK](https://github.com/GPUOpen-LibrariesAndSDKs/AMF)
     - Intel [oneVPL](https://github.com/oneapi-src/oneVPL)
     - NVIDIA [Video Codec SDK](https://developer.nvidia.com/video-codec-sdk)
-    - NVIDIA [Jetson](https://www.nvidia.com/ja-jp/autonomous-machines/embedded-systems/)
 - 次世代コーデック
   - H.266 対応
     - Sora の対応も含みます
@@ -240,14 +239,15 @@ GitHub アカウントを持っていればすぐに利用可能です。
     - [RTP Payload Format for Essential Video Coding \(EVC\)](https://datatracker.ietf.org/doc/html/draft-ietf-avtcore-rtp-evc)
 - プラットフォーム
   - iOS 対応
+    - arm64
   - Android 対応
-  - [Windows IoT 対応](https://learn.microsoft.com/ja-jp/previous-versions/windows/iot-core/windows-iot)
+    - arm64
+  - Windows 対応
+    - arm64
+  - Ubuntu 対応
     - x86
     - arm64
-  - [Ubuntu Core 対応](https://ubuntu.com/core)
-    - x86
-    - arm64
-    - arm
+    - arm32
 
 ## サポートについて
 
