@@ -50,6 +50,8 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
   - [RFC 7022 \- Guidelines for Choosing RTP Control Protocol \(RTCP\) Canonical Names \(CNAMEs\)](https://datatracker.ietf.org/doc/html/rfc7022)
 - SCTP Zero Checksum 対応
   - [Zero Checksum for the Stream Control Transmission Protocol](https://datatracker.ietf.org/doc/html/draft-ietf-tsvwg-sctp-zero-checksum)
+- TURN-UDP 対応
+  - [RFC 8656 \- Traversal Using Relays around NAT \(TURN\): Relay Extensions to Session Traversal Utilities for NAT \(STUN\)](https://datatracker.ietf.org/doc/html/rfc8656)
 
 ## Sora C++ SDK との比較
 
