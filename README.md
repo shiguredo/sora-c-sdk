@@ -176,7 +176,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - arm64
   - H.265 HWA (Encoder)
   - H.264 HWA (Encoder)
-  - JPEG HWA (Encoder)
+  - JPEG HWA (Decoder)
 
 ## FAQ
 
