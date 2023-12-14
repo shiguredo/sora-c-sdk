@@ -170,6 +170,11 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - Debian 12.0
   - riscv64
   - H.265 HWA (Encoder)
+- [Luckfox Pico 対応](https://www.luckfox.com/Mini-PC/Luckfox-Pico)
+  - arm64
+  - H.265 HWA (Encoder)
+  - H.264 HWA (Encoder)
+  - JPEG HWA (Encoder)
 
 ## FAQ
 
