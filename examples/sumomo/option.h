@@ -21,7 +21,8 @@ typedef enum SumomoOptionAudioType {
 } SumomoOptionAudioType;
 
 typedef struct SumomoOption {
-  const char* signaling_url;
+  const char* signaling_url[16];
+  int signaling_url_len;
   const char* channel_id;
   SumomoOptionalBool simulcast;
   const char* video_codec_type;

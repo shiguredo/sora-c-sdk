@@ -58,7 +58,15 @@ int sumomo_option_parse(SumomoOption* option,
       case 0:
 #define OPT_IS(optname) strcmp(long_opts[index].name, optname) == 0
         if (OPT_IS("signaling-url")) {
-          option->signaling_url = optarg;
+          if (option->signaling_url_len >=
+              sizeof(option->signaling_url) /
+                  sizeof(option->signaling_url[0])) {
+            fprintf(stderr, "Too many signaling-url\n");
+            *error = 1;
+            break;
+          }
+          option->signaling_url[option->signaling_url_len] = optarg;
+          option->signaling_url_len += 1;
         } else if (OPT_IS("channel-id")) {
           option->channel_id = optarg;
         } else if (OPT_IS("simulcast")) {

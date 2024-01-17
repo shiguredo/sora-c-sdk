@@ -174,9 +174,12 @@ int main(int argc, char* argv[]) {
 
   state.opt = &opt;
 
-  soracp_SignalingConfig_alloc_signaling_url_candidates(&config, 1);
-  soracp_SignalingConfig_set_signaling_url_candidates(&config, 0,
-                                                      opt.signaling_url);
+  soracp_SignalingConfig_alloc_signaling_url_candidates(&config,
+                                                        opt.signaling_url_len);
+  for (int i = 0; i < opt.signaling_url_len; i++) {
+    soracp_SignalingConfig_set_signaling_url_candidates(&config, i,
+                                                        opt.signaling_url[i]);
+  }
   if (opt.openh264 != NULL) {
     soracp_SignalingConfig_set_openh264(&config, opt.openh264);
   }

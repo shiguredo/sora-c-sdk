@@ -67,27 +67,70 @@ class SignalingImpl : public Signaling {
   void Connect(const soracp::SoraConnectConfig& sora_config) override {
     sora_config_ = sora_config;
 
-    // TODO(melpon): Proxy 対応
-    rtc::WebSocket::Configuration ws_config;
-    if (!config_.ca_certificate.empty()) {
-      ws_config.caCertificatePemFile = config_.ca_certificate;
+    // ランダムに並び替える
+    auto urls = config_.signaling_url_candidates;
+    {
+      std::random_device seed_gen;
+      std::mt19937 engine(seed_gen());
+      std::shuffle(urls.begin(), urls.end(), engine);
     }
-    ws_ = std::make_shared<rtc::WebSocket>(ws_config);
-    ws_->onOpen([this]() {
-      PLOG_DEBUG << "onOpen";
-      OnOpen();
-    });
-    ws_->onError([this](std::string s) {
-      PLOG_DEBUG << "WebSocket error: " << s;
-      OnError(s);
-    });
-    ws_->onClosed([this]() {
-      PLOG_DEBUG << "WebSocket closed";
-      OnClosed();
-    });
-    ws_->onMessage([this](rtc::message_variant data) { OnMessage(data); });
-    // TODO(melpon): リダイレクト、複数URL同時接続+接続順序ランダム化、あたりを実装する
-    ws_->open(config_.signaling_url_candidates[0]);
+
+    for (const auto& url : urls) {
+      // TODO(melpon): Proxy 対応
+
+      rtc::WebSocket::Configuration ws_config;
+      if (!config_.ca_certificate.empty()) {
+        ws_config.caCertificatePemFile = config_.ca_certificate;
+      }
+      auto ws = std::make_shared<rtc::WebSocket>(ws_config);
+      ws->onOpen([this, url, wws = std::weak_ptr<rtc::WebSocket>(ws)]() {
+        PLOG_DEBUG << "onOpen: url=" << url;
+        {
+          std::lock_guard<std::mutex> lock(ws_mutex_);
+          {
+            auto ws = wws.lock();
+            if (ws_ != nullptr || ws == nullptr) {
+              PLOG_DEBUG << "WebSocket is already connected";
+              return;
+            }
+            ws_ = ws;
+          }
+          for (auto& ws : connecting_wss_) {
+            if (ws == ws_) {
+              continue;
+            }
+            ws->close();
+          }
+          connecting_wss_.clear();
+        }
+        OnOpen(false);
+      });
+      ws->onError([this](std::string s) {
+        PLOG_DEBUG << "WebSocket error: " << s;
+        OnError(s);
+      });
+      ws->onClosed([this]() {
+        PLOG_DEBUG << "WebSocket closed";
+        OnClosed();
+      });
+      ws->onMessage([this](rtc::message_variant data) { OnMessage(data); });
+
+      {
+        std::lock_guard<std::mutex> lock(ws_mutex_);
+        connecting_wss_.push_back(ws);
+      }
+    }
+
+    for (int i = 0; i < urls.size(); i++) {
+      PLOG_DEBUG << "Connect to: " << urls[i];
+      std::shared_ptr<rtc::WebSocket> ws;
+      {
+        std::lock_guard<std::mutex> lock(ws_mutex_);
+        ws = connecting_wss_[i];
+      }
+
+      ws->open(urls[i]);
+    }
   }
 
   void SendVideoFrame(const VideoFrame& frame) override {
@@ -166,7 +209,31 @@ class SignalingImpl : public Signaling {
 
     nlohmann::json js = nlohmann::json::parse(message);
 
-    if (js["type"] == "offer") {
+    if (js["type"] == "redirect") {
+      const std::string location = js["location"].get<std::string>();
+      // location に繋ぎ直す
+      GetWebSocket()->close();
+      rtc::WebSocket::Configuration ws_config;
+      if (!config_.ca_certificate.empty()) {
+        ws_config.caCertificatePemFile = config_.ca_certificate;
+      }
+      auto ws = std::make_shared<rtc::WebSocket>(ws_config);
+      ws->onOpen([this, ws, location]() {
+        PLOG_DEBUG << "onOpen (redirected): url=" << location;
+        OnOpen(true);
+      });
+      ws->onError([this](std::string s) {
+        PLOG_DEBUG << "WebSocket error: " << s;
+        OnError(s);
+      });
+      ws->onClosed([this]() {
+        PLOG_DEBUG << "WebSocket closed";
+        OnClosed();
+      });
+      ws->onMessage([this](rtc::message_variant data) { OnMessage(data); });
+      ws->open(location);
+      ws_ = ws;
+    } else if (js["type"] == "offer") {
       rtc::Configuration config;
       for (auto& ice_server : js["config"]["iceServers"]) {
         rtc::IceServer s(ice_server["urls"][0].get<std::string>());
@@ -222,7 +289,8 @@ class SignalingImpl : public Signaling {
             {"sdp", sdp},
         };
         PLOG_DEBUG << "onLocalDescription: send=" << js.dump();
-        ws_->send(js.dump());
+
+        GetWebSocket()->send(js.dump());
       });
       client_.pc->onLocalCandidate([this](rtc::Candidate candidate) {
         nlohmann::json js = {
@@ -230,7 +298,8 @@ class SignalingImpl : public Signaling {
             {"candidate", candidate.candidate()},
         };
         PLOG_DEBUG << "onLocalCandidate: send=" << js.dump();
-        ws_->send(js.dump());
+
+        GetWebSocket()->send(js.dump());
       });
       client_.pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> rdc) {
         auto label = rdc->label();
@@ -616,19 +685,19 @@ class SignalingImpl : public Signaling {
     } else if (js["type"] == "switched") {
       auto v = js["ignore_disconnect_websocket"];
       if (v.is_boolean() && v.get<bool>()) {
-        ws_->close();
+        GetWebSocket()->close();
         ws_ = nullptr;
       }
     } else if (js["type"] == "stats-req") {
       nlohmann::json js = {{"type", "stats"},
                            {"reports", nlohmann::json::array()}};
       PLOG_DEBUG << "stats: " << js.dump();
-      ws_->send(js.dump());
+      GetWebSocket()->send(js.dump());
     } else if (js["type"] == "ping") {
       nlohmann::json js = {{"type", "pong"},
                            {"stats", nlohmann::json::array()}};
       PLOG_DEBUG << "pong: " << js.dump();
-      ws_->send(js.dump());
+      GetWebSocket()->send(js.dump());
     } else if (js["type"] == "notify") {
       if (on_notify_) {
         on_notify_(message);
@@ -640,7 +709,7 @@ class SignalingImpl : public Signaling {
     }
   }
 
-  void OnOpen() {
+  void OnOpen(bool redirect) {
     const auto& sc = sora_config_;
     nlohmann::json js = {
         {"type", "connect"},
@@ -674,6 +743,7 @@ class SignalingImpl : public Signaling {
       }
     };
 
+    set_if(js, "redirect", true, redirect);
     set_string(js, "client_id", sc.client_id);
     set_string(js, "bundle_id", sc.bundle_id);
     set_optional_bool(js, "multistream", sc.multistream);
@@ -758,20 +828,29 @@ class SignalingImpl : public Signaling {
     }
 
     PLOG_DEBUG << "connect: " << js.dump();
-    ws_->send(js.dump());
+    GetWebSocket()->send(js.dump());
   }
 
   void OnError(const std::string& s) {
-    client_ = Client();
-    ws_ = nullptr;
+    // client_ = Client();
+    // ws_ = nullptr;
   }
 
-  void OnClosed() { ws_ = nullptr; }
+  void OnClosed() {
+    // ws_ = nullptr;
+  }
 
   bool IsSimulcast() const { return rtp_encoding_params_.enable_parameters; }
 
+  std::shared_ptr<rtc::WebSocket> GetWebSocket() const {
+    std::lock_guard<std::mutex> lock(ws_mutex_);
+    return ws_;
+  }
+
  private:
   std::shared_ptr<rtc::WebSocket> ws_;
+  std::vector<std::shared_ptr<rtc::WebSocket>> connecting_wss_;
+  mutable std::mutex ws_mutex_;
   Client client_;
   soracp::SignalingConfig config_;
   soracp::SoraConnectConfig sora_config_;
