@@ -52,7 +52,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
     CFDictionaryRef encoder_specs = CFDictionaryCreate(
         nullptr,
         (const void**)
-            kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
+            &kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
         (const void**)&kCFBooleanTrue, 1, &kCFTypeDictionaryKeyCallBacks,
         &kCFTypeDictionaryValueCallBacks);
     Resource encoder_specs_resource(
