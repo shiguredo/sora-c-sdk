@@ -86,7 +86,11 @@ class SignalingImpl : public Signaling {
       ws->onOpen([this, url, wws = std::weak_ptr<rtc::WebSocket>(ws)]() {
         PLOG_DEBUG << "onOpen: url=" << url;
         {
-          std::lock_guard<std::mutex> lock(ws_mutex_);
+          std::unique_lock<std::mutex> lock(ws_mutex_, std::try_to_lock);
+          if (!lock) {
+            PLOG_DEBUG << "Maybe WebSocket is already connected";
+            return;
+          }
           {
             auto ws = wws.lock();
             if (ws_ != nullptr || ws == nullptr) {
@@ -95,12 +99,12 @@ class SignalingImpl : public Signaling {
             }
             ws_ = ws;
           }
-          for (auto& ws : connecting_wss_) {
-            if (ws == ws_) {
-              continue;
-            }
-            ws->close();
-          }
+          //for (auto& ws : connecting_wss_) {
+          //  if (ws == ws_) {
+          //    continue;
+          //  }
+          //  ws->close();
+          //}
           connecting_wss_.clear();
         }
         OnOpen(false);
