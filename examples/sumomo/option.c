@@ -182,7 +182,7 @@ int sumomo_option_parse(SumomoOption* option,
     }
   }
 
-  if (option->signaling_url == NULL) {
+  if (option->signaling_url_len == 0) {
     fprintf(stderr, "signaling-url is required\n");
     return -1;
   }
