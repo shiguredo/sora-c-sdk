@@ -79,3 +79,27 @@ libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk)
     --audio-type macos \
     --cacert cacert.pem
 ```
+
+## Sumomo のヘルプ
+
+```bash
+$ ./sumomo --help
+Usage: ./sumomo [options]
+Options:
+  --signaling-url=URL [required]
+  --channel-id=ID [required]
+  --simulcast=true,false,none
+  --video-codec-type=H264,H265
+  --video-bit-rate=0-5000 [kbps]
+  --metadata=JSON
+  --capture-type=fake,v4l2,mac
+  --capture-device-name=NAME
+  --capture-device-width=WIDTH
+  --capture-device-height=HEIGHT
+  --audio-type=fake,pulse,macos
+  --h264-encoder-type=openh264,videotoolbox
+  --h265-encoder-type=videotoolbox
+  --openh264=PATH
+  --cacert=PATH
+  --help
+```
