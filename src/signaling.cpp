@@ -27,11 +27,6 @@
 #include "sorac/bitrate.hpp"
 #include "util.hpp"
 
-// https://github.com/paullouisageneau/libdatachannel/issues/990
-namespace rtc {
-using ::operator<<;
-}
-
 namespace sorac {
 
 static const int ENCODING_SAMPLE_RATE = 48000;
