@@ -67,24 +67,19 @@ libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk)
 
 ## サイマルキャストに対応していますか？
 
-対応しています。 `--simulcast` で指定してください。
+対応しています。
 
-ただし、ビットレートや解像度の動的な変更には対応していません。
+ただし、 Sora の [simulcast_encodings の払い出し](https://sora-doc.shiguredo.jp/AUTH_WEBHOOK_RETURN#simulcast-encodings) の一部のみ対応しています。
 
-それらをご利用になりたい場合は libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
-
-## サイマルキャストのエンコーディングパラメーターのカスタマイズはできますか？
-
-対応しているパラメーターは以下です。`maxFramerate` と `adaptivePtime`、 `scalabilityMode` には対応していません。
-
-- rid
-- active
-- scaleResolutionDownBy
-- maxBitrate
-
-## サイマルキャストエンコーディングパラメータの `active: false` にすることで映像を ３ 本送信しないことはできますか？
-
-可能です。
+- 対応項目
+  - `rid`
+  - `active`
+  - `scaleResolutionDownBy`
+  - `maxBitrate`
+- 非対応項目
+  - `maxFramerate`
+  - `adaptivePtime`
+  - `scalabilityMode`
 
 ## Sumomo の使い方を教えてください
 
