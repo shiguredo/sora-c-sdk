@@ -65,6 +65,27 @@ Sora C SDK で利用している libdatachannel ではメディアトランス�
 
 libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 
+## サイマルキャストに対応していますか？
+
+対応しています。 `--simulcast` で指定してください。
+
+ただし、ビットレートや解像度の動的な変更には対応していません。
+
+それらをご利用になりたい場合は libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
+
+## サイマルキャストのエンコーディングパラメーターのカスタマイズはできますか？
+
+対応しているパラメーターは以下です。`maxFramerate` と `adaptivePtime`、 `scalabilityMode` には対応していません。
+
+- rid
+- active
+- scaleResolutionDownBy
+- maxBitrate
+
+## サイマルキャストエンコーディングパラメータの `active: false` にすることで映像を ３ 本送信しないことはできますか？
+
+可能です。
+
 ## Sumomo の使い方を教えてください
 
 ### macOS arm64
