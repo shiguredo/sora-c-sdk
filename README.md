@@ -226,6 +226,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - [Absolute Capture Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-capture-time/)
   - [Absolute Send Time](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/abs-send-time/)
   - [Video Layers Allocation](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/video-layers-allocation00/)
+  - [Video BFrame RTP Header Extension](https://datatracker.ietf.org/doc/html/draft-deping-avtcore-video-bframe-01)
   - libdatachannel 側への貢献を含みます
 - HWA を利用したコーデック
   - AAC HWA 対応
@@ -236,7 +237,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
     - Intel [oneVPL](https://github.com/oneapi-src/oneVPL)
     - NVIDIA [Video Codec SDK](https://developer.nvidia.com/video-codec-sdk)
 - 次世代コーデック
-  - H.266 対応
+  - H.266 (VVC) 対応
     - Sora の対応も含みます
     - libdatachannel 側への貢献を含みます
     - [RTP Payload Format for Versatile Video Coding \(VVC\)](https://datatracker.ietf.org/doc/html/rfc9328)
