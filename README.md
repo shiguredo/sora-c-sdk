@@ -92,7 +92,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | Ubuntu / x86_64         | 対応         | 対応       |
 | Ubuntu / x86            | 非対応       | 優先実装   |
 | Ubuntu / arm64          | 対応         | 優先実装   |
-| Ubuntu / arm            | 非対応       | 優先実装   |
+| Ubuntu / arm32          | 非対応       | 優先実装   |
 | Debian / riscv64        | 非対応       | 対応予定   |
 | Debian / riscv32        | 非対応       | 優先実装   |
 | Raspberry Pi OS / arm64 | 非対応       | 対応予定   |
