@@ -11,6 +11,10 @@
 
 ## develop
 
+## 2024.1.0
+
+**祝いリリース**
+
 - [ADD] Sora 2023.2.x 対応
   - @melpon
 - [ADD] Ubuntu 22.04 x86_64 対応
