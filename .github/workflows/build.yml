@@ -1,0 +1,82 @@
+name: build-workflow
+
+on:
+  push:
+    paths-ignore:
+      - "doc/**"
+      - "**.md"
+      - "LICENSE"
+      - "NOTICE"
+
+jobs:
+  build-unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        m:
+          - name: macos_arm64
+            runs-on: macos-13
+            linux: false
+          - name: ubuntu-20.04_x86_64
+            runs-on: ubuntu-20.04
+            linux: true
+          - name: ubuntu-22.04_x86_64
+            runs-on: ubuntu-22.04
+            linux: true
+    name: Build sora-c-sdk for ${{ matrix.m.name }}
+    runs-on: ${{ matrix.m.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y libpulse-dev
+        if: matrix.m.linux == true
+      - run: python3 run.py --sumomo --package ${{ matrix.m.name }}
+      - name: Get package name
+        run: |
+          source _package/${{ matrix.m.name }}/release/sorac.env
+          echo "name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "sumomo_name=${SUMOMO_PACKAGE_NAME}" >> $GITHUB_OUTPUT
+        id: package_name
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.package_name.outputs.name }}
+          path: _package/${{ matrix.m.name }}/release/${{ steps.package_name.outputs.name }}
+      - name: Upload Sumomo Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.package_name.outputs.sumomo_name }}
+          path: _package/${{ matrix.m.name }}/release/${{ steps.package_name.outputs.sumomo_name }}
+      - name: Upload Environment
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.m.name }}.env
+          path: _package/${{ matrix.m.name }}/release/sorac.env
+  create-release:
+    name: Create Release
+    if: contains(github.ref, 'tags/202')
+    needs:
+      - build-unix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/download
+        with:
+          platform: macos_arm64
+      - uses: ./.github/actions/download
+        with:
+          platform: ubuntu-20.04_x86_64
+      - uses: ./.github/actions/download
+        with:
+          platform: ubuntu-22.04_x86_64
+      - name: Env to output
+        run: |
+          echo "package_paths<<EOF" >> $GITHUB_OUTPUT
+          cat package_paths.env >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        id: env
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.env.outputs.package_paths }}

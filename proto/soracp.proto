@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package soracp;
+
+enum OptionalBool {
+    OPTIONAL_BOOL_NONE = 0;
+    OPTIONAL_BOOL_TRUE = 1;
+    OPTIONAL_BOOL_FALSE = 2;
+}
+
+enum H264EncoderType {
+    H264_ENCODER_TYPE_OPEN_H264 = 0;
+    H264_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
+}
+
+enum H265EncoderType {
+    H265_ENCODER_TYPE_UNAVAILABLE = 0;
+    H265_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
+}
+
+message DataChannel {
+    // required
+    string label = 1;
+    string direction = 2;
+
+    // optional
+    OptionalBool ordered = 4;
+
+    bool enable_max_packet_life_time = 5;
+    int32 max_packet_life_time = 6;
+
+    bool enable_max_retransmits = 7;
+    int32 max_retransmits = 8;
+
+    bool enable_protocol = 9;
+    string protocol = 10;
+
+    OptionalBool compress = 12;
+}
+
+message ForwardingFilter {
+    string action = 1;
+    message Rule {
+        string field = 1;
+        string op = 2;
+        repeated string values = 3;
+    }
+    message Rules {
+        repeated Rule rules = 1;
+    }
+    repeated Rules rules = 2;
+}
+
+message SignalingConfig {
+    repeated string signaling_url_candidates = 1;
+    H264EncoderType h264_encoder_type = 11;
+    H265EncoderType h265_encoder_type = 12;
+    string openh264 = 2;
+    string ca_certificate = 3;
+    string proxy_url = 44;
+    string proxy_username = 45;
+    string proxy_password = 46;
+    string proxy_agent = 47;
+    int32 video_encoder_initial_bitrate_kbps = 4;
+}
+
+message SoraConnectConfig {
+    string channel_id = 2;
+    string client_id = 4;
+    string metadata = 5;
+    string role = 6;
+    OptionalBool multistream = 8;
+    OptionalBool spotlight = 10;
+    int32 spotlight_number = 11;
+    string spotlight_focus_rid = 12;
+    string spotlight_unfocus_rid = 13;
+    OptionalBool simulcast = 15;
+    string simulcast_rid = 16;
+    bool video = 20;
+    bool audio = 21;
+    string video_codec_type = 25;
+    string video_vp9_params = 250;
+    string video_av1_params = 251;
+    string video_h264_params = 252;
+    int32 video_bit_rate = 26;
+    string audio_codec_type = 31;
+    int32 audio_bit_rate = 34;
+    OptionalBool data_channel_signaling = 36;
+    OptionalBool ignore_disconnect_websocket = 39;
+    repeated DataChannel data_channels = 41;
+    string bundle_id = 43;
+    string audio_streaming_language_code = 48;
+    string signaling_notify_metadata = 49;
+    bool enable_forwarding_filter = 50;
+    ForwardingFilter forwarding_filter = 51;
+}
+
+message RtpEncodingParameter {
+  string rid = 10;
+  bool active = 20;
+  bool enable_scale_resolution_down_by = 30;
+  double scale_resolution_down_by = 31;
+  bool enable_max_bitrate_bps = 40;
+  int32 max_bitrate_bps = 41;
+  bool enable_max_framerate = 50;
+  double max_framerate = 51;
+  bool adaptive_ptime = 60;
+  bool enable_scalability_mode = 70;
+  string scalability_mode = 71;
+}
+
+message RtpEncodingParameters {
+    bool enable_parameters = 10;
+    repeated RtpEncodingParameter parameters = 11;
+}
