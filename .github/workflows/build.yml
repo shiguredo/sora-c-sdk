@@ -60,6 +60,7 @@ jobs:
       - build-unix
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/download
         with:
           platform: macos_arm64
