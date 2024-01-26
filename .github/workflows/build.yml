@@ -70,9 +70,6 @@ jobs:
       - uses: ./.github/actions/download
         with:
           platform: ubuntu-22.04_x86_64
-      - uses: ./.github/actions/download
-        with:
-          platform: android
       - name: Env to output
         run: |
           echo "package_paths<<EOF" >> $GITHUB_OUTPUT
