@@ -15,8 +15,6 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 
 ## Sora C SDK について
 
-**現在リリース準備中です**
-
 [WebRTC SFU Sora](https://sora.shiguredo.jp/) 向けの C のクライアント向け SDK です。
 [libwebrtc](https://webrtc.googlesource.com/src) を利用せず、
 [libdatachannel](https://github.com/paullouisageneau/libdatachannel) を利用する事でバイナリサイズやフットプリント、アップデート頻度を抑えています。
