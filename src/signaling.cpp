@@ -251,24 +251,20 @@ class SignalingImpl : public Signaling {
             p.active = enc["active"].get<bool>();
           }
           if (enc.contains("scaleResolutionDownBy")) {
-            p.enable_scale_resolution_down_by = true;
-            p.scale_resolution_down_by =
-                enc["scaleResolutionDownBy"].get<double>();
+            p.set_scale_resolution_down_by(
+                enc["scaleResolutionDownBy"].get<double>());
           }
           if (enc.contains("maxBitrate")) {
-            p.enable_max_bitrate_bps = true;
-            p.max_bitrate_bps = enc["maxBitrate"].get<int>();
+            p.set_max_bitrate_bps(enc["maxBitrate"].get<int>());
           }
           if (enc.contains("maxFramerate")) {
-            p.enable_max_framerate = true;
-            p.max_framerate = enc["maxFramerate"].get<double>();
+            p.set_max_framerate(enc["maxFramerate"].get<double>());
           }
           if (enc.contains("adaptivePtime")) {
             p.adaptive_ptime = enc["adaptivePtime"].get<bool>();
           }
           if (enc.contains("scalabilityMode")) {
-            p.enable_scalability_mode = true;
-            p.scalability_mode = enc["scalabilityMode"].get<std::string>();
+            p.set_scalability_mode(enc["scalabilityMode"].get<std::string>());
           }
           rtp_encoding_params_.parameters.push_back(p);
         }
@@ -798,15 +794,14 @@ class SignalingImpl : public Signaling {
       set_string(dc, "label", d.label);
       set_string(dc, "direction", d.direction);
       set_if(dc, "max_packet_life_time", d.max_packet_life_time,
-             d.enable_max_packet_life_time);
-      set_if(dc, "max_retransmits", d.max_retransmits,
-             d.enable_max_retransmits);
-      set_if(dc, "protocol", d.protocol, d.enable_protocol);
+             d.has_max_packet_life_time());
+      set_if(dc, "max_retransmits", d.max_retransmits, d.has_max_retransmits());
+      set_if(dc, "protocol", d.protocol, d.has_protocol());
       set_optional_bool(dc, "compress", d.compress);
       js["data_channels"].push_back(dc);
     }
 
-    if (sc.enable_forwarding_filter) {
+    if (sc.has_forwarding_filter()) {
       nlohmann::json obj;
       const auto& f = sc.forwarding_filter;
       obj["action"] = f.action;

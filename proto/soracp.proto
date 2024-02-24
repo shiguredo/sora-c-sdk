@@ -26,15 +26,9 @@ message DataChannel {
     // optional
     OptionalBool ordered = 4;
 
-    bool enable_max_packet_life_time = 5;
-    int32 max_packet_life_time = 6;
-
-    bool enable_max_retransmits = 7;
-    int32 max_retransmits = 8;
-
-    bool enable_protocol = 9;
-    string protocol = 10;
-
+    optional int32 max_packet_life_time = 6;
+    optional int32 max_retransmits = 8;
+    optional string protocol = 10;
     OptionalBool compress = 12;
 }
 
@@ -91,22 +85,17 @@ message SoraConnectConfig {
     string bundle_id = 43;
     string audio_streaming_language_code = 48;
     string signaling_notify_metadata = 49;
-    bool enable_forwarding_filter = 50;
-    ForwardingFilter forwarding_filter = 51;
+    optional ForwardingFilter forwarding_filter = 51;
 }
 
 message RtpEncodingParameter {
   string rid = 10;
   bool active = 20;
-  bool enable_scale_resolution_down_by = 30;
-  double scale_resolution_down_by = 31;
-  bool enable_max_bitrate_bps = 40;
-  int32 max_bitrate_bps = 41;
-  bool enable_max_framerate = 50;
-  double max_framerate = 51;
+  optional double scale_resolution_down_by = 31;
+  optional int32 max_bitrate_bps = 41;
+  optional double max_framerate = 51;
   bool adaptive_ptime = 60;
-  bool enable_scalability_mode = 70;
-  string scalability_mode = 71;
+  optional string scalability_mode = 71;
 }
 
 message RtpEncodingParameters {

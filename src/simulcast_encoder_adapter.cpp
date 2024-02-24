@@ -92,7 +92,7 @@ class SimulcastEncoderAdapter : public VideoEncoder {
       }
       int width = settings.width;
       int height = settings.height;
-      if (p.enable_scale_resolution_down_by) {
+      if (p.has_scale_resolution_down_by()) {
         width = (int)(settings.width / p.scale_resolution_down_by);
         height = (int)(settings.height / p.scale_resolution_down_by);
       }
@@ -104,7 +104,7 @@ class SimulcastEncoderAdapter : public VideoEncoder {
         continue;
       }
       Settings s = settings;
-      if (e.param.enable_scale_resolution_down_by) {
+      if (e.param.has_scale_resolution_down_by()) {
         s.width = (int)(settings.width / e.param.scale_resolution_down_by);
         s.height = (int)(settings.height / e.param.scale_resolution_down_by);
       }
