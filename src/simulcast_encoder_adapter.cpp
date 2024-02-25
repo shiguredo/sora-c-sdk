@@ -135,8 +135,8 @@ class SimulcastEncoderAdapter : public VideoEncoder {
       s.bitrate = Bps((int64_t)(settings.bitrate.count() * rate));
       e.encoder = create_encoder_(e.codec.name);
       PLOG_INFO << "InitEncode(Layerd): rid=" << e.encoding.rid
-                << ", width=" << s.width << ", height=" << s.height
-                << ", bitrate=" << s.bitrate.count();
+                << ", codec=" << e.codec.name << ", width=" << s.width
+                << ", height=" << s.height << ", bitrate=" << s.bitrate.count();
       if (!e.encoder->InitEncode(s)) {
         return false;
       }
