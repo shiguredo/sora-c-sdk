@@ -11,6 +11,9 @@
 
 ## develop
 
+- [UPDATE] protoc-gen-jsonif をアップデートして optional 対応する
+  - @melpon
+
 ## 2024.1.0
 
 **祝いリリース**

@@ -88,17 +88,34 @@ message SoraConnectConfig {
     optional ForwardingFilter forwarding_filter = 51;
 }
 
-message RtpEncodingParameter {
-  string rid = 10;
-  bool active = 20;
-  optional double scale_resolution_down_by = 31;
-  optional int32 max_bitrate_bps = 41;
-  optional double max_framerate = 51;
-  bool adaptive_ptime = 60;
-  optional string scalability_mode = 71;
+message RtpEncodingParameters {
+    string rid = 10;
+    bool active = 20;
+    optional double scale_resolution_down_by = 31;
+    optional int32 max_bitrate_bps = 41;
+    optional double max_framerate = 51;
+    bool adaptive_ptime = 60;
+    optional string scalability_mode = 71;
 }
 
-message RtpEncodingParameters {
-    bool enable_parameters = 10;
-    repeated RtpEncodingParameter parameters = 11;
+message RtpCodecParameters {
+    string kind = 10;
+    string name = 20;
+    int32 payload_type = 40;
+}
+
+message RidDescription {
+    string rid = 10;
+    string direction = 20;
+    optional int32 payload_type = 30;
+}
+
+message RtpParameters {
+    string mid = 10;
+    repeated RtpEncodingParameters encodings = 20;
+    repeated RtpCodecParameters codecs = 30;
+
+    // rids は本来 RtpParameters には含まれないんだけど、
+    // ここにあった方が便利なのでここに含める
+    repeated RidDescription rids = 40;
 }

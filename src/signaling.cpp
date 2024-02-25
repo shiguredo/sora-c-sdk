@@ -194,8 +194,8 @@ class SignalingImpl : public Signaling {
     on_push_ = on_push;
   }
 
-  soracp::RtpEncodingParameters GetRtpEncodingParameters() const override {
-    return rtp_encoding_params_;
+  soracp::RtpParameters GetRtpParameters() const override {
+    return rtp_params_;
   }
 
  private:
@@ -242,9 +242,8 @@ class SignalingImpl : public Signaling {
       }
 
       if (js["simulcast"].get<bool>()) {
-        rtp_encoding_params_.enable_parameters = true;
         for (auto& enc : js["encodings"]) {
-          soracp::RtpEncodingParameter p;
+          soracp::RtpEncodingParameters p;
           p.rid = enc["rid"].get<std::string>();
           p.active = true;
           if (enc.contains("active")) {
@@ -266,7 +265,7 @@ class SignalingImpl : public Signaling {
           if (enc.contains("scalabilityMode")) {
             p.set_scalability_mode(enc["scalabilityMode"].get<std::string>());
           }
-          rtp_encoding_params_.parameters.push_back(p);
+          rtp_params_.encodings.push_back(p);
         }
       }
 
@@ -274,10 +273,16 @@ class SignalingImpl : public Signaling {
       client_.pc = std::make_shared<rtc::PeerConnection>(config);
       client_.pc->onLocalDescription([this](rtc::Description desc) {
         auto sdp = desc.generateSdp();
-        sdp += "a=rid:r0 send\r\n";
-        sdp += "a=rid:r1 send\r\n";
-        sdp += "a=rid:r2 send\r\n";
-        sdp += "a=simulcast:send r0;r1;r2\r\n";
+        if (IsSimulcast()) {
+          for (const auto& rd : rtp_params_.rids) {
+            sdp += "a=rid:" + rd.rid + " send";
+            if (rd.has_payload_type()) {
+              sdp += " pt=" + std::to_string(rd.payload_type);
+            }
+            sdp += "\r\n";
+          }
+          sdp += "a=simulcast:send r0;r1;r2\r\n";
+        }
         PLOG_DEBUG << "answer sdp:" << sdp;
         nlohmann::json js = {
             {"type", desc.typeString()},
@@ -406,29 +411,26 @@ class SignalingImpl : public Signaling {
           }
         }
         // mid, payload_type, codec
-        std::string mid;
-        int payload_type;
-        std::string codec;
-        {
-          auto get_value =
-              [&video_lines](const std::string& search) -> std::string {
-            auto it = std::find_if(video_lines.begin(), video_lines.end(),
-                                   [&search](const std::string& s) {
-                                     return starts_with(s, search);
-                                   });
-            if (it == video_lines.end()) {
-              return "";
+        for (const auto& line : video_lines) {
+          if (auto s = std::string("a=mid:"); starts_with(line, s)) {
+            auto mid = line.substr(s.size());
+            PLOG_DEBUG << "mid=" << mid;
+            rtp_params_.mid = mid;
+          } else if (auto s = std::string("a=rtpmap:"); starts_with(line, s)) {
+            auto rtpmap = line.substr(s.size());
+            auto ys = split_with(rtpmap, " ");
+            auto payload_type = std::stoi(ys[0]);
+            auto codec = split_with(ys[1], "/")[0];
+            if (codec == "H264" || codec == "H265") {
+              PLOG_DEBUG << "payload_type=" << payload_type
+                         << ", codec=" << codec;
+              soracp::RtpCodecParameters cp;
+              cp.payload_type = payload_type;
+              cp.kind = "video";
+              cp.name = codec;
+              rtp_params_.codecs.push_back(cp);
             }
-            return it->substr(search.size());
-          };
-          mid = get_value("a=mid:");
-          PLOG_DEBUG << "mid=" << mid;
-          auto xs = split_with(get_value("a=msid:"), " ");
-          auto rtpmap = get_value("a=rtpmap:");
-          auto ys = split_with(rtpmap, " ");
-          payload_type = std::stoi(ys[0]);
-          codec = split_with(ys[1], "/")[0];
-          PLOG_DEBUG << "payload_type=" << payload_type << ", codec=" << codec;
+          }
         }
         // サイマルキャストの場合、拡張ヘッダーのどの ID を使えば良いか調べる
         if (IsSimulcast()) {
@@ -444,17 +446,49 @@ class SignalingImpl : public Signaling {
           rtp_stream_id_ = std::stoi(ys[1]);
           PLOG_DEBUG << "rtp_stream_id=" << rtp_stream_id_;
         }
+        // rid が参照するべき payload_type の対応を作る
+        if (IsSimulcast()) {
+          for (const auto& line : video_lines) {
+            // 以下のような感じの行を探して値を設定する
+            // a=rid:r0 send
+            // a=rid:r0 recv pt=37
+
+            auto s = std::string("a=rid:");
+            if (!starts_with(line, s)) {
+              continue;
+            }
+            auto xs = split_with(line, " ");
+            if (xs.size() < 2) {
+              continue;
+            }
+            soracp::RidDescription rd;
+            rd.rid = xs[0].substr(s.size());
+            rd.direction = xs[1];
+            s = "pt=";
+            if (xs.size() >= 3 && starts_with(xs[2], s)) {
+              rd.set_payload_type(std::stoi(xs[2].substr(s.size())));
+            }
+            rtp_params_.rids.push_back(rd);
+            PLOG_DEBUG << "rid=" << rd.rid << ", direction=" << rd.direction
+                       << ", payload_type="
+                       << (rd.has_payload_type()
+                               ? std::to_string(rd.payload_type)
+                               : "(none)");
+          }
+        }
 
         std::shared_ptr<rtc::Track> track;
         std::map<std::optional<std::string>,
                  std::shared_ptr<rtc::RtcpSrReporter>>
             sr_reporters;
 
-        auto video = rtc::Description::Video(mid);
-        if (codec == "H264") {
-          video.addH264Codec(payload_type);
-        } else {
-          video.addH265Codec(payload_type);
+        auto video = rtc::Description::Video(rtp_params_.mid);
+        for (const auto& codec : rtp_params_.codecs) {
+          if (codec.name == "H264") {
+            video.addH264Codec(codec.payload_type);
+          } else if (codec.name == "H265") {
+            video.addH265Codec(codec.payload_type);
+          }
         }
         std::map<std::optional<std::string>, uint32_t> ssrcs;
         if (!IsSimulcast()) {
@@ -462,7 +496,7 @@ class SignalingImpl : public Signaling {
           video.addSSRC(ssrc, cname, msid, track_id);
           ssrcs.insert(std::make_pair(std::nullopt, ssrc));
         } else {
-          for (const auto& p : rtp_encoding_params_.parameters) {
+          for (const auto& p : rtp_params_.encodings) {
             uint32_t ssrc = generate_random_number();
             video.addSSRC(ssrc, cname, msid, track_id);
             ssrcs.insert(std::make_pair(p.rid, ssrc));
@@ -473,14 +507,40 @@ class SignalingImpl : public Signaling {
         auto simulcast_config = std::make_shared<SimulcastMediaHandlerConfig>();
         auto simulcast_handler =
             std::make_shared<SimulcastMediaHandler>(simulcast_config);
-        for (int i = 0;
-             i < (!IsSimulcast() ? 1 : rtp_encoding_params_.parameters.size());
+        for (int i = 0; i < (!IsSimulcast() ? 1 : rtp_params_.encodings.size());
              i++) {
           std::optional<std::string> rid;
           if (IsSimulcast()) {
-            rid = rtp_encoding_params_.parameters[i].rid;
+            rid = rtp_params_.encodings[i].rid;
           }
           uint32_t ssrc = ssrcs[rid];
+
+          int payload_type;
+          std::string codec;
+          if (IsSimulcast()) {
+            // この rid が参照するべき payload_type と codec を探す
+            auto it =
+                std::find_if(rtp_params_.rids.begin(), rtp_params_.rids.end(),
+                             [rid](const soracp::RidDescription& rd) {
+                               return rd.rid == *rid;
+                             });
+            if (it == rtp_params_.rids.end() || !it->has_payload_type()) {
+              payload_type = rtp_params_.codecs[0].payload_type;
+              codec = rtp_params_.codecs[0].name;
+            } else {
+              payload_type = it->payload_type;
+              codec =
+                  std::find_if(
+                      rtp_params_.codecs.begin(), rtp_params_.codecs.end(),
+                      [payload_type](const soracp::RtpCodecParameters& codec) {
+                        return codec.payload_type == payload_type;
+                      })
+                      ->name;
+            }
+          } else {
+            payload_type = rtp_params_.codecs[0].payload_type;
+            codec = rtp_params_.codecs[0].name;
+          }
 
           auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
               ssrc, cname, payload_type,
@@ -519,56 +579,47 @@ class SignalingImpl : public Signaling {
         }
         track->setMediaHandler(simulcast_handler);
 
-        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track),
-                       codec]() {
+        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track)]() {
           PLOG_DEBUG << "Video Track Opened";
           auto track = wtrack.lock();
           if (track == nullptr) {
             return;
           }
 
-          std::function<std::shared_ptr<VideoEncoder>()> create_encoder;
-
-          if (codec == "H264") {
-            if (config_.h264_encoder_type ==
-                soracp::H264_ENCODER_TYPE_OPEN_H264) {
-              create_encoder = [openh264 = config_.openh264]() {
-                return CreateOpenH264VideoEncoder(openh264);
-              };
-            } else if (config_.h264_encoder_type ==
-                       soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
+          std::function<std::shared_ptr<VideoEncoder>(std::string)>
+              create_encoder =
+                  [this](std::string codec) -> std::shared_ptr<VideoEncoder> {
+            if (codec == "H264") {
+              if (config_.h264_encoder_type ==
+                  soracp::H264_ENCODER_TYPE_OPEN_H264) {
+                return CreateOpenH264VideoEncoder(config_.openh264);
+              } else if (config_.h264_encoder_type ==
+                         soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-              create_encoder = []() {
                 return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
-              };
 #else
-              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-              return;
+                PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
 #endif
-            } else {
-              PLOG_ERROR << "Unknown H264EncoderType";
-              return;
-            }
-          } else if (codec == "H265") {
-            if (config_.h265_encoder_type ==
-                soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
+              } else {
+                PLOG_ERROR << "Unknown H264EncoderType";
+              }
+            } else if (codec == "H265") {
+              if (config_.h265_encoder_type ==
+                  soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-              create_encoder = []() {
                 return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
-              };
 #else
-              PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
-              return;
+                PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
 #endif
-            } else {
-              PLOG_ERROR << "Unknown H265EncoderType";
-              return;
+              } else {
+                PLOG_ERROR << "Unknown H265EncoderType";
+              }
             }
-          }
-          if (create_encoder) {
-            client_.video_encoder = CreateSimulcastEncoderAdapter(
-                rtp_encoding_params_, create_encoder);
-          }
+            return nullptr;
+          };
+
+          client_.video_encoder =
+              CreateSimulcastEncoderAdapter(rtp_params_, create_encoder);
 
           on_track_(track);
         });
@@ -834,7 +885,7 @@ class SignalingImpl : public Signaling {
     // ws_ = nullptr;
   }
 
-  bool IsSimulcast() const { return rtp_encoding_params_.enable_parameters; }
+  bool IsSimulcast() const { return !rtp_params_.encodings.empty(); }
 
   std::shared_ptr<rtc::WebSocket> GetWebSocket() const {
     std::lock_guard<std::mutex> lock(ws_mutex_);
@@ -848,7 +899,7 @@ class SignalingImpl : public Signaling {
   Client client_;
   soracp::SignalingConfig config_;
   soracp::SoraConnectConfig sora_config_;
-  soracp::RtpEncodingParameters rtp_encoding_params_;
+  soracp::RtpParameters rtp_params_;
   int rtp_stream_id_ = 0;
   int video_ssrc_ = 0;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
