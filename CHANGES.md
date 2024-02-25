@@ -11,6 +11,8 @@
 
 ## develop
 
+- [ADD] マルチコーデックサイマルキャストの送信に対応する
+  - @melpon
 - [UPDATE] protoc-gen-jsonif をアップデートして optional 対応する
   - @melpon
 
