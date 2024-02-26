@@ -207,7 +207,6 @@ int main(int argc, char* argv[]) {
 
   soracp_SoraConnectConfig_set_role(&sora_config, "sendonly");
   soracp_SoraConnectConfig_set_channel_id(&sora_config, opt.channel_id);
-  sora_config.video = true;
   if (opt.video_codec_type != NULL) {
     soracp_SoraConnectConfig_set_video_codec_type(&sora_config,
                                                   opt.video_codec_type);
@@ -219,7 +218,13 @@ int main(int argc, char* argv[]) {
   if (opt.metadata != NULL) {
     soracp_SoraConnectConfig_set_metadata(&sora_config, opt.metadata);
   }
-  soracp_SoraConnectConfig_set_audio(&sora_config, true);
+
+  // none, true の場合は true, false の場合は false
+  soracp_SoraConnectConfig_set_video(&sora_config,
+                                     opt.video != SUMOMO_OPTIONAL_BOOL_FALSE);
+  soracp_SoraConnectConfig_set_audio(&sora_config,
+                                     opt.audio != SUMOMO_OPTIONAL_BOOL_FALSE);
+
   soracp_SoraConnectConfig_set_multistream(&sora_config,
                                            soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_set_data_channel_signaling(

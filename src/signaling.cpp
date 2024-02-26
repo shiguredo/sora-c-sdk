@@ -133,6 +133,10 @@ class SignalingImpl : public Signaling {
   }
 
   void SendVideoFrame(const VideoFrame& frame) override {
+    if (rtp_params_.mid.empty()) {
+      return;
+    }
+
     if (!client_.video_encoder_settings ||
         frame.base_width != client_.video_encoder_settings->width ||
         frame.base_height != client_.video_encoder_settings->height) {
@@ -171,6 +175,9 @@ class SignalingImpl : public Signaling {
   }
 
   void SendAudioFrame(const AudioFrame& frame) override {
+    if (client_.opus_encoder == nullptr) {
+      return;
+    }
     client_.opus_encoder->Encode(frame);
   }
 
@@ -396,7 +403,7 @@ class SignalingImpl : public Signaling {
       auto msid = "msid-" + generate_random_string(24);
       auto track_id = "trackid-" + generate_random_string(24);
       // video
-      {
+      std::invoke([&]() {
         // m=video から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> video_lines;
         {
@@ -432,6 +439,11 @@ class SignalingImpl : public Signaling {
             }
           }
         }
+        // mid が空ということは vido=false なので何もしない
+        if (rtp_params_.mid.empty()) {
+          return;
+        }
+
         // サイマルキャストの場合、拡張ヘッダーのどの ID を使えば良いか調べる
         if (IsSimulcast()) {
           auto it = std::find_if(
@@ -627,9 +639,10 @@ class SignalingImpl : public Signaling {
         client_.video->track = track;
         client_.video->senders = sr_reporters;
         client_.video->simulcast_handler = simulcast_handler;
-      }
+      });
+
       // audio
-      {
+      std::invoke([&]() {
         uint32_t ssrc = generate_random_number();
         // m=audio から他の m= が出てくるまでの間のデータを取得する
         std::vector<std::string> audio_lines;
@@ -661,6 +674,11 @@ class SignalingImpl : public Signaling {
           };
           mid = get_value("a=mid:");
           PLOG_DEBUG << "mid=" << mid;
+          // mid が空ということは audio=false なので何もしない
+          if (mid.empty()) {
+            return;
+          }
+
           auto xs = split_with(get_value("a=msid:"), " ");
           auto rtpmap = get_value("a=rtpmap:");
           payload_type = std::stoi(split_with(rtpmap, " ")[0]);
@@ -725,7 +743,7 @@ class SignalingImpl : public Signaling {
             sr_reporters;
         sr_reporters[std::nullopt] = sr_reporter;
         client_.audio->senders = sr_reporters;
-      }
+      });
 
       client_.pc->setRemoteDescription(rtc::Description(sdp, "offer"));
     } else if (js["type"] == "switched") {

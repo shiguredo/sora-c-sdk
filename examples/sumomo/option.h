@@ -28,6 +28,8 @@ typedef struct SumomoOption {
   const char* video_codec_type;
   int video_bit_rate;
   const char* metadata;
+  SumomoOptionalBool video;
+  SumomoOptionalBool audio;
 
   SumomoOptionCaptureType capture_type;
   const char* capture_device_name;
