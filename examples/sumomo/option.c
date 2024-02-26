@@ -175,7 +175,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --channel-id=ID [required]\n");
       fprintf(stdout, "  --simulcast=true,false,none\n");
       fprintf(stdout, "  --video-codec-type=H264,H265\n");
-      fprintf(stdout, "  --video-bit-rate=0-5000 [kbps]\n");
+      fprintf(stdout, "  --video-bit-rate=0-15000 [kbps]\n");
       fprintf(stdout, "  --metadata=JSON\n");
       fprintf(stdout, "  --video=true,false,none\n");
       fprintf(stdout, "  --audio=true,false,none\n");
