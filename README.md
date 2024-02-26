@@ -160,21 +160,28 @@ GitHub アカウントを持っていればすぐに利用可能です。
     - H.264 HWA (Encoder)
     - H.265 HWA (Encoder)
 
-### 対応予定
+### 対応候補
 
-- [Raspberry Pi Zero 対応](https://www.raspberrypi.com/)
+**優先実装としてお受けできます**
+
+- [Raspberry Pi Zero](https://www.raspberrypi.com/)
   - Raspberry Pi OS
   - arm64 / arm
   - H.264 HWA (Encoder)
-- [VisionFive 2 対応](https://www.starfivetech.com/en/site/boards)
-  - Debian 12.0
-  - riscv64
-  - H.265 HWA (Encoder)
-- [Luckfox Pico 対応](https://www.luckfox.com/Mini-PC/Luckfox-Pico)
+- [Luckfox Pico](https://www.luckfox.com/Mini-PC/Luckfox-Pico)
   - arm64
   - H.265 HWA (Encoder)
   - H.264 HWA (Encoder)
   - JPEG HWA (Decoder)
+- [VisionFive 2](https://www.starfivetech.com/en/site/boards)
+  - Debian 12.0
+  - riscv64
+  - H.265 HWA (Encoder)
+- [Milk\-V](https://milkv.io/duo-s)
+  - riscv64
+  - armv64
+  - H.265 HWA (Encoder)
+  - H.264 HWA (Encoder)
 
 ## FAQ
 
