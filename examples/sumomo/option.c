@@ -91,7 +91,7 @@ int sumomo_option_parse(SumomoOption* option,
           }
         } else if (OPT_IS("video-bit-rate")) {
           option->video_bit_rate = atoi(optarg);
-          if (option->video_bit_rate < 0 || option->video_bit_rate > 5000) {
+          if (option->video_bit_rate < 0 || option->video_bit_rate > 15000) {
             fprintf(stderr, "Invalid video bit rate: %d\n",
                     option->video_bit_rate);
             *error = 1;
