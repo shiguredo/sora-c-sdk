@@ -401,6 +401,40 @@ def install_openh264(version, source_dir, install_dir):
 
 
 @versioned
+def install_aom(version, source_dir, build_dir, install_dir, cmake_args):
+    rm_rf(os.path.join(source_dir, "aom"))
+    rm_rf(os.path.join(build_dir, "aom"))
+    rm_rf(os.path.join(install_dir, "aom"))
+    git_clone_shallow(
+        "https://aomedia.googlesource.com/aom",
+        version,
+        os.path.join(source_dir, "aom"),
+    )
+    with cd(os.path.join(source_dir, "aom")):
+        cmd(
+            [
+                "cmake",
+                "-B",
+                os.path.join(build_dir, "aom"),
+                f'-DCMAKE_INSTALL_PREFIX={os.path.join(install_dir, "aom")}',
+                "-DBUILD_SHARED_LIBS=ON",
+                *cmake_args,
+            ]
+        )
+        cmd(
+            [
+                "cmake",
+                "--build",
+                os.path.join(build_dir, "aom"),
+                f"-j{multiprocessing.cpu_count()}",
+                "--config",
+                "Release",
+            ]
+        )
+        cmd(["cmake", "--install", os.path.join(build_dir, "aom")])
+
+
+@versioned
 def install_mbedtls(version, source_dir, build_dir, install_dir, cmake_args):
     rm_rf(os.path.join(source_dir, "mbedtls"))
     rm_rf(os.path.join(build_dir, "mbedtls"))
@@ -564,6 +598,33 @@ def install_deps(
     with cd(BASE_DIR):
         version = read_version_file("VERSION")
 
+        # CMake
+        install_cmake_args = {
+            "version": version["CMAKE_VERSION"],
+            "version_file": os.path.join(install_dir, "cmake.version"),
+            "source_dir": source_dir,
+            "install_dir": install_dir,
+            "platform": "",
+            "ext": "tar.gz",
+        }
+        if build_platform in ("windows_x86_64",):
+            install_cmake_args["platform"] = "windows-x86_64"
+            install_cmake_args["ext"] = "zip"
+        elif build_platform in ("macos_x86_64", "macos_arm64"):
+            install_cmake_args["platform"] = "macos-universal"
+        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+            install_cmake_args["platform"] = "linux-x86_64"
+        elif build_platform in ("ubuntu-20.04_arm64", "ubuntu-22.04_arm64"):
+            install_cmake_args["platform"] = "linux-aarch64"
+        else:
+            raise Exception("Failed to install CMake")
+        install_cmake(**install_cmake_args)
+
+        if build_platform == "macos_arm64":
+            add_path(os.path.join(install_dir, "cmake", "CMake.app", "Contents", "bin"))
+        else:
+            add_path(os.path.join(install_dir, "cmake", "bin"))
+
         # libdatachannel
         dir = os.path.join(shared_source_dir, "libdatachannel")
         url = "https://github.com/paullouisageneau/libdatachannel.git"
@@ -596,32 +657,21 @@ def install_deps(
         }
         install_openh264(**install_openh264_args)
 
-        # CMake
-        install_cmake_args = {
-            "version": version["CMAKE_VERSION"],
-            "version_file": os.path.join(install_dir, "cmake.version"),
+        # AOM
+        install_aom_args = {
+            "version": version["AOM_VERSION"],
+            "version_file": os.path.join(install_dir, "aom.version"),
             "source_dir": source_dir,
+            "build_dir": build_dir,
             "install_dir": install_dir,
-            "platform": "",
-            "ext": "tar.gz",
+            "cmake_args": [],
         }
-        if build_platform in ("windows_x86_64",):
-            install_cmake_args["platform"] = "windows-x86_64"
-            install_cmake_args["ext"] = "zip"
-        elif build_platform in ("macos_x86_64", "macos_arm64"):
-            install_cmake_args["platform"] = "macos-universal"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
-            install_cmake_args["platform"] = "linux-x86_64"
-        elif build_platform in ("ubuntu-20.04_arm64", "ubuntu-22.04_arm64"):
-            install_cmake_args["platform"] = "linux-aarch64"
-        else:
-            raise Exception("Failed to install CMake")
-        install_cmake(**install_cmake_args)
-
-        if build_platform == "macos_arm64":
-            add_path(os.path.join(install_dir, "cmake", "CMake.app", "Contents", "bin"))
-        else:
-            add_path(os.path.join(install_dir, "cmake", "bin"))
+        if build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+            install_aom_args["cmake_args"] = [
+                "-DCMAKE_C_COMPILER=clang-12",
+                "-DCMAKE_CXX_COMPILER=clang++-12",
+            ]
+        install_aom(**install_aom_args)
 
         macos_cmake_args = []
         if build_platform in ("macos_x86_64", "macos_arm64"):
@@ -920,6 +970,11 @@ def main():
         # OpenH264
         cmake_args.append(
             f"-DOPENH264_ROOT_DIR={cmake_path(os.path.join(install_dir, 'openh264'))}"
+        )
+
+        # AOM
+        cmake_args.append(
+            f"-DAOM_ROOT_DIR={cmake_path(os.path.join(install_dir, 'aom'))}"
         )
 
         # libdatachannel

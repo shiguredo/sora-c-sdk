@@ -13,6 +13,7 @@
 // plog
 #include <plog/Log.h>
 
+#include "sorac/aom_av1_video_encoder.hpp"
 #include "sorac/current_time.hpp"
 #include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
@@ -428,7 +429,7 @@ class SignalingImpl : public Signaling {
             auto ys = split_with(rtpmap, " ");
             auto payload_type = std::stoi(ys[0]);
             auto codec = split_with(ys[1], "/")[0];
-            if (codec == "H264" || codec == "H265") {
+            if (codec == "H264" || codec == "H265" || codec == "AV1") {
               PLOG_DEBUG << "payload_type=" << payload_type
                          << ", codec=" << codec;
               soracp::RtpCodecParameters cp;
@@ -500,6 +501,8 @@ class SignalingImpl : public Signaling {
             video.addH264Codec(codec.payload_type);
           } else if (codec.name == "H265") {
             video.addH265Codec(codec.payload_type);
+          } else if (codec.name == "AV1") {
+            video.addAV1Codec(codec.payload_type);
           }
         }
         std::map<std::optional<std::string>, uint32_t> ssrcs;
@@ -556,15 +559,19 @@ class SignalingImpl : public Signaling {
 
           auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
               ssrc, cname, payload_type,
-              codec == "H264" ? rtc::H264RtpPacketizer::defaultClockRate
-                              : rtc::H265RtpPacketizer::defaultClockRate);
+              codec == "H264"   ? rtc::H264RtpPacketizer::defaultClockRate
+              : codec == "H265" ? rtc::H265RtpPacketizer::defaultClockRate
+                                : rtc::AV1RtpPacketizer::defaultClockRate);
           std::shared_ptr<rtc::RtpPacketizer> packetizer;
           if (codec == "H264") {
             packetizer = std::make_shared<rtc::H264RtpPacketizer>(
                 rtc::NalUnit::Separator::LongStartSequence, rtp_config);
-          } else {
+          } else if (codec == "H265") {
             packetizer = std::make_shared<rtc::H265RtpPacketizer>(
                 rtc::NalUnit::Separator::LongStartSequence, rtp_config);
+          } else {
+            packetizer = std::make_shared<rtc::AV1RtpPacketizer>(
+                rtc::AV1RtpPacketizer::Packetization::TemporalUnit, rtp_config);
           }
           auto sr_reporter = std::make_shared<rtc::RtcpSrReporter>(rtp_config);
           packetizer->addToChain(sr_reporter);
@@ -625,6 +632,12 @@ class SignalingImpl : public Signaling {
 #endif
               } else {
                 PLOG_ERROR << "Unknown H265EncoderType";
+              }
+            } else if (codec == "AV1") {
+              if (config_.av1_encoder_type == soracp::AV1_ENCODER_TYPE_AOM) {
+                return CreateAomAv1VideoEncoder(config_.aom);
+              } else {
+                PLOG_ERROR << "Unknown Av1EncoderType";
               }
             }
             return nullptr;

@@ -18,6 +18,10 @@ enum H265EncoderType {
     H265_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
 }
 
+enum Av1EncoderType {
+    AV1_ENCODER_TYPE_AOM = 0;
+}
+
 message DataChannel {
     // required
     string label = 1;
@@ -49,7 +53,9 @@ message SignalingConfig {
     repeated string signaling_url_candidates = 1;
     H264EncoderType h264_encoder_type = 11;
     H265EncoderType h265_encoder_type = 12;
+    Av1EncoderType av1_encoder_type = 120;
     string openh264 = 2;
+    string aom = 21;
     string ca_certificate = 3;
     string proxy_url = 44;
     string proxy_username = 45;

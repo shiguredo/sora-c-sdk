@@ -24,7 +24,9 @@ static struct option long_opts[] = {
     {"audio-type", required_argument, 0, 0},
     {"h264-encoder-type", required_argument, 0, 0},
     {"h265-encoder-type", required_argument, 0, 0},
+    {"av1-encoder-type", required_argument, 0, 0},
     {"openh264", required_argument, 0, 0},
+    {"aom", required_argument, 0, 0},
     {"cacert", required_argument, 0, 0},
     {"help", no_argument, 0, 0},
     {0, 0, 0, 0},
@@ -93,6 +95,8 @@ int sumomo_option_parse(SumomoOption* option,
             option->video_codec_type = optarg;
           } else if (strcmp(optarg, "H265") == 0) {
             option->video_codec_type = optarg;
+          } else if (strcmp(optarg, "AV1") == 0) {
+            option->video_codec_type = optarg;
           } else {
             fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
             *error = 1;
@@ -154,8 +158,17 @@ int sumomo_option_parse(SumomoOption* option,
             fprintf(stderr, "Invalid h265 encoder type: %s\n", optarg);
             *error = 1;
           }
+        } else if (OPT_IS("av1-encoder-type")) {
+          if (strcmp(optarg, "aom") == 0) {
+            option->av1_encoder_type = soracp_AV1_ENCODER_TYPE_AOM;
+          } else {
+            fprintf(stderr, "Invalid AV1 encoder type: %s\n", optarg);
+            *error = 1;
+          }
         } else if (OPT_IS("openh264")) {
           option->openh264 = optarg;
+        } else if (OPT_IS("aom")) {
+          option->aom = optarg;
         } else if (OPT_IS("cacert")) {
           option->cacert = optarg;
         } else if (OPT_IS("help")) {
@@ -186,7 +199,9 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  --h265-encoder-type=videotoolbox\n");
+      fprintf(stdout, "  --av1-encoder-type=aom\n");
       fprintf(stdout, "  --openh264=PATH\n");
+      fprintf(stdout, "  --aom=PATH\n");
       fprintf(stdout, "  --cacert=PATH\n");
       fprintf(stdout, "  --help\n");
       return -1;

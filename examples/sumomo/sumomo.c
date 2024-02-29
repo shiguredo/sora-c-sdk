@@ -190,11 +190,15 @@ int main(int argc, char* argv[]) {
   if (opt.openh264 != NULL) {
     soracp_SignalingConfig_set_openh264(&config, opt.openh264);
   }
+  if (opt.aom != NULL) {
+    soracp_SignalingConfig_set_aom(&config, opt.aom);
+  }
   if (opt.cacert != NULL) {
     soracp_SignalingConfig_set_ca_certificate(&config, opt.cacert);
   }
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
+  soracp_SignalingConfig_set_av1_encoder_type(&config, opt.av1_encoder_type);
   soracp_SignalingConfig_set_video_encoder_initial_bitrate_kbps(
       &config, opt.video_bit_rate == 0 ? 500 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
