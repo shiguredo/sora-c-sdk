@@ -13,6 +13,8 @@
 
 - [ADD] マルチコーデックサイマルキャストの送信に対応する
   - @melpon
+- [ADD] libaom を追加して AV1 エンコードできるようにする
+  - @melpon
 - [UPDATE] protoc-gen-jsonif をアップデートして optional 対応する
   - @melpon
 
