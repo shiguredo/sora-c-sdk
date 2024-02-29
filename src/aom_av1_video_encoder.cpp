@@ -28,16 +28,14 @@
 
 // a と b の定義を全て展開した上で結合する
 // 単純に a ## b とした場合、全て展開する前に結合されてしまう
-// clang-format off
 #define SORAC_CAT(a, b) SORAC_CAT_I(a, b)
 
 #if defined(_WIN32)
-#define SORAC_CAT_I(a, b) a ## b
+#define SORAC_CAT_I(a, b) a##b
 #else
-#define SORAC_CAT_I(a, b) SORAC_CAT_II(a ## b)
+#define SORAC_CAT_I(a, b) SORAC_CAT_II(a##b)
 #define SORAC_CAT_II(res) res
 #endif
-// clang-format on
 
 namespace sorac {
 

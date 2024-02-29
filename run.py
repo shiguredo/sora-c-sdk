@@ -513,7 +513,7 @@ def install_protoc_gen_jsonif(version, source_dir, install_dir, platform: str):
     )
     # なぜか実行属性が消えてるので入れてやる
     for file in os.scandir(os.path.join(jsonif_install_dir, "bin")):
-        if file.is_file:
+        if file.is_file():
             os.chmod(file.path, file.stat().st_mode | stat.S_IXUSR)
 
 
