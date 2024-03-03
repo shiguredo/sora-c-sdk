@@ -336,7 +336,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
   bool init_ctx_ = false;
   aom_codec_ctx_t ctx_;
   aom_codec_enc_cfg_t cfg_;
-  aom_image_t* frame_for_encode_;
+  aom_image_t* frame_for_encode_ = nullptr;
   int64_t timestamp_ = 0;
   int frame_number_ = 0;
 
