@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           sudo apt-get update
-          sudo apt-get install -y libpulse-dev
+          sudo apt-get install -y libpulse-dev yasm
         if: matrix.m.linux == true
       - run: python3 run.py --sumomo --package ${{ matrix.m.name }}
       - name: Get package name
