@@ -166,6 +166,12 @@ class SignalingImpl : public Signaling {
         if (rtp_config->timestampToSeconds(report_elapsed_timestamp) > 0.2) {
           sender->setNeedsToReport();
         }
+        if (image.dependency_descriptor_context != nullptr) {
+          rtp_config->dependencyDescriptorId = dependency_descriptor_id_;
+          rtp_config->dependencyDescriptorContext = *std::static_pointer_cast<
+              rtc::RtpPacketizationConfig::DependencyDescriptorContext>(
+              image.dependency_descriptor_context);
+        }
         std::vector<std::byte> buf((std::byte*)image.buf.get(),
                                    (std::byte*)image.buf.get() + image.size);
         client_.video->simulcast_handler->config()->rid = image.rid;
@@ -488,6 +494,21 @@ class SignalingImpl : public Signaling {
                                ? std::to_string(rd.payload_type)
                                : "(none)");
           }
+        }
+        {
+          auto it = std::find_if(
+              video_lines.begin(), video_lines.end(), [](const std::string& s) {
+                return starts_with(s, "a=extmap:") &&
+                       s.find(
+                           "https://aomediacodec.github.io/av1-rtp-spec/"
+                           "#dependency-descriptor-rtp-header-extension") !=
+                           std::string::npos;
+              });
+          auto xs = split_with(*it, " ");
+          auto ys = split_with(xs[0], ":");
+          dependency_descriptor_id_ = std::stoi(ys[1]);
+          PLOG_DEBUG << "dependency_descriptor_id="
+                     << dependency_descriptor_id_;
         }
 
         std::shared_ptr<rtc::Track> track;
@@ -932,6 +953,7 @@ class SignalingImpl : public Signaling {
   soracp::SoraConnectConfig sora_config_;
   soracp::RtpParameters rtp_params_;
   int rtp_stream_id_ = 0;
+  int dependency_descriptor_id_ = 0;
   int video_ssrc_ = 0;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
   std::function<void(std::shared_ptr<sorac::DataChannel>)> on_data_channel_;

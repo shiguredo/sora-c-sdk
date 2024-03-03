@@ -5,8 +5,13 @@
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/_source/libdatachannel/include",
+                "${workspaceFolder}/_source/libdatachannel/include/rtc",
+                "${workspaceFolder}/_source/libdatachannel/src",
                 "${workspaceFolder}/_source/libdatachannel/deps/json/include",
                 "${workspaceFolder}/_source/libdatachannel/deps/plog/include",
+                "${workspaceFolder}/_source/libdatachannel/deps/libjuice/include",
+                "${workspaceFolder}/_source/libdatachannel/deps/usrsctp/usrsctplib",
+                "${workspaceFolder}/_source/libdatachannel/deps/libsrtp/include",
                 "${workspaceFolder}/_source/opus/include",
 
                 "${workspaceFolder}/_build/ubuntu-20.04_x86_64/release/sorac",

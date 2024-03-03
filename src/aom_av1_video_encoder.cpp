@@ -10,6 +10,9 @@
 // plog
 #include <plog/Log.h>
 
+// libdatachannel
+#include <rtc/rtppacketizationconfig.hpp>
+
 // AOM
 #include <aom/aom_codec.h>
 #include <aom/aom_encoder.h>
@@ -167,6 +170,8 @@ class AomAv1VideoEncoder : public VideoEncoder {
     SET_PARAM(AV1E_SET_ENABLE_TX64, 0);
     SET_PARAM(AV1E_SET_MAX_REFERENCE_FRAMES, 3);
 
+    frame_number_ = 0;
+
     return true;
   }
 
@@ -241,6 +246,41 @@ class AomAv1VideoEncoder : public VideoEncoder {
     memcpy(encoded.buf.get(), pkt->data.frame.buf, encoded.size);
     encoded.timestamp = frame.timestamp;
 
+    bool is_key_frame = (pkt->data.frame.flags & AOM_EFLAG_FORCE_KF) != 0;
+
+    // DD の設定を行う
+    rtc::RtpPacketizationConfig::DependencyDescriptorContext ctx;
+    ctx.structure.templateIdOffset = 0;
+    ctx.structure.decodeTargetCount = 1;
+    ctx.structure.chainCount = 1;
+    ctx.structure.decodeTargetProtectedBy = {0};
+    ctx.structure.resolutions.push_back({frame.width(), frame.height()});
+    rtc::FrameDependencyTemplate key_frame_template;
+    key_frame_template.spatialId = 0;
+    key_frame_template.temporalId = 0;
+    key_frame_template.decodeTargetIndications = {
+        rtc::DecodeTargetIndication::Switch};
+    key_frame_template.chainDiffs = {0};
+    rtc::FrameDependencyTemplate delta_frame_template;
+    delta_frame_template.spatialId = 0;
+    delta_frame_template.temporalId = 0;
+    delta_frame_template.decodeTargetIndications = {
+        rtc::DecodeTargetIndication::Switch};
+    delta_frame_template.chainDiffs = {1};
+    delta_frame_template.frameDiffs = {1};
+    ctx.structure.templates = {key_frame_template, delta_frame_template};
+    ctx.active_chains[0] = true;
+    ctx.descriptor.frameNumber = ++frame_number_;
+    if (is_key_frame) {
+      ctx.descriptor.dependencyTemplate = key_frame_template;
+    } else {
+      ctx.descriptor.dependencyTemplate = delta_frame_template;
+    }
+    ctx.descriptor.structureAttached = is_key_frame;
+
+    encoded.dependency_descriptor_context = std::make_shared<
+        rtc::RtpPacketizationConfig::DependencyDescriptorContext>(ctx);
+
     callback_(encoded);
   }
 
@@ -298,6 +338,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
   aom_codec_enc_cfg_t cfg_;
   aom_image_t* frame_for_encode_;
   int64_t timestamp_ = 0;
+  int frame_number_ = 0;
 
   std::function<void(const EncodedImage&)> callback_;
 
