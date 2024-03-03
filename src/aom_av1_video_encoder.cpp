@@ -269,7 +269,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
     delta_frame_template.chainDiffs = {1};
     delta_frame_template.frameDiffs = {1};
     ctx.structure.templates = {key_frame_template, delta_frame_template};
-    ctx.active_chains[0] = true;
+    ctx.activeChains[0] = true;
     ctx.descriptor.frameNumber = ++frame_number_;
     if (is_key_frame) {
       ctx.descriptor.dependencyTemplate = key_frame_template;
