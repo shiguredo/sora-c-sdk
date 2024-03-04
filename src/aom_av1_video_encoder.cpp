@@ -78,7 +78,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
     cfg_.g_threads = 8;
     cfg_.g_timebase.num = 1;
     cfg_.g_timebase.den = 90000;
-    cfg_.rc_target_bitrate = settings.bitrate.count();
+    cfg_.rc_target_bitrate = bitrate_cast<Kbps>(settings.bitrate).count();
     cfg_.rc_dropframe_thresh = 0;
     cfg_.g_input_bit_depth = 8;
     cfg_.kf_mode = AOM_KF_DISABLED;
