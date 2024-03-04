@@ -166,7 +166,7 @@ class SignalingImpl : public Signaling {
         if (rtp_config->timestampToSeconds(report_elapsed_timestamp) > 0.2) {
           sender->setNeedsToReport();
         }
-        if (image.dependency_descriptor_context != nullptr) {
+        if (image.dependency_descriptor_context != nullptr && dependency_descriptor_id_ != 0) {
           rtp_config->dependencyDescriptorId = dependency_descriptor_id_;
           rtp_config->dependencyDescriptorContext = *std::static_pointer_cast<
               rtc::RtpPacketizationConfig::DependencyDescriptorContext>(
@@ -504,11 +504,13 @@ class SignalingImpl : public Signaling {
                            "#dependency-descriptor-rtp-header-extension") !=
                            std::string::npos;
               });
-          auto xs = split_with(*it, " ");
-          auto ys = split_with(xs[0], ":");
-          dependency_descriptor_id_ = std::stoi(ys[1]);
-          PLOG_DEBUG << "dependency_descriptor_id="
-                     << dependency_descriptor_id_;
+          if (it != video_lines.end()) {
+            auto xs = split_with(*it, " ");
+            auto ys = split_with(xs[0], ":");
+            dependency_descriptor_id_ = std::stoi(ys[1]);
+            PLOG_DEBUG << "dependency_descriptor_id="
+                       << dependency_descriptor_id_;
+          }
         }
 
         std::shared_ptr<rtc::Track> track;
