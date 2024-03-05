@@ -509,11 +509,10 @@ void sorac_signaling_set_on_push(SoracSignaling* p,
     on_push(message.c_str(), (int)message.size(), userdata);
   });
 }
-void sorac_signaling_get_rtp_encoding_parameters(
-    SoracSignaling* p,
-    soracp_RtpEncodingParameters* params) {
+void sorac_signaling_get_rtp_parameters(SoracSignaling* p,
+                                        soracp_RtpParameters* params) {
   auto signaling = g_cptr.Get(p, g_signaling_map);
-  auto u = signaling->GetRtpEncodingParameters();
-  soracp_RtpEncodingParameters_from_cpp(u, params);
+  auto u = signaling->GetRtpParameters();
+  soracp_RtpParameters_from_cpp(u, params);
 }
 }

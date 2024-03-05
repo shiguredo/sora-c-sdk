@@ -52,6 +52,9 @@ struct EncodedImage {
   int size;
   std::chrono::microseconds timestamp;
   std::optional<std::string> rid;
+  // rtc::RtpPacketizationConfig::DependencyDescriptorContext 型なんだけど、ここで
+  // libdatachannel のヘッダーを include してはいけないので shared_ptr<void> を利用する
+  std::shared_ptr<void> dependency_descriptor_context;
 };
 
 struct AudioFrame {

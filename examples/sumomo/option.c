@@ -14,6 +14,9 @@ static struct option long_opts[] = {
     {"video-codec-type", required_argument, 0, 0},
     {"video-bit-rate", required_argument, 0, 0},
     {"metadata", required_argument, 0, 0},
+    {"video", required_argument, 0, 0},
+    {"audio", required_argument, 0, 0},
+
     {"capture-type", required_argument, 0, 0},
     {"capture-device-name", required_argument, 0, 0},
     {"capture-device-width", required_argument, 0, 0},
@@ -21,7 +24,9 @@ static struct option long_opts[] = {
     {"audio-type", required_argument, 0, 0},
     {"h264-encoder-type", required_argument, 0, 0},
     {"h265-encoder-type", required_argument, 0, 0},
+    {"av1-encoder-type", required_argument, 0, 0},
     {"openh264", required_argument, 0, 0},
+    {"aom", required_argument, 0, 0},
     {"cacert", required_argument, 0, 0},
     {"help", no_argument, 0, 0},
     {0, 0, 0, 0},
@@ -57,6 +62,20 @@ int sumomo_option_parse(SumomoOption* option,
     switch (c) {
       case 0:
 #define OPT_IS(optname) strcmp(long_opts[index].name, optname) == 0
+#define SET_OPTBOOL(name)                                          \
+  do {                                                             \
+    if (strcmp(optarg, "true") == 0) {                             \
+      name = SUMOMO_OPTIONAL_BOOL_TRUE;                            \
+    } else if (strcmp(optarg, "false") == 0) {                     \
+      name = SUMOMO_OPTIONAL_BOOL_FALSE;                           \
+    } else if (strcmp(optarg, "none") == 0) {                      \
+      name = SUMOMO_OPTIONAL_BOOL_NONE;                            \
+    } else {                                                       \
+      fprintf(stderr, "Failed to set to " #name ": %s\n", optarg); \
+      *error = 1;                                                  \
+    }                                                              \
+  } while (false)
+
         if (OPT_IS("signaling-url")) {
           if (option->signaling_url_len >=
               sizeof(option->signaling_url) /
@@ -70,20 +89,13 @@ int sumomo_option_parse(SumomoOption* option,
         } else if (OPT_IS("channel-id")) {
           option->channel_id = optarg;
         } else if (OPT_IS("simulcast")) {
-          if (strcmp(optarg, "true") == 0) {
-            option->simulcast = SUMOMO_OPTIONAL_BOOL_TRUE;
-          } else if (strcmp(optarg, "false") == 0) {
-            option->simulcast = SUMOMO_OPTIONAL_BOOL_FALSE;
-          } else if (strcmp(optarg, "none") == 0) {
-            option->simulcast = SUMOMO_OPTIONAL_BOOL_NONE;
-          } else {
-            fprintf(stderr, "Invalid simulcast: %s\n", optarg);
-            *error = 1;
-          }
+          SET_OPTBOOL(option->simulcast);
         } else if (OPT_IS("video-codec-type")) {
           if (strcmp(optarg, "H264") == 0) {
             option->video_codec_type = optarg;
           } else if (strcmp(optarg, "H265") == 0) {
+            option->video_codec_type = optarg;
+          } else if (strcmp(optarg, "AV1") == 0) {
             option->video_codec_type = optarg;
           } else {
             fprintf(stderr, "Invalid video encoder type: %s\n", optarg);
@@ -98,6 +110,10 @@ int sumomo_option_parse(SumomoOption* option,
           }
         } else if (OPT_IS("metadata")) {
           option->metadata = optarg;
+        } else if (OPT_IS("video")) {
+          SET_OPTBOOL(option->video);
+        } else if (OPT_IS("audio")) {
+          SET_OPTBOOL(option->audio);
         } else if (OPT_IS("capture-type")) {
           if (strcmp(optarg, "fake") == 0) {
             option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE;
@@ -142,8 +158,17 @@ int sumomo_option_parse(SumomoOption* option,
             fprintf(stderr, "Invalid h265 encoder type: %s\n", optarg);
             *error = 1;
           }
+        } else if (OPT_IS("av1-encoder-type")) {
+          if (strcmp(optarg, "aom") == 0) {
+            option->av1_encoder_type = soracp_AV1_ENCODER_TYPE_AOM;
+          } else {
+            fprintf(stderr, "Invalid AV1 encoder type: %s\n", optarg);
+            *error = 1;
+          }
         } else if (OPT_IS("openh264")) {
           option->openh264 = optarg;
+        } else if (OPT_IS("aom")) {
+          option->aom = optarg;
         } else if (OPT_IS("cacert")) {
           option->cacert = optarg;
         } else if (OPT_IS("help")) {
@@ -163,8 +188,10 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --channel-id=ID [required]\n");
       fprintf(stdout, "  --simulcast=true,false,none\n");
       fprintf(stdout, "  --video-codec-type=H264,H265\n");
-      fprintf(stdout, "  --video-bit-rate=0-5000 [kbps]\n");
+      fprintf(stdout, "  --video-bit-rate=0-15000 [kbps]\n");
       fprintf(stdout, "  --metadata=JSON\n");
+      fprintf(stdout, "  --video=true,false,none\n");
+      fprintf(stdout, "  --audio=true,false,none\n");
       fprintf(stdout, "  --capture-type=fake,v4l2,mac\n");
       fprintf(stdout, "  --capture-device-name=NAME\n");
       fprintf(stdout, "  --capture-device-width=WIDTH\n");
@@ -172,7 +199,9 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  --h265-encoder-type=videotoolbox\n");
+      fprintf(stdout, "  --av1-encoder-type=aom\n");
       fprintf(stdout, "  --openh264=PATH\n");
+      fprintf(stdout, "  --aom=PATH\n");
       fprintf(stdout, "  --cacert=PATH\n");
       fprintf(stdout, "  --help\n");
       return -1;

@@ -9,7 +9,8 @@ extern "C" {
 
 extern void sumomo_util_scale_simulcast(
     const char* rids[],
-    int num_rids,
+    const float scales[],
+    int len,
     SoracVideoFrameRef* frame,
     void (*scaled)(SoracVideoFrameRef* frame, void* userdata),
     void* userdata);

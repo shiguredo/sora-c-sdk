@@ -225,9 +225,8 @@ extern void sorac_signaling_set_on_notify(
 extern void sorac_signaling_set_on_push(SoracSignaling* p,
                                         sorac_signaling_on_push_func on_push,
                                         void* userdata);
-extern void sorac_signaling_get_rtp_encoding_parameters(
-    SoracSignaling* p,
-    soracp_RtpEncodingParameters* params);
+extern void sorac_signaling_get_rtp_parameters(SoracSignaling* p,
+                                               soracp_RtpParameters* params);
 
 #ifdef __cplusplus
 }

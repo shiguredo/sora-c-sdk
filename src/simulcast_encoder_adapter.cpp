@@ -53,16 +53,38 @@ static Bps GetMaxBitrate(int width, int height) {
 class SimulcastEncoderAdapter : public VideoEncoder {
  public:
   SimulcastEncoderAdapter(
-      const soracp::RtpEncodingParameters& params,
-      std::function<std::shared_ptr<VideoEncoder>()> create_encoder)
+      const soracp::RtpParameters& params,
+      std::function<std::shared_ptr<VideoEncoder>(std::string)> create_encoder)
       : create_encoder_(create_encoder) {
-    if (!params.enable_parameters || params.parameters.empty()) {
+    if (params.encodings.empty()) {
       encoders_.resize(1);
-      encoders_[0].param.active = true;
+      encoders_[0].encoding.active = true;
+      encoders_[0].codec = params.codecs[0];
       simulcast_ = false;
     } else {
-      for (auto& param : params.parameters) {
-        encoders_.push_back({nullptr, param});
+      for (const auto& encoding : params.encodings) {
+        auto it = std::find_if(params.rids.begin(), params.rids.end(),
+                               [&encoding](const soracp::RidDescription& rd) {
+                                 return rd.rid == encoding.rid;
+                               });
+        if (it == params.rids.end()) {
+          PLOG_ERROR << "Rid not found: rid=" << encoding.rid;
+          continue;
+        }
+        if (!it->has_payload_type()) {
+          encoders_.push_back({nullptr, encoding, params.codecs[0]});
+        } else {
+          auto it2 =
+              std::find_if(params.codecs.begin(), params.codecs.end(),
+                           [it](const soracp::RtpCodecParameters& codec) {
+                             return codec.payload_type == it->payload_type;
+                           });
+          if (it2 == params.codecs.end()) {
+            PLOG_ERROR << "Codec not found: payload_type=" << it->payload_type;
+            continue;
+          }
+          encoders_.push_back({nullptr, encoding, *it2});
+        }
       }
       simulcast_ = true;
     }
@@ -86,7 +108,7 @@ class SimulcastEncoderAdapter : public VideoEncoder {
     // 各サイズの最大ビットレートを計算して、その割合でビットレートを分配する
     Bps sum_bitrate;
     for (const auto& e : encoders_) {
-      const auto& p = e.param;
+      const auto& p = e.encoding;
       if (!p.active) {
         continue;
       }
@@ -100,20 +122,21 @@ class SimulcastEncoderAdapter : public VideoEncoder {
     }
 
     for (auto& e : encoders_) {
-      if (!e.param.active) {
+      if (!e.encoding.active) {
         continue;
       }
       Settings s = settings;
-      if (e.param.has_scale_resolution_down_by()) {
-        s.width = (int)(settings.width / e.param.scale_resolution_down_by);
-        s.height = (int)(settings.height / e.param.scale_resolution_down_by);
+      if (e.encoding.has_scale_resolution_down_by()) {
+        s.width = (int)(settings.width / e.encoding.scale_resolution_down_by);
+        s.height = (int)(settings.height / e.encoding.scale_resolution_down_by);
       }
       double rate = (double)GetMaxBitrate(s.width, s.height).count() /
                     sum_bitrate.count();
       s.bitrate = Bps((int64_t)(settings.bitrate.count() * rate));
-      e.encoder = create_encoder_();
-      PLOG_INFO << "InitEncode(Layerd): width=" << s.width
-                << " height=" << s.height << " bitrate=" << s.bitrate.count();
+      e.encoder = create_encoder_(e.codec.name);
+      PLOG_INFO << "InitEncode(Layerd): rid=" << e.encoding.rid
+                << ", codec=" << e.codec.name << ", width=" << s.width
+                << ", height=" << s.height << ", bitrate=" << s.bitrate.count();
       if (!e.encoder->InitEncode(s)) {
         return false;
       }
@@ -129,7 +152,7 @@ class SimulcastEncoderAdapter : public VideoEncoder {
       if (e.encoder != nullptr) {
         std::optional<std::string> rid;
         if (simulcast_) {
-          rid = e.param.rid;
+          rid = e.encoding.rid;
         }
         e.encoder->SetEncodeCallback(
             [rid, callback](const sorac::EncodedImage& image) {
@@ -156,7 +179,7 @@ class SimulcastEncoderAdapter : public VideoEncoder {
       }
       for (auto& e : encoders_) {
         if (e.encoder != nullptr) {
-          if (e.param.rid == *frame.rid) {
+          if (e.encoding.rid == *frame.rid) {
             e.encoder->Encode(frame);
             break;
           }
@@ -177,17 +200,18 @@ class SimulcastEncoderAdapter : public VideoEncoder {
  private:
   struct Encoder {
     std::shared_ptr<VideoEncoder> encoder;
-    soracp::RtpEncodingParameter param;
+    soracp::RtpEncodingParameters encoding;
+    soracp::RtpCodecParameters codec;
     Settings settings;
   };
   std::vector<Encoder> encoders_;
   bool simulcast_;
-  std::function<std::shared_ptr<VideoEncoder>()> create_encoder_;
+  std::function<std::shared_ptr<VideoEncoder>(std::string)> create_encoder_;
 };
 
 std::shared_ptr<VideoEncoder> CreateSimulcastEncoderAdapter(
-    const soracp::RtpEncodingParameters& params,
-    std::function<std::shared_ptr<VideoEncoder>()> create_encoder) {
+    const soracp::RtpParameters& params,
+    std::function<std::shared_ptr<VideoEncoder>(std::string)> create_encoder) {
   return std::make_shared<SimulcastEncoderAdapter>(params, create_encoder);
 }
 

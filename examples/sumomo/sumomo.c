@@ -27,7 +27,7 @@ typedef struct State {
   SumomoRecorder* recorder;
   SumomoCapturer* capturer;
   SoracDataChannel* data_channel;
-  soracp_RtpEncodingParameters rtp_encoding_parameters;
+  soracp_RtpParameters rtp_parameters;
 } State;
 
 void on_capture_frame_scaled(SoracVideoFrameRef* frame, void* userdata) {
@@ -37,22 +37,29 @@ void on_capture_frame_scaled(SoracVideoFrameRef* frame, void* userdata) {
 
 void on_capture_frame(SoracVideoFrameRef* frame, void* userdata) {
   State* state = (State*)userdata;
-  sorac_signaling_get_rtp_encoding_parameters(state->signaling,
-                                              &state->rtp_encoding_parameters);
-  if (!state->rtp_encoding_parameters.enable_parameters) {
+  sorac_signaling_get_rtp_parameters(state->signaling, &state->rtp_parameters);
+  if (state->rtp_parameters.encodings_len == 0) {
     sorac_signaling_send_video_frame(state->signaling, frame);
   } else {
     // 動的な確保が面倒なので適当に固定で持っておく
     const char* rids[10];
-    int rids_len = state->rtp_encoding_parameters.parameters_len;
-    if (rids_len > sizeof(rids) / sizeof(rids[0])) {
-      rids_len = sizeof(rids) / sizeof(rids[0]);
+    float scales[10];
+    int len = state->rtp_parameters.encodings_len;
+    if (len > sizeof(rids) / sizeof(rids[0])) {
+      len = sizeof(rids) / sizeof(rids[0]);
     }
-    for (int i = 0; i < rids_len; i++) {
-      rids[i] = state->rtp_encoding_parameters.parameters[i].rid;
+    for (int i = 0; i < len; i++) {
+      soracp_RtpEncodingParameters* encoding =
+          &state->rtp_parameters.encodings[i];
+      rids[i] = encoding->rid;
+      if (soracp_RtpEncodingParameters_has_scale_resolution_down_by(encoding)) {
+        scales[i] = encoding->scale_resolution_down_by;
+      } else {
+        scales[i] = 1.0f;
+      }
     }
-    sumomo_util_scale_simulcast(rids, rids_len, frame, on_capture_frame_scaled,
-                                state);
+    sumomo_util_scale_simulcast(rids, scales, len, frame,
+                                on_capture_frame_scaled, state);
   }
 }
 
@@ -164,7 +171,7 @@ int main(int argc, char* argv[]) {
   sorac_plog_init();
 
   State state = {0};
-  soracp_RtpEncodingParameters_init(&state.rtp_encoding_parameters);
+  soracp_RtpParameters_init(&state.rtp_parameters);
   soracp_SignalingConfig config;
   soracp_SoraConnectConfig sora_config;
   soracp_DataChannel dc;
@@ -183,11 +190,15 @@ int main(int argc, char* argv[]) {
   if (opt.openh264 != NULL) {
     soracp_SignalingConfig_set_openh264(&config, opt.openh264);
   }
+  if (opt.aom != NULL) {
+    soracp_SignalingConfig_set_aom(&config, opt.aom);
+  }
   if (opt.cacert != NULL) {
     soracp_SignalingConfig_set_ca_certificate(&config, opt.cacert);
   }
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
+  soracp_SignalingConfig_set_av1_encoder_type(&config, opt.av1_encoder_type);
   soracp_SignalingConfig_set_video_encoder_initial_bitrate_kbps(
       &config, opt.video_bit_rate == 0 ? 500 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
@@ -200,7 +211,6 @@ int main(int argc, char* argv[]) {
 
   soracp_SoraConnectConfig_set_role(&sora_config, "sendonly");
   soracp_SoraConnectConfig_set_channel_id(&sora_config, opt.channel_id);
-  sora_config.video = true;
   if (opt.video_codec_type != NULL) {
     soracp_SoraConnectConfig_set_video_codec_type(&sora_config,
                                                   opt.video_codec_type);
@@ -212,7 +222,13 @@ int main(int argc, char* argv[]) {
   if (opt.metadata != NULL) {
     soracp_SoraConnectConfig_set_metadata(&sora_config, opt.metadata);
   }
-  soracp_SoraConnectConfig_set_audio(&sora_config, true);
+
+  // none, true の場合は true, false の場合は false
+  soracp_SoraConnectConfig_set_video(&sora_config,
+                                     opt.video != SUMOMO_OPTIONAL_BOOL_FALSE);
+  soracp_SoraConnectConfig_set_audio(&sora_config,
+                                     opt.audio != SUMOMO_OPTIONAL_BOOL_FALSE);
+
   soracp_SoraConnectConfig_set_multistream(&sora_config,
                                            soracp_OPTIONAL_BOOL_TRUE);
   soracp_SoraConnectConfig_set_data_channel_signaling(
