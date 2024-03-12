@@ -65,6 +65,22 @@ Sora C SDK で利用している libdatachannel ではメディアトランス�
 
 libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk) を利用してください。
 
+## サイマルキャストに対応していますか？
+
+対応しています。
+
+ただし、 Sora の [simulcast_encodings の払い出し](https://sora-doc.shiguredo.jp/AUTH_WEBHOOK_RETURN#simulcast-encodings) の一部のみ対応しています。
+
+- 対応項目
+  - `rid`
+  - `active`
+  - `scaleResolutionDownBy`
+  - `maxBitrate`
+- 非対応項目
+  - `maxFramerate`
+  - `adaptivePtime`
+  - `scalabilityMode`
+
 ## Sumomo の使い方を教えてください
 
 ### macOS arm64
