@@ -104,7 +104,8 @@ class SimulcastEncoderAdapter : public VideoEncoder {
 
     PLOG_INFO << "InitEncode: width=" << settings.width
               << " height=" << settings.height
-              << " bitrate=" << settings.bitrate.count();
+              << " bitrate=" << settings.bitrate.count()
+              << " fps=" << settings.fps;
     // 各サイズの最大ビットレートを計算して、その割合でビットレートを分配する
     Bps sum_bitrate;
     for (const auto& e : encoders_) {
@@ -133,10 +134,20 @@ class SimulcastEncoderAdapter : public VideoEncoder {
       double rate = (double)GetMaxBitrate(s.width, s.height).count() /
                     sum_bitrate.count();
       s.bitrate = Bps((int64_t)(settings.bitrate.count() * rate));
+      s.fps = settings.fps;
+      // 個別にビットレートやフレームレートが指定されていたら、その通りにする
+      if (e.encoding.has_max_bitrate_bps()) {
+        s.bitrate = Bps(e.encoding.max_bitrate_bps);
+      }
+      if (e.encoding.has_max_framerate()) {
+        s.fps = e.encoding.max_framerate;
+      }
+
       e.encoder = create_encoder_(e.codec.name);
       PLOG_INFO << "InitEncode(Layerd): rid=" << e.encoding.rid
                 << ", codec=" << e.codec.name << ", width=" << s.width
-                << ", height=" << s.height << ", bitrate=" << s.bitrate.count();
+                << ", height=" << s.height << ", bitrate=" << s.bitrate.count()
+                << ", fps=" << s.fps;
       if (!e.encoder->InitEncode(s)) {
         return false;
       }

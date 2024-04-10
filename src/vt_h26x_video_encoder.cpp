@@ -51,8 +51,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
     CFDictionaryRef encoder_specs = CFDictionaryCreate(
         nullptr,
-        (const void**)
-            &kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
+        (const void**)&kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
         (const void**)&kCFBooleanTrue, 1, &kCFTypeDictionaryKeyCallBacks,
         &kCFTypeDictionaryValueCallBacks);
     Resource encoder_specs_resource(
@@ -106,6 +105,20 @@ class VTH26xVideoEncoder : public VideoEncoder {
           vtref_, kVTCompressionPropertyKey_AverageBitRate, cfnum);
       if (err != noErr) {
         PLOG_ERROR << "Failed to set average-bitrate property: err=" << err;
+        return false;
+      }
+    }
+
+    // フレームレート
+    {
+      int value = settings.fps;
+      CFNumberRef cfnum =
+          CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &value);
+      Resource cfnum_resource([cfnum]() { CFRelease(cfnum); });
+      OSStatus err = VTSessionSetProperty(
+          vtref_, kVTCompressionPropertyKey_ExpectedFrameRate, cfnum);
+      if (err != noErr) {
+        PLOG_ERROR << "Failed to set expected-frame-rate property: err=" << err;
         return false;
       }
     }

@@ -81,7 +81,7 @@ void on_track(SoracTrack* track, void* userdata) {
 #if defined(__linux__)
       state->capturer = sumomo_v4l2_capturer_create(
           state->opt->capture_device_name, state->opt->capture_device_width,
-          state->opt->capture_device_height);
+          state->opt->capture_device_height, state->opt->capture_device_fps);
 #else
       fprintf(stderr,
               "V4L2 capturer cannot be used on environments other than Linux");
@@ -91,14 +91,16 @@ void on_track(SoracTrack* track, void* userdata) {
 #if defined(__APPLE__)
       state->capturer = sumomo_mac_capturer_create(
           state->opt->capture_device_name, state->opt->capture_device_width,
-          state->opt->capture_device_height);
+          state->opt->capture_device_height, state->opt->capture_device_fps);
 #else
       fprintf(stderr,
               "V4L2 capturer cannot be used on environments other than Linux");
       exit(1);
 #endif
     } else {
-      state->capturer = sumomo_fake_capturer_create();
+      state->capturer = sumomo_fake_capturer_create(
+          state->opt->capture_device_width, state->opt->capture_device_height,
+          state->opt->capture_device_fps);
     }
     sumomo_capturer_set_frame_callback(state->capturer, on_capture_frame,
                                        state);
@@ -199,8 +201,6 @@ int main(int argc, char* argv[]) {
   soracp_SignalingConfig_set_h264_encoder_type(&config, opt.h264_encoder_type);
   soracp_SignalingConfig_set_h265_encoder_type(&config, opt.h265_encoder_type);
   soracp_SignalingConfig_set_av1_encoder_type(&config, opt.av1_encoder_type);
-  soracp_SignalingConfig_set_video_encoder_initial_bitrate_kbps(
-      &config, opt.video_bit_rate == 0 ? 500 : opt.video_bit_rate);
   SoracSignaling* signaling = sorac_signaling_create(&config);
   state.signaling = signaling;
 

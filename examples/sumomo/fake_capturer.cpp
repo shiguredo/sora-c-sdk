@@ -13,7 +13,8 @@ namespace sumomo {
 
 class FakeCapturer : public SumomoCapturer {
  public:
-  FakeCapturer() {
+  FakeCapturer(int width, int height, int fps)
+      : width_(width), height_(height), fps_(fps) {
     this->destroy = [](SumomoCapturer* p) { delete (sumomo::FakeCapturer*)p; };
     this->set_frame_callback = [](SumomoCapturer* p,
                                   sumomo_capturer_on_frame_func on_frame,
@@ -42,19 +43,19 @@ class FakeCapturer : public SumomoCapturer {
       engine_ = std::make_unique<std::mt19937>(seed_gen());
       return nullptr;
     });
-    th_.Start(30, [this](std::chrono::microseconds timestamp,
-                         std::chrono::microseconds prev) {
-      std::uniform_int_distribution<int> dist(0, 640 * 480 - 1);
+    th_.Start(fps_, [this](std::chrono::microseconds timestamp,
+                           std::chrono::microseconds prev) {
+      std::uniform_int_distribution<int> dist(0, width_ * height_ - 1);
       sorac::VideoFrame frame;
       frame.timestamp = timestamp;
-      frame.i420_buffer = sorac::VideoFrameBufferI420::Create(640, 480);
+      frame.i420_buffer = sorac::VideoFrameBufferI420::Create(width_, height_);
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
       frame.i420_buffer->y[dist(*engine_)] = 0xff;
-      frame.base_width = 640;
-      frame.base_height = 480;
+      frame.base_width = width_;
+      frame.base_height = height_;
       callback_(frame);
     });
     return 0;
@@ -62,6 +63,9 @@ class FakeCapturer : public SumomoCapturer {
   void Stop() { th_.Stop(); }
 
  private:
+  int width_;
+  int height_;
+  int fps_;
   std::function<void(const sorac::VideoFrame& frame)> callback_;
   SteadyFrameThread th_;
   std::unique_ptr<std::mt19937> engine_;
@@ -71,7 +75,7 @@ class FakeCapturer : public SumomoCapturer {
 
 extern "C" {
 
-SumomoCapturer* sumomo_fake_capturer_create() {
-  return new sumomo::FakeCapturer();
+SumomoCapturer* sumomo_fake_capturer_create(int width, int height, int fps) {
+  return new sumomo::FakeCapturer(width, height, fps);
 }
 }

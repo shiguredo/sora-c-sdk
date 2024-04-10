@@ -95,6 +95,7 @@ target_sources(sorac
     src/aom_av1_video_encoder.cpp
     src/current_time.cpp
     src/data_channel.cpp
+    src/default_encoder_adapter.cpp
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp

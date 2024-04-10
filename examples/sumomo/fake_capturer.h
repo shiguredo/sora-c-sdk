@@ -9,7 +9,9 @@
 extern "C" {
 #endif
 
-extern SumomoCapturer* sumomo_fake_capturer_create();
+extern SumomoCapturer* sumomo_fake_capturer_create(int width,
+                                                   int height,
+                                                   int fps);
 
 #ifdef __cplusplus
 }

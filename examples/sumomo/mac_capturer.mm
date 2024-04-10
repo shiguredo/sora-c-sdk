@@ -368,10 +368,11 @@ namespace sumomo {
 
 class MacCapturer : public SumomoCapturer {
  public:
-  MacCapturer(const char* device, int width, int height) {
+  MacCapturer(const char* device, int width, int height, int fps) {
     this->device_ = device;
     this->width_ = width;
     this->height_ = height;
+    this->fps_ = fps;
     this->destroy = [](SumomoCapturer* p) { delete (sumomo::MacCapturer*)p; };
     this->set_frame_callback = [](SumomoCapturer* p,
                                   sumomo_capturer_on_frame_func on_frame,
@@ -385,7 +386,7 @@ class MacCapturer : public SumomoCapturer {
     };
     this->start = [](SumomoCapturer* p) {
       auto q = (sumomo::MacCapturer*)p;
-      return q->Start(q->device_.c_str(), q->width_, q->height_);
+      return q->Start(q->device_.c_str(), q->width_, q->height_, q->fps_);
     };
     this->stop = [](SumomoCapturer* p) { ((sumomo::MacCapturer*)p)->Stop(); };
   }
@@ -396,14 +397,14 @@ class MacCapturer : public SumomoCapturer {
     callback_ = callback;
   }
 
-  int Start(const char* device, int width, int height) {
+  int Start(const char* device, int width, int height, int fps) {
     Stop();
 
     capturer_ = [[SumomoMacCapturer alloc] initWithCallback:callback_];
     [capturer_ startCaptureWithDeviceName:device
                                     width:width
                                    height:height
-                                      fps:30
+                                      fps:fps
                         completionHandler:[](NSError* _Nullable error) {
                           if (error) {
                             fprintf(stderr, "Failed to start capture: %s\n",
@@ -422,6 +423,7 @@ class MacCapturer : public SumomoCapturer {
   std::function<void(const sorac::VideoFrame& frame)> callback_;
   int width_;
   int height_;
+  int fps_;
 
   SumomoMacCapturer* capturer_;
 };
@@ -432,7 +434,8 @@ extern "C" {
 
 SumomoCapturer* sumomo_mac_capturer_create(const char* device,
                                            int width,
-                                           int height) {
-  return new sumomo::MacCapturer(device, width, height);
+                                           int height,
+                                           int fps) {
+  return new sumomo::MacCapturer(device, width, height, fps);
 }
 }

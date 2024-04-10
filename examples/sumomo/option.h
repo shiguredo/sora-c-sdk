@@ -36,6 +36,7 @@ typedef struct SumomoOption {
   const char* capture_device_name;
   int capture_device_width;
   int capture_device_height;
+  int capture_device_fps;
   SumomoOptionAudioType audio_type;
   soracp_H264EncoderType h264_encoder_type;
   soracp_H265EncoderType h265_encoder_type;

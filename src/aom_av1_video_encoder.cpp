@@ -62,6 +62,8 @@ class AomAv1VideoEncoder : public VideoEncoder {
 
     PLOG_INFO << "AOM InitEncode";
 
+    settings_ = settings;
+
     // https://source.chromium.org/chromium/chromium/src/+/main:third_party/webrtc/modules/video_coding/codecs/av1/libaom_av1_encoder.cc
     // を参考に初期化やエンコードを行う
 
@@ -214,7 +216,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
       frame_for_encode_->stride[AOM_PLANE_V] = 0;
     }
 
-    const uint32_t duration = 90000 / 30;
+    const uint32_t duration = 90000 / settings_.fps;
     timestamp_ += duration;
 
     aom_enc_frame_flags_t flags = 0;
@@ -333,6 +335,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
   }
 
  private:
+  Settings settings_;
   bool init_ctx_ = false;
   aom_codec_ctx_t ctx_;
   aom_codec_enc_cfg_t cfg_;

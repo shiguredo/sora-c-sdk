@@ -22,6 +22,7 @@ static struct option long_opts[] = {
     {"capture-device-name", required_argument, 0, 0},
     {"capture-device-width", required_argument, 0, 0},
     {"capture-device-height", required_argument, 0, 0},
+    {"capture-device-fps", required_argument, 0, 0},
     {"audio-type", required_argument, 0, 0},
     {"h264-encoder-type", required_argument, 0, 0},
     {"h265-encoder-type", required_argument, 0, 0},
@@ -51,6 +52,7 @@ int sumomo_option_parse(SumomoOption* option,
 #endif
   option->capture_device_width = 640;
   option->capture_device_height = 480;
+  option->capture_device_fps = 30;
   option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
   option->video_codec_type = "H264";
   option->cacert = "/etc/ssl/certs/ca-certificates.crt";
@@ -134,6 +136,8 @@ int sumomo_option_parse(SumomoOption* option,
           option->capture_device_width = atoi(optarg);
         } else if (OPT_IS("capture-device-height")) {
           option->capture_device_height = atoi(optarg);
+        } else if (OPT_IS("capture-device-fps")) {
+          option->capture_device_fps = atoi(optarg);
         } else if (OPT_IS("audio-type")) {
           if (strcmp(optarg, "fake") == 0) {
             option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
@@ -200,6 +204,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --capture-device-name=NAME\n");
       fprintf(stdout, "  --capture-device-width=WIDTH\n");
       fprintf(stdout, "  --capture-device-height=HEIGHT\n");
+      fprintf(stdout, "  --capture-device-fps=FPS\n");
       fprintf(stdout, "  --audio-type=fake,pulse,macos\n");
       fprintf(stdout, "  --h264-encoder-type=openh264,videotoolbox\n");
       fprintf(stdout, "  --h265-encoder-type=videotoolbox\n");

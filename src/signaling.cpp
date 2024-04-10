@@ -15,6 +15,7 @@
 
 #include "sorac/aom_av1_video_encoder.hpp"
 #include "sorac/current_time.hpp"
+#include "sorac/default_encoder_adapter.hpp"
 #include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
 #include "sorac/simulcast_encoder_adapter.hpp"
@@ -145,7 +146,8 @@ class SignalingImpl : public Signaling {
       VideoEncoder::Settings settings;
       settings.width = frame.base_width;
       settings.height = frame.base_height;
-      settings.bitrate = Kbps(config_.video_encoder_initial_bitrate_kbps);
+      settings.bitrate = default_bitrate_;
+      settings.fps = 30;
       if (!client_.video_encoder->InitEncode(settings)) {
         PLOG_ERROR << "Failed to InitEncode()";
         return;
@@ -410,6 +412,19 @@ class SignalingImpl : public Signaling {
       auto cname = "cname-" + generate_random_string(24);
       auto msid = "msid-" + generate_random_string(24);
       auto track_id = "trackid-" + generate_random_string(24);
+      // ビットレート
+      default_bitrate_ = std::invoke([&]() {
+        auto it = std::find_if(
+            lines.begin(), lines.end(),
+            [](const std::string& s) { return starts_with(s, "b=TIAS:"); });
+        if (it == lines.end()) {
+          throw std::runtime_error("b=TIAS: not found");
+        }
+        auto ys = split_with(*it, ":");
+        auto bitrate = Bps(std::stoi(ys[1]));
+        return bitrate;
+      });
+
       // video
       std::invoke([&]() {
         // m=video から他の m= が出てくるまでの間のデータを取得する
@@ -666,9 +681,15 @@ class SignalingImpl : public Signaling {
             }
             return nullptr;
           };
+          std::function<std::shared_ptr<VideoEncoder>(std::string)>
+              create_encoder2 =
+                  [create_encoder](
+                      std::string codec) -> std::shared_ptr<VideoEncoder> {
+            return CreateDefaultEncoderAdapter(create_encoder(codec));
+          };
 
           client_.video_encoder =
-              CreateSimulcastEncoderAdapter(rtp_params_, create_encoder);
+              CreateSimulcastEncoderAdapter(rtp_params_, create_encoder2);
 
           on_track_(track);
         });
@@ -962,6 +983,7 @@ class SignalingImpl : public Signaling {
   soracp::RtpParameters rtp_params_;
   int rtp_stream_id_ = 0;
   int dependency_descriptor_id_ = 0;
+  Bps default_bitrate_;
   int video_ssrc_ = 0;
   std::function<void(std::shared_ptr<rtc::Track>)> on_track_;
   std::function<void(std::shared_ptr<sorac::DataChannel>)> on_data_channel_;

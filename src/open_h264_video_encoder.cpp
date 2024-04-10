@@ -53,7 +53,7 @@ class OpenH264VideoEncoder : public VideoEncoder {
     encoder_params.iMaxBitrate = UNSPECIFIED_BIT_RATE;
     // Rate Control mode
     encoder_params.iRCMode = RC_BITRATE_MODE;
-    encoder_params.fMaxFrameRate = 30;
+    encoder_params.fMaxFrameRate = settings.fps;
 
     // The following parameters are extension parameters (they're in SEncParamExt,
     // not in SEncParamBase).
