@@ -166,7 +166,8 @@ class SignalingImpl : public Signaling {
         if (rtp_config->timestampToSeconds(report_elapsed_timestamp) > 0.2) {
           sender->setNeedsToReport();
         }
-        if (image.dependency_descriptor_context != nullptr && dependency_descriptor_id_ != 0) {
+        if (image.dependency_descriptor_context != nullptr &&
+            dependency_descriptor_id_ != 0) {
           rtp_config->dependencyDescriptorId = dependency_descriptor_id_;
           rtp_config->dependencyDescriptorContext = *std::static_pointer_cast<
               rtc::RtpPacketizationConfig::DependencyDescriptorContext>(
@@ -848,6 +849,7 @@ class SignalingImpl : public Signaling {
     set_string(js, "bundle_id", sc.bundle_id);
     set_optional_bool(js, "multistream", sc.multistream);
     set_optional_bool(js, "simulcast", sc.simulcast);
+    set_optional_bool(js, "simulcast_multicodec", sc.simulcast_multicodec);
     set_string(js, "simulcast_rid", sc.simulcast_rid);
     set_optional_bool(js, "spotlight", sc.spotlight);
     set_if(js, "spotlight_number", sc.spotlight_number,

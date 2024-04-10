@@ -239,6 +239,12 @@ int main(int argc, char* argv[]) {
                     : opt.simulcast == SUMOMO_OPTIONAL_BOOL_FALSE
                         ? soracp_OPTIONAL_BOOL_FALSE
                         : soracp_OPTIONAL_BOOL_TRUE);
+  soracp_SoraConnectConfig_set_simulcast_multicodec(
+      &sora_config, opt.simulcast_multicodec == SUMOMO_OPTIONAL_BOOL_NONE
+                        ? soracp_OPTIONAL_BOOL_NONE
+                    : opt.simulcast_multicodec == SUMOMO_OPTIONAL_BOOL_FALSE
+                        ? soracp_OPTIONAL_BOOL_FALSE
+                        : soracp_OPTIONAL_BOOL_TRUE);
 
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");

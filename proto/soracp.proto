@@ -75,6 +75,7 @@ message SoraConnectConfig {
     string spotlight_focus_rid = 12;
     string spotlight_unfocus_rid = 13;
     OptionalBool simulcast = 15;
+    OptionalBool simulcast_multicodec = 150;
     string simulcast_rid = 16;
     bool video = 20;
     bool audio = 21;

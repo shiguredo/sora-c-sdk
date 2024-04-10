@@ -25,6 +25,7 @@ typedef struct SumomoOption {
   int signaling_url_len;
   const char* channel_id;
   SumomoOptionalBool simulcast;
+  SumomoOptionalBool simulcast_multicodec;
   const char* video_codec_type;
   int video_bit_rate;
   const char* metadata;

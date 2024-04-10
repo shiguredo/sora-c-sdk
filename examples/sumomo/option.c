@@ -11,6 +11,7 @@ static struct option long_opts[] = {
     {"signaling-url", required_argument, 0, 0},
     {"channel-id", required_argument, 0, 0},
     {"simulcast", required_argument, 0, 0},
+    {"simulcast-multicodec", required_argument, 0, 0},
     {"video-codec-type", required_argument, 0, 0},
     {"video-bit-rate", required_argument, 0, 0},
     {"metadata", required_argument, 0, 0},
@@ -90,6 +91,8 @@ int sumomo_option_parse(SumomoOption* option,
           option->channel_id = optarg;
         } else if (OPT_IS("simulcast")) {
           SET_OPTBOOL(option->simulcast);
+        } else if (OPT_IS("simulcast-multicodec")) {
+          SET_OPTBOOL(option->simulcast_multicodec);
         } else if (OPT_IS("video-codec-type")) {
           if (strcmp(optarg, "H264") == 0) {
             option->video_codec_type = optarg;
@@ -187,6 +190,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --signaling-url=URL [required]\n");
       fprintf(stdout, "  --channel-id=ID [required]\n");
       fprintf(stdout, "  --simulcast=true,false,none\n");
+      fprintf(stdout, "  --simulcast-multicodec=true,false,none\n");
       fprintf(stdout, "  --video-codec-type=H264,H265\n");
       fprintf(stdout, "  --video-bit-rate=0-15000 [kbps]\n");
       fprintf(stdout, "  --metadata=JSON\n");
