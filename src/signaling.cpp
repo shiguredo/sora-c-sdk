@@ -832,9 +832,9 @@ class SignalingImpl : public Signaling {
       }
     };
     auto set_optional_bool = [](nlohmann::json& js, const std::string& key,
-                                soracp::OptionalBool value) {
-      if (value != soracp::OPTIONAL_BOOL_NONE) {
-        js[key] = value == soracp::OPTIONAL_BOOL_TRUE ? true : false;
+                                bool has_value, bool value) {
+      if (has_value) {
+        js[key] = value;
       }
     };
     auto set_json = [](nlohmann::json& js, const std::string& key,
@@ -847,11 +847,12 @@ class SignalingImpl : public Signaling {
     set_if(js, "redirect", true, redirect);
     set_string(js, "client_id", sc.client_id);
     set_string(js, "bundle_id", sc.bundle_id);
-    set_optional_bool(js, "multistream", sc.multistream);
-    set_optional_bool(js, "simulcast", sc.simulcast);
-    set_optional_bool(js, "simulcast_multicodec", sc.simulcast_multicodec);
+    set_optional_bool(js, "multistream", sc.has_multistream(), sc.multistream);
+    set_optional_bool(js, "simulcast", sc.has_simulcast(), sc.simulcast);
+    set_optional_bool(js, "simulcast_multicodec", sc.has_simulcast_multicodec(),
+                      sc.simulcast_multicodec);
     set_string(js, "simulcast_rid", sc.simulcast_rid);
-    set_optional_bool(js, "spotlight", sc.spotlight);
+    set_optional_bool(js, "spotlight", sc.has_spotlight(), sc.spotlight);
     set_if(js, "spotlight_number", sc.spotlight_number,
            sc.spotlight_number > 0);
     set_string(js, "spotlight_focus_rid", sc.spotlight_focus_rid);
@@ -892,8 +893,11 @@ class SignalingImpl : public Signaling {
 
     set_string(js, "audio_streaming_language_code",
                sc.audio_streaming_language_code);
-    set_optional_bool(js, "data_channel_signaling", sc.data_channel_signaling);
+    set_optional_bool(js, "data_channel_signaling",
+                      sc.has_data_channel_signaling(),
+                      sc.data_channel_signaling);
     set_optional_bool(js, "ignore_disconnect_websocket",
+                      sc.has_ignore_disconnect_websocket(),
                       sc.ignore_disconnect_websocket);
 
     for (const auto& d : sc.data_channels) {
@@ -904,7 +908,7 @@ class SignalingImpl : public Signaling {
              d.has_max_packet_life_time());
       set_if(dc, "max_retransmits", d.max_retransmits, d.has_max_retransmits());
       set_if(dc, "protocol", d.protocol, d.has_protocol());
-      set_optional_bool(dc, "compress", d.compress);
+      set_optional_bool(dc, "compress", d.has_compress(), d.compress);
       js["data_channels"].push_back(dc);
     }
 

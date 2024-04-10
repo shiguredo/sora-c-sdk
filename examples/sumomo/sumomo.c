@@ -229,22 +229,16 @@ int main(int argc, char* argv[]) {
   soracp_SoraConnectConfig_set_audio(&sora_config,
                                      opt.audio != SUMOMO_OPTIONAL_BOOL_FALSE);
 
-  soracp_SoraConnectConfig_set_multistream(&sora_config,
-                                           soracp_OPTIONAL_BOOL_TRUE);
-  soracp_SoraConnectConfig_set_data_channel_signaling(
-      &sora_config, soracp_OPTIONAL_BOOL_TRUE);
-  soracp_SoraConnectConfig_set_simulcast(
-      &sora_config, opt.simulcast == SUMOMO_OPTIONAL_BOOL_NONE
-                        ? soracp_OPTIONAL_BOOL_NONE
-                    : opt.simulcast == SUMOMO_OPTIONAL_BOOL_FALSE
-                        ? soracp_OPTIONAL_BOOL_FALSE
-                        : soracp_OPTIONAL_BOOL_TRUE);
-  soracp_SoraConnectConfig_set_simulcast_multicodec(
-      &sora_config, opt.simulcast_multicodec == SUMOMO_OPTIONAL_BOOL_NONE
-                        ? soracp_OPTIONAL_BOOL_NONE
-                    : opt.simulcast_multicodec == SUMOMO_OPTIONAL_BOOL_FALSE
-                        ? soracp_OPTIONAL_BOOL_FALSE
-                        : soracp_OPTIONAL_BOOL_TRUE);
+  soracp_SoraConnectConfig_set_multistream(&sora_config, true);
+  soracp_SoraConnectConfig_set_data_channel_signaling(&sora_config, true);
+  if (opt.simulcast != SUMOMO_OPTIONAL_BOOL_NONE) {
+    soracp_SoraConnectConfig_set_simulcast(
+        &sora_config, opt.simulcast == SUMOMO_OPTIONAL_BOOL_TRUE);
+  }
+  if (opt.simulcast_multicodec != SUMOMO_OPTIONAL_BOOL_NONE) {
+    soracp_SoraConnectConfig_set_simulcast_multicodec(
+        &sora_config, opt.simulcast_multicodec == SUMOMO_OPTIONAL_BOOL_TRUE);
+  }
 
   soracp_SoraConnectConfig_alloc_data_channels(&sora_config, 1);
   soracp_DataChannel_set_label(&dc, "#test");

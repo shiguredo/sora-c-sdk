@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package soracp;
 
-enum OptionalBool {
-    OPTIONAL_BOOL_NONE = 0;
-    OPTIONAL_BOOL_TRUE = 1;
-    OPTIONAL_BOOL_FALSE = 2;
-}
-
 enum H264EncoderType {
     H264_ENCODER_TYPE_OPEN_H264 = 0;
     H264_ENCODER_TYPE_VIDEO_TOOLBOX = 1;
@@ -28,12 +22,11 @@ message DataChannel {
     string direction = 2;
 
     // optional
-    OptionalBool ordered = 4;
-
+    optional bool ordered = 4;
     optional int32 max_packet_life_time = 6;
     optional int32 max_retransmits = 8;
     optional string protocol = 10;
-    OptionalBool compress = 12;
+    optional bool compress = 12;
 }
 
 message ForwardingFilter {
@@ -69,13 +62,13 @@ message SoraConnectConfig {
     string client_id = 4;
     string metadata = 5;
     string role = 6;
-    OptionalBool multistream = 8;
-    OptionalBool spotlight = 10;
+    optional bool multistream = 8;
+    optional bool spotlight = 10;
     int32 spotlight_number = 11;
     string spotlight_focus_rid = 12;
     string spotlight_unfocus_rid = 13;
-    OptionalBool simulcast = 15;
-    OptionalBool simulcast_multicodec = 150;
+    optional bool simulcast = 15;
+    optional bool simulcast_multicodec = 150;
     string simulcast_rid = 16;
     bool video = 20;
     bool audio = 21;
@@ -86,8 +79,8 @@ message SoraConnectConfig {
     int32 video_bit_rate = 26;
     string audio_codec_type = 31;
     int32 audio_bit_rate = 34;
-    OptionalBool data_channel_signaling = 36;
-    OptionalBool ignore_disconnect_websocket = 39;
+    optional bool data_channel_signaling = 36;
+    optional bool ignore_disconnect_websocket = 39;
     repeated DataChannel data_channels = 41;
     string bundle_id = 43;
     string audio_streaming_language_code = 48;
