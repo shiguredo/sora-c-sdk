@@ -13,8 +13,8 @@ namespace sumomo {
 
 class FakeCapturer : public SumomoCapturer {
  public:
-  FakeCapturer(int width, int height, int fps)
-      : width_(width), height_(height), fps_(fps) {
+  FakeCapturer(int width, int height, int fps, SumomoFakeCapturerFormat format)
+      : width_(width), height_(height), fps_(fps), format_(format) {
     this->destroy = [](SumomoCapturer* p) { delete (sumomo::FakeCapturer*)p; };
     this->set_frame_callback = [](SumomoCapturer* p,
                                   sumomo_capturer_on_frame_func on_frame,
@@ -48,12 +48,19 @@ class FakeCapturer : public SumomoCapturer {
       std::uniform_int_distribution<int> dist(0, width_ * height_ - 1);
       sorac::VideoFrame frame;
       frame.timestamp = timestamp;
-      frame.i420_buffer = sorac::VideoFrameBufferI420::Create(width_, height_);
-      frame.i420_buffer->y[dist(*engine_)] = 0xff;
-      frame.i420_buffer->y[dist(*engine_)] = 0xff;
-      frame.i420_buffer->y[dist(*engine_)] = 0xff;
-      frame.i420_buffer->y[dist(*engine_)] = 0xff;
-      frame.i420_buffer->y[dist(*engine_)] = 0xff;
+      if (format_ == SUMOMO_FAKE_CAPTURER_FORMAT_I420) {
+        frame.i420_buffer =
+            sorac::VideoFrameBufferI420::Create(width_, height_);
+        for (int i = 0; i < width_ / 100; i++) {
+          frame.i420_buffer->y[dist(*engine_)] = 0xff;
+        }
+      } else if (format_ == SUMOMO_FAKE_CAPTURER_FORMAT_NV12) {
+        frame.nv12_buffer =
+            sorac::VideoFrameBufferNV12::Create(width_, height_);
+        for (int i = 0; i < width_ / 100; i++) {
+          frame.nv12_buffer->y[dist(*engine_)] = 0xff;
+        }
+      }
       frame.base_width = width_;
       frame.base_height = height_;
       callback_(frame);
@@ -66,6 +73,7 @@ class FakeCapturer : public SumomoCapturer {
   int width_;
   int height_;
   int fps_;
+  SumomoFakeCapturerFormat format_;
   std::function<void(const sorac::VideoFrame& frame)> callback_;
   SteadyFrameThread th_;
   std::unique_ptr<std::mt19937> engine_;
@@ -75,7 +83,10 @@ class FakeCapturer : public SumomoCapturer {
 
 extern "C" {
 
-SumomoCapturer* sumomo_fake_capturer_create(int width, int height, int fps) {
-  return new sumomo::FakeCapturer(width, height, fps);
+SumomoCapturer* sumomo_fake_capturer_create(int width,
+                                            int height,
+                                            int fps,
+                                            SumomoFakeCapturerFormat format) {
+  return new sumomo::FakeCapturer(width, height, fps, format);
 }
 }

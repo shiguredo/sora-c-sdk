@@ -100,7 +100,10 @@ void on_track(SoracTrack* track, void* userdata) {
     } else {
       state->capturer = sumomo_fake_capturer_create(
           state->opt->capture_device_width, state->opt->capture_device_height,
-          state->opt->capture_device_fps);
+          state->opt->capture_device_fps,
+          state->opt->capture_type == SUMOMO_OPTION_CAPTURE_TYPE_FAKE_I420
+              ? SUMOMO_FAKE_CAPTURER_FORMAT_I420
+              : SUMOMO_FAKE_CAPTURER_FORMAT_NV12);
     }
     sumomo_capturer_set_frame_callback(state->capturer, on_capture_frame,
                                        state);

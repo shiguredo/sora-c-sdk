@@ -44,7 +44,7 @@ int sumomo_option_parse(SumomoOption* option,
   }
   *error = 0;
   memset(option, 0, sizeof(SumomoOption));
-  option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE;
+  option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE_I420;
 #if defined(__linux__)
   option->capture_device_name = "/dev/video0";
 #elif defined(__APPLE__)
@@ -120,8 +120,10 @@ int sumomo_option_parse(SumomoOption* option,
         } else if (OPT_IS("audio")) {
           SET_OPTBOOL(option->audio);
         } else if (OPT_IS("capture-type")) {
-          if (strcmp(optarg, "fake") == 0) {
-            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE;
+          if (strcmp(optarg, "fake-i420") == 0) {
+            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE_I420;
+          } else if (strcmp(optarg, "fake-nv12") == 0) {
+            option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_FAKE_NV12;
           } else if (strcmp(optarg, "v4l2") == 0) {
             option->capture_type = SUMOMO_OPTION_CAPTURE_TYPE_V4L2;
           } else if (strcmp(optarg, "mac") == 0) {
@@ -200,7 +202,7 @@ int sumomo_option_parse(SumomoOption* option,
       fprintf(stdout, "  --metadata=JSON\n");
       fprintf(stdout, "  --video=true,false,none\n");
       fprintf(stdout, "  --audio=true,false,none\n");
-      fprintf(stdout, "  --capture-type=fake,v4l2,mac\n");
+      fprintf(stdout, "  --capture-type=fake-i420,fake-nv12,v4l2,mac\n");
       fprintf(stdout, "  --capture-device-name=NAME\n");
       fprintf(stdout, "  --capture-device-width=WIDTH\n");
       fprintf(stdout, "  --capture-device-height=HEIGHT\n");

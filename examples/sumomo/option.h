@@ -10,7 +10,8 @@ typedef enum SumomoOptionalBool {
 } SumomoOptionalBool;
 
 typedef enum SumomoOptionCaptureType {
-  SUMOMO_OPTION_CAPTURE_TYPE_FAKE,
+  SUMOMO_OPTION_CAPTURE_TYPE_FAKE_I420,
+  SUMOMO_OPTION_CAPTURE_TYPE_FAKE_NV12,
   SUMOMO_OPTION_CAPTURE_TYPE_V4L2,
   SUMOMO_OPTION_CAPTURE_TYPE_MAC,
 } SumomoOptionCaptureType;
