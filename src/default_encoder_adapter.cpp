@@ -67,8 +67,9 @@ class DefaultEncoderAdapter : public VideoEncoder {
       if (fps > settings_.fps) {
         return;
       }
-      encode_timestamps_.push_back(now);
     }
+    encode_timestamps_.push_back(now);
+
     VideoFrame frame2 = frame;
     if (frame2.i420_buffer != nullptr) {
       frame2.i420_buffer->width = settings_.width;
