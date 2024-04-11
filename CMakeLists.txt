@@ -96,6 +96,7 @@ target_sources(sorac
     src/current_time.cpp
     src/data_channel.cpp
     src/default_encoder_adapter.cpp
+    src/h264_profile_level_id.cpp
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
@@ -118,6 +119,8 @@ target_sources(sorac
       include/sorac/bitrate.hpp
       include/sorac/current_time.hpp
       include/sorac/data_channel.hpp
+      include/sorac/default_encoder_adapter.hpp
+      include/sorac/h264_profile_level_id.hpp
       include/sorac/open_h264_video_encoder.hpp
       include/sorac/opus_audio_encoder.hpp
       include/sorac/signaling.hpp

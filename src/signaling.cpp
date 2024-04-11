@@ -440,6 +440,9 @@ class SignalingImpl : public Signaling {
             video_lines.assign(it, it2);
           }
         }
+
+        std::optional<sorac::H264ProfileLevelId> h264_profile;
+
         // mid, payload_type, codec
         for (const auto& line : video_lines) {
           if (auto s = std::string("a=mid:"); starts_with(line, s)) {
@@ -459,6 +462,25 @@ class SignalingImpl : public Signaling {
               cp.kind = "video";
               cp.name = codec;
               rtp_params_.codecs.push_back(cp);
+            }
+          } else if (auto s = std::string("a=fmtp:"); starts_with(line, s)) {
+            // 直前の a=rtpmap が H264 だった場合、a=fmtp 行の profile-level-id を取得する
+            if (rtp_params_.codecs.empty() ||
+                rtp_params_.codecs.back().name != "H264") {
+              continue;
+            }
+            auto fmtp = line.substr(s.size());
+            auto ys = split_with(fmtp, " ");
+            auto params = split_with(ys[1], ";");
+            for (const auto& param : params) {
+              auto zs = split_with(param, "=");
+              if (zs.size() != 2) {
+                continue;
+              }
+              if (zs[0] == "profile-level-id") {
+                h264_profile = ParseH264ProfileLevelId(zs[1].c_str());
+                PLOG_DEBUG << "profile-level-id=" << zs[1];
+              }
             }
           }
         }
@@ -637,7 +659,8 @@ class SignalingImpl : public Signaling {
         }
         track->setMediaHandler(simulcast_handler);
 
-        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track)]() {
+        track->onOpen([this, wtrack = std::weak_ptr<rtc::Track>(track),
+                       h264_profile]() {
           PLOG_DEBUG << "Video Track Opened";
           auto track = wtrack.lock();
           if (track == nullptr) {
@@ -646,7 +669,8 @@ class SignalingImpl : public Signaling {
 
           std::function<std::shared_ptr<VideoEncoder>(std::string)>
               create_encoder =
-                  [this](std::string codec) -> std::shared_ptr<VideoEncoder> {
+                  [this, h264_profile](
+                      std::string codec) -> std::shared_ptr<VideoEncoder> {
             if (codec == "H264") {
               if (config_.h264_encoder_type ==
                   soracp::H264_ENCODER_TYPE_OPEN_H264) {
@@ -654,7 +678,8 @@ class SignalingImpl : public Signaling {
               } else if (config_.h264_encoder_type ==
                          soracp::H264_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-                return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264);
+                return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH264,
+                                                h264_profile);
 #else
                 PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
 #endif
@@ -665,7 +690,8 @@ class SignalingImpl : public Signaling {
               if (config_.h265_encoder_type ==
                   soracp::H265_ENCODER_TYPE_VIDEO_TOOLBOX) {
 #if defined(__APPLE__)
-                return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265);
+                return CreateVTH26xVideoEncoder(VTH26xVideoEncoderType::kH265,
+                                                std::nullopt);
 #else
                 PLOG_ERROR << "VideoToolbox is only supported on macOS/iOS";
 #endif
