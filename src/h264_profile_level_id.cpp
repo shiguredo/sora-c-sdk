@@ -15,6 +15,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 
 namespace sorac {
@@ -73,7 +74,7 @@ constexpr ProfilePattern kProfilePatterns[] = {
 
 std::optional<H264ProfileLevelId> ParseH264ProfileLevelId(const char* str) {
   // The string should consist of 3 bytes in hexadecimal format.
-  if (strlen(str) != 6u)
+  if (std::strlen(str) != 6u)
     return std::nullopt;
   const uint32_t profile_level_id_numeric = strtol(str, nullptr, 16);
   if (profile_level_id_numeric == 0)

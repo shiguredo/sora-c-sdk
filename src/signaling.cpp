@@ -16,6 +16,7 @@
 #include "sorac/aom_av1_video_encoder.hpp"
 #include "sorac/current_time.hpp"
 #include "sorac/default_encoder_adapter.hpp"
+#include "sorac/h264_profile_level_id.hpp"
 #include "sorac/open_h264_video_encoder.hpp"
 #include "sorac/opus_audio_encoder.hpp"
 #include "sorac/simulcast_encoder_adapter.hpp"
@@ -441,7 +442,7 @@ class SignalingImpl : public Signaling {
           }
         }
 
-        std::optional<sorac::H264ProfileLevelId> h264_profile;
+        std::optional<H264ProfileLevelId> h264_profile;
 
         // mid, payload_type, codec
         for (const auto& line : video_lines) {
