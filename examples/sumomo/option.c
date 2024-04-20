@@ -54,7 +54,6 @@ int sumomo_option_parse(SumomoOption* option,
   option->capture_device_height = 480;
   option->capture_device_fps = 30;
   option->audio_type = SUMOMO_OPTION_AUDIO_TYPE_FAKE;
-  option->video_codec_type = "H264";
   option->cacert = "/etc/ssl/certs/ca-certificates.crt";
 
   int index;
