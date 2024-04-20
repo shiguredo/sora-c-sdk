@@ -45,6 +45,9 @@ struct VideoFrame {
   int height() const {
     return i420_buffer != nullptr ? i420_buffer->height : nv12_buffer->height;
   }
+  // サイマルキャストで DD を利用する時にフレーム番号を全体で同じにする必要があるため
+  // ここにフレーム番号を持たせる
+  int frame_number;
 };
 
 struct EncodedImage {

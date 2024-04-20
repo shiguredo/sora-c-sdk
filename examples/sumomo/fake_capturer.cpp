@@ -48,16 +48,17 @@ class FakeCapturer : public SumomoCapturer {
       std::uniform_int_distribution<int> dist(0, width_ * height_ - 1);
       sorac::VideoFrame frame;
       frame.timestamp = timestamp;
+      frame.frame_number = ++frame_number_;
       if (format_ == SUMOMO_FAKE_CAPTURER_FORMAT_I420) {
         frame.i420_buffer =
             sorac::VideoFrameBufferI420::Create(width_, height_);
-        for (int i = 0; i < width_ / 100; i++) {
+        for (int i = 0; i < width_ / 10; i++) {
           frame.i420_buffer->y[dist(*engine_)] = 0xff;
         }
       } else if (format_ == SUMOMO_FAKE_CAPTURER_FORMAT_NV12) {
         frame.nv12_buffer =
             sorac::VideoFrameBufferNV12::Create(width_, height_);
-        for (int i = 0; i < width_ / 100; i++) {
+        for (int i = 0; i < width_ / 10; i++) {
           frame.nv12_buffer->y[dist(*engine_)] = 0xff;
         }
       }
@@ -73,6 +74,7 @@ class FakeCapturer : public SumomoCapturer {
   int width_;
   int height_;
   int fps_;
+  int frame_number_ = 0;
   SumomoFakeCapturerFormat format_;
   std::function<void(const sorac::VideoFrame& frame)> callback_;
   SteadyFrameThread th_;

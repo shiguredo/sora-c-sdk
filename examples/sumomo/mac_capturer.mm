@@ -48,6 +48,7 @@ static dispatch_queue_t kCapturerQueue = nil;
   std::function<void(const sorac::VideoFrame&)> _callback;
   BOOL _willBeRunning;
   dispatch_queue_t _frameQueue;
+  int _frameNumber;
 }
 
 - (instancetype)initWithCallback:
@@ -64,6 +65,7 @@ static dispatch_queue_t kCapturerQueue = nil;
     _videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
     _willBeRunning = NO;
     _frameQueue = nil;
+    _frameNumber = 0;
 
     NSSet<NSNumber*>* supportedPixelFormats = [NSSet
         setWithObjects:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange),
@@ -283,6 +285,7 @@ static dispatch_queue_t kCapturerQueue = nil;
       (int64_t)(CMTimeGetSeconds(
                     CMSampleBufferGetPresentationTimeStamp(sampleBuffer)) *
                 kMicrosecondsPerSecond));
+  frame.frame_number = ++_frameNumber;
   frame.nv12_buffer = sorac::VideoFrameBufferNV12::Create(width, height);
   frame.base_width = width;
   frame.base_height = height;

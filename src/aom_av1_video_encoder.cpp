@@ -172,8 +172,6 @@ class AomAv1VideoEncoder : public VideoEncoder {
     SET_PARAM(AV1E_SET_ENABLE_TX64, 0);
     SET_PARAM(AV1E_SET_MAX_REFERENCE_FRAMES, 3);
 
-    frame_number_ = 0;
-
     return true;
   }
 
@@ -272,16 +270,20 @@ class AomAv1VideoEncoder : public VideoEncoder {
     delta_frame_template.frameDiffs = {1};
     ctx.structure.templates = {key_frame_template, delta_frame_template};
     ctx.activeChains[0] = true;
-    ctx.descriptor.frameNumber = ++frame_number_;
+    ctx.descriptor.frameNumber = frame.frame_number;
     if (is_key_frame) {
       ctx.descriptor.dependencyTemplate = key_frame_template;
     } else {
       ctx.descriptor.dependencyTemplate = delta_frame_template;
+      ctx.descriptor.dependencyTemplate.frameDiffs = {frame.frame_number -
+                                                      prev_frame_number_};
     }
     ctx.descriptor.structureAttached = is_key_frame;
 
     encoded.dependency_descriptor_context = std::make_shared<
         rtc::RtpPacketizationConfig::DependencyDescriptorContext>(ctx);
+
+    prev_frame_number_ = frame.frame_number;
 
     callback_(encoded);
   }
@@ -341,7 +343,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
   aom_codec_enc_cfg_t cfg_;
   aom_image_t* frame_for_encode_ = nullptr;
   int64_t timestamp_ = 0;
-  int frame_number_ = 0;
+  int prev_frame_number_ = 0;
 
   std::function<void(const EncodedImage&)> callback_;
 

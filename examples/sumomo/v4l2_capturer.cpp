@@ -229,6 +229,7 @@ class V4L2Capturer : public SumomoCapturer {
         frame.timestamp = sorac::get_current_time();
         frame.base_width = width_;
         frame.base_height = height_;
+        frame.frame_number = ++frame_number_;
         callback_(frame);
 
         if (ioctl(device_fd_, VIDIOC_QBUF, &buf) < 0) {
@@ -267,6 +268,7 @@ class V4L2Capturer : public SumomoCapturer {
   int width_;
   int height_;
   int fps_;
+  int frame_number_ = 0;
 
   int device_fd_ = -1;
   std::atomic<bool> quit_;
