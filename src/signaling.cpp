@@ -443,6 +443,7 @@ class SignalingImpl : public Signaling {
         }
 
         std::optional<H264ProfileLevelId> h264_profile;
+        std::optional<std::string> h264_profile_string;
 
         // mid, payload_type, codec
         for (const auto& line : video_lines) {
@@ -479,8 +480,13 @@ class SignalingImpl : public Signaling {
                 continue;
               }
               if (zs[0] == "profile-level-id") {
+                h264_profile_string = zs[1];
                 h264_profile = ParseH264ProfileLevelId(zs[1].c_str());
                 PLOG_DEBUG << "profile-level-id=" << zs[1];
+                if (h264_profile != std::nullopt) {
+                  PLOG_DEBUG << "profile=" << (int)h264_profile->profile
+                             << ", level=" << (int)h264_profile->level;
+                }
               }
             }
           }
@@ -560,7 +566,11 @@ class SignalingImpl : public Signaling {
         auto video = rtc::Description::Video(rtp_params_.mid);
         for (const auto& codec : rtp_params_.codecs) {
           if (codec.name == "H264") {
-            video.addH264Codec(codec.payload_type);
+            std::optional<std::string> profile;
+            if (h264_profile_string != std::nullopt) {
+              profile = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=" + *h264_profile_string;
+            }
+            video.addH264Codec(codec.payload_type, profile);
           } else if (codec.name == "H265") {
             video.addH265Codec(codec.payload_type);
           } else if (codec.name == "AV1") {
