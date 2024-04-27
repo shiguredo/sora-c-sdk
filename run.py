@@ -627,8 +627,7 @@ def install_deps(
 
         # libdatachannel
         dir = os.path.join(shared_source_dir, "libdatachannel")
-        # url = "https://github.com/paullouisageneau/libdatachannel.git"
-        url = "https://github.com/melpon/libdatachannel.git"
+        url = version["LIBDATACHANNEL_URL"]
         if not os.path.exists(os.path.join(dir, ".git")):
             cmd(["git", "clone", url, dir])
             with cd(dir):
