@@ -196,6 +196,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
   - https://github.com/paullouisageneau/libdatachannel/pull/1037
   - https://github.com/paullouisageneau/libdatachannel/pull/1041
   - https://github.com/paullouisageneau/libdatachannel/pull/1061
+  - https://github.com/paullouisageneau/libdatachannel/pull/1127
 - usrsctp への貢献を行います
   - https://github.com/sctplab/usrsctp/pull/689
   - https://github.com/sctplab/usrsctp/pull/690
