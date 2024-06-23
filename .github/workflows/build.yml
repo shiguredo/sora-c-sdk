@@ -23,6 +23,9 @@ jobs:
           - name: ubuntu-22.04_x86_64
             runs-on: ubuntu-22.04
             linux: true
+          - name: ubuntu-24.04_x86_64
+            runs-on: ubuntu-24.04
+            linux: true
     name: Build sora-c-sdk for ${{ matrix.m.name }}
     runs-on: ${{ matrix.m.runs-on }}
     steps:
@@ -70,6 +73,9 @@ jobs:
       - uses: ./.github/actions/download
         with:
           platform: ubuntu-22.04_x86_64
+      - uses: ./.github/actions/download
+        with:
+          platform: ubuntu-24.04_x86_64
       - name: Env to output
         run: |
           echo "package_paths<<EOF" >> $GITHUB_OUTPUT
