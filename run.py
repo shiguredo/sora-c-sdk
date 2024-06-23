@@ -610,7 +610,7 @@ def install_deps(
             install_cmake_args["ext"] = "zip"
         elif build_platform in ("macos_x86_64", "macos_arm64"):
             install_cmake_args["platform"] = "macos-universal"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64", "ubuntu-24.04_x86_64"):
             install_cmake_args["platform"] = "linux-x86_64"
         elif build_platform in ("ubuntu-20.04_arm64", "ubuntu-22.04_arm64"):
             install_cmake_args["platform"] = "linux-aarch64"
@@ -662,7 +662,7 @@ def install_deps(
             install_protobuf_args["platform"] = "win64"
         elif build_platform in ("macos_x86_64", "macos_arm64"):
             install_protobuf_args["platform"] = "osx-universal_binary"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64", "ubuntu-24.04_x86_64"):
             install_protobuf_args["platform"] = "linux-x86_64"
         else:
             raise Exception("Failed to install Protobuf")
@@ -682,7 +682,7 @@ def install_deps(
             install_jsonif_args["platform"] = "darwin-amd64"
         elif build_platform in ("macos_arm64",):
             install_jsonif_args["platform"] = "darwin-arm64"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64", "ubuntu-24.04_x86_64"):
             install_jsonif_args["platform"] = "linux-amd64"
         else:
             raise Exception("Failed to install protoc-gen-jsonif")
@@ -777,6 +777,7 @@ AVAILABLE_TARGETS = [
     "macos_arm64",
     "ubuntu-20.04_x86_64",
     "ubuntu-22.04_x86_64",
+    "ubuntu-24.04_x86_64",
     "ios",
     "android",
 ]
@@ -805,8 +806,10 @@ def main():
 
     if target_platform in ("ubuntu-20.04_x86_64",):
         build_platform = "ubuntu-20.04_x86_64"
-    elif target_platform in ("ubuntu-22.04_x86_64",):
+    elif target_platform in ("ubuntu-22.04_x86_64", ):
         build_platform = "ubuntu-22.04_x86_64"
+    elif target_platform in ("ubuntu-24.04_x86_64", ):
+        build_platform = "ubuntu-24.04_x86_64"
     elif target_platform in ("macos_x86_64", "macos_arm64"):
         build_platform = f"macos_{arch}"
 
@@ -899,6 +902,7 @@ def main():
             "windows_x86_64",
             "ubuntu-20.04_x86_64",
             "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
         ):
             cmake_args.append("-DUSE_NVCODEC_ENCODER=ON")
             if target_platform == "windows_x86_64":
@@ -911,6 +915,7 @@ def main():
             "windows_x86_64",
             "ubuntu-20.04_x86_64",
             "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
         ):
             cmake_args.append("-DUSE_VPL_ENCODER=ON")
             cmake_args.append(

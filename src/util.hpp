@@ -1,6 +1,8 @@
 #ifndef SORAC_UTIL_HPP_
 #define SORAC_UTIL_HPP_
 
+#include <stdint.h>
+
 #include <string>
 #include <vector>
 
