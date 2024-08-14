@@ -8,15 +8,13 @@
   - 下位互換がある追加
 - FIX
   - バグ修正
-- TEST
-  - テスト関連
-- DOC
-  - ドキュメント関連
 
 ## develop
 
 - [ADD] Ubuntu 24.04 x86_64 対応
   - @melpon
+
+### misc
 
 ## 2024.1.0
 
