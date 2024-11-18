@@ -76,7 +76,6 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | 音声コーデック | Sora C++ SDK | Sora C SDK |
 | -------------- | ------------ | ---------- |
 | Opus           | 対応         | 対応       |
-| Lyra           | 対応         | 非対応     |
 | AAC            | 非対応       | 優先実装   |
 
 | 映像コーデック | Sora C++ SDK | Sora C SDK |
