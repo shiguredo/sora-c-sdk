@@ -16,6 +16,9 @@
 
 ### misc
 
+- [CHANGE] GitHub Actions の ubuntu-latest を ubuntu-24.04 に変更
+  - @voluntas
+
 ## 2024.1.0
 
 **祝リリース**
