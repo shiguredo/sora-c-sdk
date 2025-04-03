@@ -22,6 +22,13 @@
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libjpeg-turbo/include",
                 "${workspaceFolder}/_install/ubuntu-20.04_x86_64/release/libyuv/include",
 
+                "${workspaceFolder}/_build/ubuntu-22.04_x86_64/release/sorac",
+                "${workspaceFolder}/_build/ubuntu-22.04_x86_64/release/sorac/proto/sorac",
+                "${workspaceFolder}/_install/ubuntu-22.04_x86_64/release/mbedtls/include",
+                "${workspaceFolder}/_install/ubuntu-22.04_x86_64/release/openh264/include",
+                "${workspaceFolder}/_install/ubuntu-22.04_x86_64/release/libjpeg-turbo/include",
+                "${workspaceFolder}/_install/ubuntu-22.04_x86_64/release/libyuv/include",
+
                 "${workspaceFolder}/_build/macos_arm64/release/sorac",
                 "${workspaceFolder}/_build/macos_arm64/release/sorac/proto/sorac",
                 "${workspaceFolder}/_install/macos_arm64/release/mbedtls/include",

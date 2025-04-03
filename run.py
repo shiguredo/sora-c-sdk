@@ -394,7 +394,7 @@ def install_openh264(version, source_dir, install_dir):
         cmd(
             [
                 "make",
-                f'PREFIX={os.path.join(install_dir, "openh264")}',
+                f"PREFIX={os.path.join(install_dir, 'openh264')}",
                 "install-headers",
             ]
         )
@@ -416,7 +416,7 @@ def install_aom(version, source_dir, build_dir, install_dir, cmake_args):
                 "cmake",
                 "-B",
                 os.path.join(build_dir, "aom"),
-                f'-DCMAKE_INSTALL_PREFIX={os.path.join(install_dir, "aom")}',
+                f"-DCMAKE_INSTALL_PREFIX={os.path.join(install_dir, 'aom')}",
                 "-DBUILD_SHARED_LIBS=ON",
                 *cmake_args,
             ]
@@ -657,21 +657,27 @@ def install_deps(
         }
         install_openh264(**install_openh264_args)
 
-        # AOM
-        install_aom_args = {
-            "version": version["AOM_VERSION"],
-            "version_file": os.path.join(install_dir, "aom.version"),
-            "source_dir": source_dir,
-            "build_dir": build_dir,
-            "install_dir": install_dir,
-            "cmake_args": [],
-        }
-        if build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
-            install_aom_args["cmake_args"] = [
-                "-DCMAKE_C_COMPILER=clang-12",
-                "-DCMAKE_CXX_COMPILER=clang++-12",
-            ]
-        install_aom(**install_aom_args)
+        if build_platform in ("windows_x86_64",):
+            install_cmake_args["platform"] = "windows-x86_64"
+            install_cmake_args["ext"] = "zip"
+        elif build_platform in ("macos_x86_64", "macos_arm64"):
+            install_cmake_args["platform"] = "macos-universal"
+        elif build_platform in (
+            "ubuntu-20.04_x86_64",
+            "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
+        ):
+            install_cmake_args["platform"] = "linux-x86_64"
+        elif build_platform in ("ubuntu-20.04_arm64", "ubuntu-22.04_arm64"):
+            install_cmake_args["platform"] = "linux-aarch64"
+        else:
+            raise Exception("Failed to install CMake")
+        install_cmake(**install_cmake_args)
+
+        if build_platform == "macos_arm64":
+            add_path(os.path.join(install_dir, "cmake", "CMake.app", "Contents", "bin"))
+        else:
+            add_path(os.path.join(install_dir, "cmake", "bin"))
 
         macos_cmake_args = []
         if build_platform in ("macos_x86_64", "macos_arm64"):
@@ -688,6 +694,22 @@ def install_deps(
             macos_cmake_args.append(f"-DCMAKE_CXX_COMPILER_TARGET={target}")
             macos_cmake_args.append(f"-DCMAKE_OBJCXX_COMPILER_TARGET={target}")
             macos_cmake_args.append(f"-DCMAKE_SYSROOT={sysroot}")
+
+        # AOM
+        install_aom_args = {
+            "version": version["AOM_VERSION"],
+            "version_file": os.path.join(install_dir, "aom.version"),
+            "source_dir": source_dir,
+            "build_dir": build_dir,
+            "install_dir": install_dir,
+            "cmake_args": macos_cmake_args,
+        }
+        if build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+            install_aom_args["cmake_args"] = [
+                "-DCMAKE_C_COMPILER=clang-12",
+                "-DCMAKE_CXX_COMPILER=clang++-12",
+            ]
+        install_aom(**install_aom_args)
 
         # MbedTLS
         install_mbedtls_args = {
@@ -712,7 +734,11 @@ def install_deps(
             install_protobuf_args["platform"] = "win64"
         elif build_platform in ("macos_x86_64", "macos_arm64"):
             install_protobuf_args["platform"] = "osx-universal_binary"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in (
+            "ubuntu-20.04_x86_64",
+            "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
+        ):
             install_protobuf_args["platform"] = "linux-x86_64"
         else:
             raise Exception("Failed to install Protobuf")
@@ -732,7 +758,11 @@ def install_deps(
             install_jsonif_args["platform"] = "darwin-amd64"
         elif build_platform in ("macos_arm64",):
             install_jsonif_args["platform"] = "darwin-arm64"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in (
+            "ubuntu-20.04_x86_64",
+            "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
+        ):
             install_jsonif_args["platform"] = "linux-amd64"
         else:
             raise Exception("Failed to install protoc-gen-jsonif")
@@ -827,6 +857,7 @@ AVAILABLE_TARGETS = [
     "macos_arm64",
     "ubuntu-20.04_x86_64",
     "ubuntu-22.04_x86_64",
+    "ubuntu-24.04_x86_64",
     "ios",
     "android",
 ]
@@ -857,6 +888,8 @@ def main():
         build_platform = "ubuntu-20.04_x86_64"
     elif target_platform in ("ubuntu-22.04_x86_64",):
         build_platform = "ubuntu-22.04_x86_64"
+    elif target_platform in ("ubuntu-24.04_x86_64",):
+        build_platform = "ubuntu-24.04_x86_64"
     elif target_platform in ("macos_x86_64", "macos_arm64"):
         build_platform = f"macos_{arch}"
 
@@ -949,6 +982,7 @@ def main():
             "windows_x86_64",
             "ubuntu-20.04_x86_64",
             "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
         ):
             cmake_args.append("-DUSE_NVCODEC_ENCODER=ON")
             if target_platform == "windows_x86_64":
@@ -961,6 +995,7 @@ def main():
             "windows_x86_64",
             "ubuntu-20.04_x86_64",
             "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
         ):
             cmake_args.append("-DUSE_VPL_ENCODER=ON")
             cmake_args.append(

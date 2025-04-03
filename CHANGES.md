@@ -17,10 +17,19 @@
   - @melpon
 - [UPDATE] protoc-gen-jsonif をアップデートして optional 対応する
   - @melpon
+- [ADD] Ubuntu 24.04 x86_64 対応
+  - @melpon
+
+### misc
+
+- [CHANGE] GitHub Actions の ubuntu-latest を ubuntu-24.04 に変更
+  - @voluntas
+- [FIX] canary リリースの時は prerelease フラグをつける
+  - @miosakuma
 
 ## 2024.1.0
 
-**祝いリリース**
+**祝リリース**
 
 - [ADD] Sora 2023.2.x 対応
   - @melpon

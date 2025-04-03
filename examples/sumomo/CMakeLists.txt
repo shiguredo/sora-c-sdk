@@ -24,7 +24,7 @@ target_sources(sumomo
     util.cpp
 )
 
-if (SUMOMO_TARGET STREQUAL "ubuntu-20.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubuntu-22.04_x86_64")
+if (SUMOMO_TARGET STREQUAL "ubuntu-20.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubuntu-22.04_x86_64" OR SUMOMO_TARGET STREQUAL "ubuntu-24.04_x86_64")
   target_sources(sumomo
     PRIVATE
       pulse_recorder.cpp

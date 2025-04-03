@@ -1,5 +1,9 @@
 # Sora C SDK
 
+> [!IMPORTANT]  
+> このライブラリはメンテナンスモードで、将来的にはアーカイブします。
+> 今後は組込向けの Sora ESP SDK の開発を検討しています。
+
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/shiguredo/sora-c-sdk.svg)](https://github.com/shiguredo/sora-c-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -7,11 +11,11 @@
 
 We will not respond to PRs or issues that have not been discussed on Discord. Also, Discord is only available in Japanese.
 
-Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use.
+Please read <https://github.com/shiguredo/oss/blob/master/README.en.md> before use.
 
 ## 時雨堂のオープンソースソフトウェアについて
 
-利用前に https://github.com/shiguredo/oss をお読みください。
+利用前に <https://github.com/shiguredo/oss> をお読みください。
 
 ## Sora C SDK について
 
@@ -76,7 +80,6 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 | 音声コーデック | Sora C++ SDK | Sora C SDK |
 | -------------- | ------------ | ---------- |
 | Opus           | 対応         | 対応       |
-| Lyra           | 対応         | 非対応     |
 | AAC            | 非対応       | 優先実装   |
 
 | 映像コーデック | Sora C++ SDK | Sora C SDK |
@@ -191,14 +194,15 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 - Sora の機能への積極的な対応は行いません
 - libdatachannel へ積極的な貢献を行います
-  - https://github.com/paullouisageneau/libdatachannel/pull/1009
-  - https://github.com/paullouisageneau/libdatachannel/pull/1015
-  - https://github.com/paullouisageneau/libdatachannel/pull/1037
-  - https://github.com/paullouisageneau/libdatachannel/pull/1041
-  - https://github.com/paullouisageneau/libdatachannel/pull/1061
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1009>
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1015>
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1037>
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1041>
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1061>
+  - <https://github.com/paullouisageneau/libdatachannel/pull/1127>
 - usrsctp への貢献を行います
-  - https://github.com/sctplab/usrsctp/pull/689
-  - https://github.com/sctplab/usrsctp/pull/690
+  - <https://github.com/sctplab/usrsctp/pull/689>
+  - <https://github.com/sctplab/usrsctp/pull/690>
 - Mbed TLS や OpenSSL への貢献を行います
 - libsrtp への貢献を行います
 - 映像コーデックは内蔵しません
@@ -289,7 +293,7 @@ GitHub アカウントを持っていればすぐに利用可能です。
 
 最新の状況などは Discord で共有しています。質問や相談も Discord でのみ受け付けています。
 
-https://discord.gg/shiguredo
+<https://discord.gg/shiguredo>
 
 ### バグ報告
 
@@ -318,7 +322,7 @@ limitations under the License.
 
 ## OpenH264
 
-https://www.openh264.org/BINARY_LICENSE.txt
+<https://www.openh264.org/BINARY_LICENSE.txt>
 
 ```
 "OpenH264 Video Codec provided by Cisco Systems, Inc."
