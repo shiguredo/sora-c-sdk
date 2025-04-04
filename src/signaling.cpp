@@ -164,11 +164,6 @@ class SignalingImpl : public Signaling {
             (1000 * 1000);
         rtp_config->timestamp = rtp_config->startTimestamp +
                                 rtp_config->secondsToTimestamp(elapsed_seconds);
-        auto report_elapsed_timestamp =
-            rtp_config->timestamp - sender->lastReportedTimestamp();
-        if (rtp_config->timestampToSeconds(report_elapsed_timestamp) > 0.2) {
-          sender->setNeedsToReport();
-        }
         if (image.dependency_descriptor_context != nullptr &&
             dependency_descriptor_id_ != 0) {
           rtp_config->dependencyDescriptorId = dependency_descriptor_id_;
@@ -568,7 +563,10 @@ class SignalingImpl : public Signaling {
           if (codec.name == "H264") {
             std::optional<std::string> profile;
             if (h264_profile_string != std::nullopt) {
-              profile = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=" + *h264_profile_string;
+              profile =
+                  "level-asymmetry-allowed=1;packetization-mode=1;profile-"
+                  "level-id=" +
+                  *h264_profile_string;
             }
             video.addH264Codec(codec.payload_type, profile);
           } else if (codec.name == "H265") {
@@ -631,9 +629,9 @@ class SignalingImpl : public Signaling {
 
           auto rtp_config = std::make_shared<rtc::RtpPacketizationConfig>(
               ssrc, cname, payload_type,
-              codec == "H264"   ? rtc::H264RtpPacketizer::defaultClockRate
-              : codec == "H265" ? rtc::H265RtpPacketizer::defaultClockRate
-                                : rtc::AV1RtpPacketizer::defaultClockRate);
+              codec == "H264"   ? rtc::H264RtpPacketizer::ClockRate
+              : codec == "H265" ? rtc::H265RtpPacketizer::ClockRate
+                                : rtc::AV1RtpPacketizer::ClockRate);
           std::shared_ptr<rtc::RtpPacketizer> packetizer;
           if (codec == "H264") {
             packetizer = std::make_shared<rtc::H264RtpPacketizer>(
@@ -818,12 +816,6 @@ class SignalingImpl : public Signaling {
                 rtp_config->timestamp =
                     rtp_config->startTimestamp +
                     rtp_config->secondsToTimestamp(elapsed_seconds);
-                auto report_elapsed_timestamp =
-                    rtp_config->timestamp - sender->lastReportedTimestamp();
-                if (rtp_config->timestampToSeconds(report_elapsed_timestamp) >
-                    5) {
-                  sender->setNeedsToReport();
-                }
                 std::vector<std::byte> buf(
                     (std::byte*)audio.buf.get(),
                     (std::byte*)audio.buf.get() + audio.size);

@@ -4,6 +4,7 @@ cmake_policy(SET CMP0074 NEW)
 
 project(sorac C CXX)
 
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(_source/libdatachannel libdatachannel EXCLUDE_FROM_ALL)
 add_subdirectory(_source/libdatachannel/deps/json json EXCLUDE_FROM_ALL)
 add_subdirectory(_source/opus opus EXCLUDE_FROM_ALL)

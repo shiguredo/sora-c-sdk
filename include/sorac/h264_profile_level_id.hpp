@@ -14,6 +14,7 @@
 #ifndef API_VIDEO_CODECS_H264_PROFILE_LEVEL_ID_H_
 #define API_VIDEO_CODECS_H264_PROFILE_LEVEL_ID_H_
 
+#include <stdint.h>
 #include <optional>
 #include <string>
 

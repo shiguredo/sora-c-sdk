@@ -612,7 +612,11 @@ def install_deps(
             install_cmake_args["ext"] = "zip"
         elif build_platform in ("macos_x86_64", "macos_arm64"):
             install_cmake_args["platform"] = "macos-universal"
-        elif build_platform in ("ubuntu-20.04_x86_64", "ubuntu-22.04_x86_64"):
+        elif build_platform in (
+            "ubuntu-20.04_x86_64",
+            "ubuntu-22.04_x86_64",
+            "ubuntu-24.04_x86_64",
+        ):
             install_cmake_args["platform"] = "linux-x86_64"
         elif build_platform in ("ubuntu-20.04_arm64", "ubuntu-22.04_arm64"):
             install_cmake_args["platform"] = "linux-aarch64"
