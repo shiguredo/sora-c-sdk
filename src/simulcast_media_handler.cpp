@@ -9,6 +9,11 @@ SimulcastMediaHandler::SimulcastMediaHandler(
     std::shared_ptr<SimulcastMediaHandlerConfig> config)
     : config_(config) {}
 
+void SimulcastMediaHandler::addToChainWithNoRid(
+    std::shared_ptr<rtc::MediaHandler> handler) {
+  rid_handlers_[""] = RidHandler{nullptr, handler};
+}
+
 void SimulcastMediaHandler::addToChainWithRid(
     std::string rid,
     std::shared_ptr<rtc::MediaHandler> handler,

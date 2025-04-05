@@ -80,6 +80,7 @@ class SignalingImpl : public Signaling {
       if (!config_.ca_certificate.empty()) {
         ws_config.caCertificatePemFile = config_.ca_certificate;
       }
+      ws_config.pingInterval = std::chrono::milliseconds::zero();
       auto ws = std::make_shared<rtc::WebSocket>(ws_config);
       ws->onOpen([this, url, wws = std::weak_ptr<rtc::WebSocket>(ws)]() {
         PLOG_DEBUG << "onOpen: url=" << url;
@@ -229,6 +230,7 @@ class SignalingImpl : public Signaling {
       if (!config_.ca_certificate.empty()) {
         ws_config.caCertificatePemFile = config_.ca_certificate;
       }
+      ws_config.pingInterval = std::chrono::milliseconds::zero();
       auto ws = std::make_shared<rtc::WebSocket>(ws_config);
       ws->onOpen([this, ws, location]() {
         PLOG_DEBUG << "onOpen (redirected): url=" << location;
@@ -654,7 +656,7 @@ class SignalingImpl : public Signaling {
           packetizer->addToChain(pli_handler);
 
           if (!IsSimulcast()) {
-            simulcast_handler->addToChain(packetizer);
+            simulcast_handler->addToChainWithNoRid(packetizer);
           } else {
             simulcast_handler->addToChainWithRid(
                 *rid, packetizer, [this, rtp_config](std::string rid) {

@@ -51,8 +51,9 @@ class DataChannelImpl : public DataChannel {
         size = str.size();
       }
 
+      std::string r;
       if (compress_) {
-        std::string r = zlib_uncompress(buf, size);
+        r = zlib_uncompress(buf, size);
         buf = (const uint8_t*)r.data();
         size = r.size();
       }

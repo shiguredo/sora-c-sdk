@@ -149,6 +149,7 @@ set(_LIBS
   ${MbedTLS_LIBRARY}
   ${MbedCrypto_LIBRARY}
   ${MbedX509_LIBRARY}
+  ${AOM_ROOT_DIR}/lib/libaom.a
   $<TARGET_FILE:Opus::opus>
   $<TARGET_FILE:srtp2>
   $<TARGET_FILE:LibJuice::LibJuiceStatic>
