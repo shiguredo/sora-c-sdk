@@ -168,9 +168,9 @@ class SignalingImpl : public Signaling {
         if (image.dependency_descriptor_context != nullptr &&
             dependency_descriptor_id_ != 0) {
           rtp_config->dependencyDescriptorId = dependency_descriptor_id_;
-          rtp_config->dependencyDescriptorContext = *std::static_pointer_cast<
-              rtc::RtpPacketizationConfig::DependencyDescriptorContext>(
-              image.dependency_descriptor_context);
+          rtp_config->dependencyDescriptorContext =
+              *std::static_pointer_cast<rtc::DependencyDescriptorContext>(
+                  image.dependency_descriptor_context);
         }
         std::vector<std::byte> buf((std::byte*)image.buf.get(),
                                    (std::byte*)image.buf.get() + image.size);
@@ -642,8 +642,11 @@ class SignalingImpl : public Signaling {
             packetizer = std::make_shared<rtc::H265RtpPacketizer>(
                 rtc::NalUnit::Separator::LongStartSequence, rtp_config);
           } else {
+            // DependencyDescriptor のサイズを考慮して 14 バイト減らした
+            // フラグメントにしないとパケットが送れないことがある
             packetizer = std::make_shared<rtc::AV1RtpPacketizer>(
-                rtc::AV1RtpPacketizer::Packetization::TemporalUnit, rtp_config);
+                rtc::AV1RtpPacketizer::Packetization::TemporalUnit, rtp_config,
+                rtc::RtpPacketizer::DefaultMaxFragmentSize - 14);
           }
           auto sr_reporter = std::make_shared<rtc::RtcpSrReporter>(rtp_config);
           packetizer->addToChain(sr_reporter);

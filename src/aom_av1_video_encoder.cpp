@@ -249,7 +249,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
     bool is_key_frame = (pkt->data.frame.flags & AOM_EFLAG_FORCE_KF) != 0;
 
     // DD の設定を行う
-    rtc::RtpPacketizationConfig::DependencyDescriptorContext ctx;
+    rtc::DependencyDescriptorContext ctx;
     ctx.structure.templateIdOffset = 0;
     ctx.structure.decodeTargetCount = 1;
     ctx.structure.chainCount = 1;
@@ -280,8 +280,7 @@ class AomAv1VideoEncoder : public VideoEncoder {
     }
     ctx.descriptor.structureAttached = is_key_frame;
 
-    encoded.dependency_descriptor_context = std::make_shared<
-        rtc::RtpPacketizationConfig::DependencyDescriptorContext>(ctx);
+    encoded.dependency_descriptor_context = std::make_shared<rtc::DependencyDescriptorContext>(ctx);
 
     prev_frame_number_ = frame.frame_number;
 

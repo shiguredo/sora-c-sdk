@@ -1,0 +1,19 @@
+# 現状の実装だとビデオトラックの PLI や再送要求の受信がうまく動かないので
+# libdatachannel に以下の内容を適用する必要がある。
+#
+# fork して適用したり PR を出したりしても良いが、
+# このリポジトリはアーカイブする予定なのでもう更新しないかもしれない。
+
+diff --git a/src/impl/peerconnection.cpp b/src/impl/peerconnection.cpp
+index c04f3e50..6099a195 100644
+--- a/src/impl/peerconnection.cpp
++++ b/src/impl/peerconnection.cpp
+@@ -1055,6 +1055,8 @@ void PeerConnection::processLocalDescription(Description description) {
+ 		mLocalDescription->addCandidates(std::move(existingCandidates));
+ 	}
+ 
++	updateTrackSsrcCache(description);
++
+ 	mProcessor.enqueue(&PeerConnection::trigger<Description>, shared_from_this(),
+ 	                   &localDescriptionCallback, std::move(description));
+ }
