@@ -1,7 +1,7 @@
 # Sora C SDK
 
 > [!IMPORTANT]  
-> このライブラリは非メンテナンスモードで、将来的にはアーカイブします。
+> このライブラリはメンテナンスを終了しており、将来的にはアーカイブします。
 > 今後は組込向けの Sora ESP32 SDK と libdatachannel の Python バインディングを開発予定です
 
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/shiguredo/sora-c-sdk.svg)](https://github.com/shiguredo/sora-c-sdk)
