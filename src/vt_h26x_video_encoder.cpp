@@ -12,6 +12,112 @@
 
 namespace sorac {
 
+// https://source.chromium.org/chromium/chromium/src/+/main:third_party/webrtc/sdk/objc/components/video_codec/RTCVideoEncoderH264.mm
+// より
+// Extract VideoToolbox profile out of the webrtc::SdpVideoFormat. If there is
+// no specific VideoToolbox profile for the specified level, AutoLevel will be
+// returned. The user must initialize the encoder with a resolution and
+// framerate conforming to the selected H264 level regardless.
+CFStringRef ExtractProfile(const sorac::H264ProfileLevelId& profile_level_id) {
+  switch (profile_level_id.profile) {
+    case sorac::H264Profile::kProfileConstrainedBaseline:
+    case sorac::H264Profile::kProfileBaseline:
+      switch (profile_level_id.level) {
+        case sorac::H264Level::kLevel3:
+          return kVTProfileLevel_H264_Baseline_3_0;
+        case sorac::H264Level::kLevel3_1:
+          return kVTProfileLevel_H264_Baseline_3_1;
+        case sorac::H264Level::kLevel3_2:
+          return kVTProfileLevel_H264_Baseline_3_2;
+        case sorac::H264Level::kLevel4:
+          return kVTProfileLevel_H264_Baseline_4_0;
+        case sorac::H264Level::kLevel4_1:
+          return kVTProfileLevel_H264_Baseline_4_1;
+        case sorac::H264Level::kLevel4_2:
+          return kVTProfileLevel_H264_Baseline_4_2;
+        case sorac::H264Level::kLevel5:
+          return kVTProfileLevel_H264_Baseline_5_0;
+        case sorac::H264Level::kLevel5_1:
+          return kVTProfileLevel_H264_Baseline_5_1;
+        case sorac::H264Level::kLevel5_2:
+          return kVTProfileLevel_H264_Baseline_5_2;
+        case sorac::H264Level::kLevel1:
+        case sorac::H264Level::kLevel1_b:
+        case sorac::H264Level::kLevel1_1:
+        case sorac::H264Level::kLevel1_2:
+        case sorac::H264Level::kLevel1_3:
+        case sorac::H264Level::kLevel2:
+        case sorac::H264Level::kLevel2_1:
+        case sorac::H264Level::kLevel2_2:
+          return kVTProfileLevel_H264_Baseline_AutoLevel;
+      }
+
+    case sorac::H264Profile::kProfileMain:
+      switch (profile_level_id.level) {
+        case sorac::H264Level::kLevel3:
+          return kVTProfileLevel_H264_Main_3_0;
+        case sorac::H264Level::kLevel3_1:
+          return kVTProfileLevel_H264_Main_3_1;
+        case sorac::H264Level::kLevel3_2:
+          return kVTProfileLevel_H264_Main_3_2;
+        case sorac::H264Level::kLevel4:
+          return kVTProfileLevel_H264_Main_4_0;
+        case sorac::H264Level::kLevel4_1:
+          return kVTProfileLevel_H264_Main_4_1;
+        case sorac::H264Level::kLevel4_2:
+          return kVTProfileLevel_H264_Main_4_2;
+        case sorac::H264Level::kLevel5:
+          return kVTProfileLevel_H264_Main_5_0;
+        case sorac::H264Level::kLevel5_1:
+          return kVTProfileLevel_H264_Main_5_1;
+        case sorac::H264Level::kLevel5_2:
+          return kVTProfileLevel_H264_Main_5_2;
+        case sorac::H264Level::kLevel1:
+        case sorac::H264Level::kLevel1_b:
+        case sorac::H264Level::kLevel1_1:
+        case sorac::H264Level::kLevel1_2:
+        case sorac::H264Level::kLevel1_3:
+        case sorac::H264Level::kLevel2:
+        case sorac::H264Level::kLevel2_1:
+        case sorac::H264Level::kLevel2_2:
+          return kVTProfileLevel_H264_Main_AutoLevel;
+      }
+
+    case sorac::H264Profile::kProfileConstrainedHigh:
+    case sorac::H264Profile::kProfileHigh:
+    case sorac::H264Profile::kProfilePredictiveHigh444:
+      switch (profile_level_id.level) {
+        case sorac::H264Level::kLevel3:
+          return kVTProfileLevel_H264_High_3_0;
+        case sorac::H264Level::kLevel3_1:
+          return kVTProfileLevel_H264_High_3_1;
+        case sorac::H264Level::kLevel3_2:
+          return kVTProfileLevel_H264_High_3_2;
+        case sorac::H264Level::kLevel4:
+          return kVTProfileLevel_H264_High_4_0;
+        case sorac::H264Level::kLevel4_1:
+          return kVTProfileLevel_H264_High_4_1;
+        case sorac::H264Level::kLevel4_2:
+          return kVTProfileLevel_H264_High_4_2;
+        case sorac::H264Level::kLevel5:
+          return kVTProfileLevel_H264_High_5_0;
+        case sorac::H264Level::kLevel5_1:
+          return kVTProfileLevel_H264_High_5_1;
+        case sorac::H264Level::kLevel5_2:
+          return kVTProfileLevel_H264_High_5_2;
+        case sorac::H264Level::kLevel1:
+        case sorac::H264Level::kLevel1_b:
+        case sorac::H264Level::kLevel1_1:
+        case sorac::H264Level::kLevel1_2:
+        case sorac::H264Level::kLevel1_3:
+        case sorac::H264Level::kLevel2:
+        case sorac::H264Level::kLevel2_1:
+        case sorac::H264Level::kLevel2_2:
+          return kVTProfileLevel_H264_High_AutoLevel;
+      }
+  }
+}
+
 // デストラクタで指定した関数を呼ぶだけのクラス
 class Resource {
  public:
@@ -24,7 +130,9 @@ class Resource {
 
 class VTH26xVideoEncoder : public VideoEncoder {
  public:
-  VTH26xVideoEncoder(VTH26xVideoEncoderType type) : type_(type) {}
+  VTH26xVideoEncoder(VTH26xVideoEncoderType type,
+                     std::optional<H264ProfileLevelId> profile)
+      : type_(type), profile_(profile) {}
   ~VTH26xVideoEncoder() override { Release(); }
 
   void ForceIntraNextFrame() override { next_iframe_ = true; }
@@ -51,8 +159,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
 
     CFDictionaryRef encoder_specs = CFDictionaryCreate(
         nullptr,
-        (const void**)
-            &kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
+        (const void**)&kVTVideoEncoderSpecification_EnableHardwareAcceleratedVideoEncoder,
         (const void**)&kCFBooleanTrue, 1, &kCFTypeDictionaryKeyCallBacks,
         &kCFTypeDictionaryValueCallBacks);
     Resource encoder_specs_resource(
@@ -81,7 +188,8 @@ class VTH26xVideoEncoder : public VideoEncoder {
     if (type_ == VTH26xVideoEncoderType::kH264) {
       if (OSStatus err = VTSessionSetProperty(
               vtref_, kVTCompressionPropertyKey_ProfileLevel,
-              kVTProfileLevel_H264_Baseline_3_1);
+              ExtractProfile(profile_.value_or(H264ProfileLevelId(
+                  H264Profile::kProfileBaseline, H264Level::kLevel3_1))));
           err != noErr) {
         PLOG_ERROR << "Failed to set profile-level property: err=" << err;
         return false;
@@ -106,6 +214,20 @@ class VTH26xVideoEncoder : public VideoEncoder {
           vtref_, kVTCompressionPropertyKey_AverageBitRate, cfnum);
       if (err != noErr) {
         PLOG_ERROR << "Failed to set average-bitrate property: err=" << err;
+        return false;
+      }
+    }
+
+    // フレームレート
+    {
+      int value = settings.fps;
+      CFNumberRef cfnum =
+          CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &value);
+      Resource cfnum_resource([cfnum]() { CFRelease(cfnum); });
+      OSStatus err = VTSessionSetProperty(
+          vtref_, kVTCompressionPropertyKey_ExpectedFrameRate, cfnum);
+      if (err != noErr) {
+        PLOG_ERROR << "Failed to set expected-frame-rate property: err=" << err;
         return false;
       }
     }
@@ -412,6 +534,7 @@ class VTH26xVideoEncoder : public VideoEncoder {
   };
 
   VTH26xVideoEncoderType type_;
+  std::optional<H264ProfileLevelId> profile_;
 
   VTCompressionSessionRef vtref_ = nullptr;
   std::function<void(const EncodedImage&)> callback_;
@@ -420,8 +543,9 @@ class VTH26xVideoEncoder : public VideoEncoder {
 };
 
 std::shared_ptr<VideoEncoder> CreateVTH26xVideoEncoder(
-    VTH26xVideoEncoderType type) {
-  return std::make_shared<VTH26xVideoEncoder>(type);
+    VTH26xVideoEncoderType type,
+    std::optional<H264ProfileLevelId> profile) {
+  return std::make_shared<VTH26xVideoEncoder>(type, profile);
 }
 
 }  // namespace sorac

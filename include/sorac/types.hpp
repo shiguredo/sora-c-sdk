@@ -45,6 +45,9 @@ struct VideoFrame {
   int height() const {
     return i420_buffer != nullptr ? i420_buffer->height : nv12_buffer->height;
   }
+  // サイマルキャストで DD を利用する時にフレーム番号を全体で同じにする必要があるため
+  // ここにフレーム番号を持たせる
+  int frame_number;
 };
 
 struct EncodedImage {
@@ -52,6 +55,9 @@ struct EncodedImage {
   int size;
   std::chrono::microseconds timestamp;
   std::optional<std::string> rid;
+  // rtc::RtpPacketizationConfig::DependencyDescriptorContext 型なんだけど、ここで
+  // libdatachannel のヘッダーを include してはいけないので shared_ptr<void> を利用する
+  std::shared_ptr<void> dependency_descriptor_context;
 };
 
 struct AudioFrame {

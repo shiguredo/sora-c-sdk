@@ -16,6 +16,7 @@ class SimulcastMediaHandler : public rtc::MediaHandler {
  public:
   SimulcastMediaHandler(std::shared_ptr<SimulcastMediaHandlerConfig> config);
 
+  void addToChainWithNoRid(std::shared_ptr<rtc::MediaHandler> handler);
   void addToChainWithRid(
       std::string rid,
       std::shared_ptr<rtc::MediaHandler> handler,

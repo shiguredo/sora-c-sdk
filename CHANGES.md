@@ -11,6 +11,12 @@
 
 ## develop
 
+- [ADD] マルチコーデックサイマルキャストの送信に対応する
+  - @melpon
+- [ADD] libaom を追加して AV1 エンコードできるようにする
+  - @melpon
+- [UPDATE] protoc-gen-jsonif をアップデートして optional 対応する
+  - @melpon
 - [ADD] Ubuntu 24.04 x86_64 対応
   - @melpon
 

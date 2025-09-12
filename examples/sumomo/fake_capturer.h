@@ -9,7 +9,16 @@
 extern "C" {
 #endif
 
-extern SumomoCapturer* sumomo_fake_capturer_create();
+typedef enum {
+  SUMOMO_FAKE_CAPTURER_FORMAT_I420 = 0,
+  SUMOMO_FAKE_CAPTURER_FORMAT_NV12 = 1,
+} SumomoFakeCapturerFormat;
+
+extern SumomoCapturer* sumomo_fake_capturer_create(
+    int width,
+    int height,
+    int fps,
+    SumomoFakeCapturerFormat format);
 
 #ifdef __cplusplus
 }

@@ -13,8 +13,8 @@
 namespace sorac {
 
 std::shared_ptr<VideoEncoder> CreateSimulcastEncoderAdapter(
-    const soracp::RtpEncodingParameters& params,
-    std::function<std::shared_ptr<VideoEncoder>()> create_encoder);
+    const soracp::RtpParameters& params,
+    std::function<std::shared_ptr<VideoEncoder>(std::string)> create_encoder);
 
 }
 

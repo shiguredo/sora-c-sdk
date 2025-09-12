@@ -32,10 +32,11 @@ namespace sumomo {
 
 class V4L2Capturer : public SumomoCapturer {
  public:
-  V4L2Capturer(const char* device, int width, int height) {
+  V4L2Capturer(const char* device, int width, int height, int fps) {
     this->device_ = device;
     this->width_ = width;
     this->height_ = height;
+    this->fps_ = fps;
     this->destroy = [](SumomoCapturer* p) { delete (sumomo::V4L2Capturer*)p; };
     this->set_frame_callback = [](SumomoCapturer* p,
                                   sumomo_capturer_on_frame_func on_frame,
@@ -49,7 +50,7 @@ class V4L2Capturer : public SumomoCapturer {
     };
     this->start = [](SumomoCapturer* p) {
       auto q = (sumomo::V4L2Capturer*)p;
-      return q->Start(q->device_.c_str(), q->width_, q->height_);
+      return q->Start(q->device_.c_str(), q->width_, q->height_, q->fps_);
     };
     this->stop = [](SumomoCapturer* p) { ((sumomo::V4L2Capturer*)p)->Stop(); };
   }
@@ -59,7 +60,7 @@ class V4L2Capturer : public SumomoCapturer {
     callback_ = callback;
   }
 
-  int Start(const char* device, int width, int height) {
+  int Start(const char* device, int width, int height, int fps) {
     Stop();
 
     device_fd_ = open(device, O_RDWR | O_NONBLOCK, 0);
@@ -101,6 +102,24 @@ class V4L2Capturer : public SumomoCapturer {
     }
     width_ = fmt.fmt.pix.width;
     height_ = fmt.fmt.pix.height;
+
+    // フレームレートの設定
+    struct v4l2_streamparm sp;
+    memset(&sp, 0, sizeof(sp));
+    sp.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (ioctl(device_fd_, VIDIOC_G_PARM, &sp) < 0) {
+      fprintf(stderr, "Failed to VIDIOC_G_PARM: %s\n", strerror(errno));
+    } else {
+      if ((sp.parm.capture.capability & V4L2_CAP_TIMEPERFRAME) != 0) {
+        memset(&sp, 0, sizeof(sp));
+        sp.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        sp.parm.capture.timeperframe.numerator = 1;
+        sp.parm.capture.timeperframe.denominator = fps;
+        if (ioctl(device_fd_, VIDIOC_S_PARM, &sp) < 0) {
+          fprintf(stderr, "Failed to set the framerate: %s\n", strerror(errno));
+        }
+      }
+    }
 
     // ビデオバッファの設定
     const int V4L2_BUFFER_COUNT = 4;
@@ -210,6 +229,7 @@ class V4L2Capturer : public SumomoCapturer {
         frame.timestamp = sorac::get_current_time();
         frame.base_width = width_;
         frame.base_height = height_;
+        frame.frame_number = ++frame_number_;
         callback_(frame);
 
         if (ioctl(device_fd_, VIDIOC_QBUF, &buf) < 0) {
@@ -247,6 +267,8 @@ class V4L2Capturer : public SumomoCapturer {
   std::function<void(const sorac::VideoFrame& frame)> callback_;
   int width_;
   int height_;
+  int fps_;
+  int frame_number_ = 0;
 
   int device_fd_ = -1;
   std::atomic<bool> quit_;
@@ -265,7 +287,8 @@ extern "C" {
 
 SumomoCapturer* sumomo_v4l2_capturer_create(const char* device,
                                             int width,
-                                            int height) {
-  return new sumomo::V4L2Capturer(device, width, height);
+                                            int height,
+                                            int fps) {
+  return new sumomo::V4L2Capturer(device, width, height, fps);
 }
 }

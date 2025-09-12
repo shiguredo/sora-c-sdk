@@ -15,6 +15,7 @@ class VideoEncoder {
     int width;
     int height;
     Bps bitrate;
+    int fps;
   };
 
   virtual ~VideoEncoder() {}

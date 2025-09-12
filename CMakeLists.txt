@@ -4,6 +4,7 @@ cmake_policy(SET CMP0074 NEW)
 
 project(sorac C CXX)
 
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(_source/libdatachannel libdatachannel EXCLUDE_FROM_ALL)
 add_subdirectory(_source/libdatachannel/deps/json json EXCLUDE_FROM_ALL)
 add_subdirectory(_source/opus opus EXCLUDE_FROM_ALL)
@@ -92,8 +93,11 @@ add_custom_command(
 target_sources(sorac
   PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.cpp"
+    src/aom_av1_video_encoder.cpp
     src/current_time.cpp
     src/data_channel.cpp
+    src/default_encoder_adapter.cpp
+    src/h264_profile_level_id.cpp
     src/open_h264_video_encoder.cpp
     src/opus_audio_encoder.cpp
     src/signaling.cpp
@@ -112,9 +116,12 @@ target_sources(sorac
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.h"
       "${CMAKE_CURRENT_BINARY_DIR}/proto/sorac/soracp.json.c.hpp"
+      include/sorac/aom_av1_video_encoder.hpp
       include/sorac/bitrate.hpp
       include/sorac/current_time.hpp
       include/sorac/data_channel.hpp
+      include/sorac/default_encoder_adapter.hpp
+      include/sorac/h264_profile_level_id.hpp
       include/sorac/open_h264_video_encoder.hpp
       include/sorac/opus_audio_encoder.hpp
       include/sorac/signaling.hpp
@@ -132,6 +139,9 @@ target_compile_definitions(sorac PRIVATE JSONIF_USE_NLOHMANN_JSON)
 # OpenH264
 target_include_directories(sorac PRIVATE ${OPENH264_ROOT_DIR}/include)
 
+# AOM
+target_include_directories(sorac PRIVATE ${AOM_ROOT_DIR}/include)
+
 set_target_properties(sorac PROPERTIES CXX_STANDARD 20 C_STANDARD 20)
 
 set(_LIBS
@@ -139,6 +149,7 @@ set(_LIBS
   ${MbedTLS_LIBRARY}
   ${MbedCrypto_LIBRARY}
   ${MbedX509_LIBRARY}
+  ${AOM_ROOT_DIR}/lib/libaom.a
   $<TARGET_FILE:Opus::opus>
   $<TARGET_FILE:srtp2>
   $<TARGET_FILE:LibJuice::LibJuiceStatic>

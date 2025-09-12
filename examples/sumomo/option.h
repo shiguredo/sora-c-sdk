@@ -10,7 +10,8 @@ typedef enum SumomoOptionalBool {
 } SumomoOptionalBool;
 
 typedef enum SumomoOptionCaptureType {
-  SUMOMO_OPTION_CAPTURE_TYPE_FAKE,
+  SUMOMO_OPTION_CAPTURE_TYPE_FAKE_I420,
+  SUMOMO_OPTION_CAPTURE_TYPE_FAKE_NV12,
   SUMOMO_OPTION_CAPTURE_TYPE_V4L2,
   SUMOMO_OPTION_CAPTURE_TYPE_MAC,
 } SumomoOptionCaptureType;
@@ -25,18 +26,24 @@ typedef struct SumomoOption {
   int signaling_url_len;
   const char* channel_id;
   SumomoOptionalBool simulcast;
+  SumomoOptionalBool simulcast_multicodec;
   const char* video_codec_type;
   int video_bit_rate;
   const char* metadata;
+  SumomoOptionalBool video;
+  SumomoOptionalBool audio;
 
   SumomoOptionCaptureType capture_type;
   const char* capture_device_name;
   int capture_device_width;
   int capture_device_height;
+  int capture_device_fps;
   SumomoOptionAudioType audio_type;
   soracp_H264EncoderType h264_encoder_type;
   soracp_H265EncoderType h265_encoder_type;
+  soracp_Av1EncoderType av1_encoder_type;
   const char* openh264;
+  const char* aom;
   const char* cacert;
 } SumomoOption;
 

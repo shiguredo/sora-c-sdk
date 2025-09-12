@@ -1,0 +1,41 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) 起動",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/_build/ubuntu-24.04_x86_64/debug/examples/sumomo/sumomo",
+            "args": [
+                "--signaling-url=wss://sora.wandbox.org/signaling",
+                "--channel-id=sora",
+                "--capture-type=fake-i420",
+                "--video-codec-type=AV1",
+                "--audio-type=fake",
+                "--aom=${workspaceFolder}/_install/ubuntu-24.04_x86_64/debug/aom/lib/libaom.so",
+                "--openh264=${workspaceFolder}/libopenh264-2.6.0-linux64.8.so",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "gdb の再フォーマットを有効にする",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "逆アセンブリ フレーバーを Intel に設定",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+
+    ]
+}

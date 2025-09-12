@@ -80,6 +80,26 @@ libwebrtc ベースの [Sora C++ SDK](https://github.com/shiguredo/sora-cpp-sdk)
     --cacert cacert.pem
 ```
 
+### マルチコーデックサイマルキャスト
+
+マルチコーデックサイマルキャストを利用した配信を macOS arm64 で利用する例です。
+
+```bash
+./sumomo --signaling-url wss://sora.example.com/signaling \
+  --channel-id sora \
+  --simulcast true \
+  --simulcast-multicodec true \
+  --audio=true \
+  --audio-type=macos \
+  --capture-type mac \
+  --capture-device-name=OBS \
+  --video-codec-type=AV1 \
+  --video-bit-rate 5000 \
+  --h264-encoder-type videotoolbox \
+  --aom `pwd`/_install/macos_arm64/release/aom/lib/libaom.dylib
+~/shiguredo/sora-c-sdk
+```
+
 ## Sumomo のヘルプ
 
 ```bash

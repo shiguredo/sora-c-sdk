@@ -8,26 +8,17 @@
 extern "C" {
 
 void sumomo_util_scale_simulcast(const char* rids[],
-                                 int num_rids,
+                                 const float scales[],
+                                 int len,
                                  SoracVideoFrameRef* frame,
                                  void (*scaled)(SoracVideoFrameRef* frame,
                                                 void* userdata),
                                  void* userdata) {
-  for (int i = 0; i < num_rids; i++) {
+  for (int i = 0; i < len; i++) {
     sorac::VideoFrame f = *(sorac::VideoFrame*)frame;
     f.rid = rids[i];
-    int width;
-    int height;
-    if (*f.rid == "r0") {
-      width = f.width() / 4;
-      height = f.height() / 4;
-    } else if (*f.rid == "r1") {
-      width = f.width() / 2;
-      height = f.height() / 2;
-    } else {
-      width = f.width();
-      height = f.height();
-    }
+    int width = (int)(f.width() / scales[i]);
+    int height = (int)(f.height() / scales[i]);
     if (f.width() != width || f.height() != height) {
       if (f.i420_buffer) {
         auto fb = sorac::VideoFrameBufferI420::Create(width, height);

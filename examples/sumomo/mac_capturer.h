@@ -11,7 +11,8 @@ extern "C" {
 
 extern SumomoCapturer* sumomo_mac_capturer_create(const char* device,
                                                   int width,
-                                                  int height);
+                                                  int height,
+                                                  int fps);
 
 #ifdef __cplusplus
 }
